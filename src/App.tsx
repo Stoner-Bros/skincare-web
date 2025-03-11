@@ -3,6 +3,7 @@ import AppRouter from "./routes";
 import { SidebarProvider } from "./components/ui/sidebar";
 
 function App() {
+  console.log("test commit")
   return (
     <>
       <SidebarProvider>
