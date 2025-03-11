@@ -38,7 +38,25 @@
     --sidebar-border: 220 13% 91%;
     --sidebar-ring: 217.2 91.2% 59.8%;
   }
-
+  .swiper-container .swiper-pagination-bullet {
+    @apply !w-2 !h-2 !bg-white !opacity-100 !mx-0.5 !rounded-full;
+  }
+  
+  .swiper-container .swiper-pagination-bullet-active {
+    @apply !w-2 !h-2 !bg-black !rounded-full;
+  }
+  .swiper-container .swiper-button-prev {
+    @apply text-white;
+  } 
+  .swiper-container .swiper-button-next {
+    @apply text-white;
+  }   
+  .swiper2-container .swiper-button-prev {
+    @apply text-white;
+  } 
+  .swiper2-container .swiper-button-next {
+    @apply text-white;
+  }   
   .dark {
     --background: 20 14.3% 4.1%;
     --foreground: 0 0% 95%;
@@ -82,4 +100,18 @@
   body {
     @apply bg-background text-foreground;
   }
+}
+
+::-webkit-scrollbar-thumb {
+  background: #5555555e;
+  border-radius: 20px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #555555ad;
+}
+
+::-webkit-scrollbar {
+  width: 8px;
+  height: 10px;
 }
