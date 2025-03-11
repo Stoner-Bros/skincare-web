@@ -17,7 +17,11 @@ import Customer from "@/pages/Dashboard/User/Customer";
 import SkinTherapist from "@/pages/Dashboard/User/SkinTherapist";
 import Staff from "@/pages/Dashboard/User/Staff";
 import Home from "@/pages/Home";
-import NotFound from "@/pages/NotFound";
+import AboutUs from "@/pages/AboutUs/AboutUs";
+import Services from "@/pages/Home/services";
+import ContentPolicy from "@/pages/AboutUs/ContentPrivacy";
+import PrivacyPolicy from "@/pages/AboutUs/PrivacyPolicy";
+import NotFound from "@/pages/AboutUs/AboutUs";
 import { Suspense } from "react";
 import { Navigate, Outlet, useRoutes } from "react-router-dom";
 
@@ -116,7 +120,7 @@ export default function AppRouter() {
       ),
       children: [
         {
-          element: <Home />,
+          element: <AboutUs />,
           index: true,
         },
         { path: "/login", element: <LoginPage /> },
