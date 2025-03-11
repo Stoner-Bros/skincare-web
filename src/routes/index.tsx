@@ -24,6 +24,7 @@ import PrivacyPolicy from "@/pages/AboutUs/PrivacyPolicy";
 import NotFound from "@/pages/AboutUs/AboutUs";
 import { Suspense } from "react";
 import { Navigate, Outlet, useRoutes } from "react-router-dom";
+import HomeLayout from "@/components/layout/home-layout";
 
 // ----------------------------------------------------------------------
 
@@ -112,11 +113,11 @@ export default function AppRouter() {
     {
       path: "/",
       element: (
-        // <SystemLayout>
-        <Suspense>
-          <Outlet />
-        </Suspense>
-        // </SystemLayout>
+        <HomeLayout>
+          <Suspense>
+            <Outlet />
+          </Suspense>
+        </HomeLayout>
       ),
       children: [
         {

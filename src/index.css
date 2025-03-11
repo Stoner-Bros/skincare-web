@@ -41,22 +41,22 @@
   .swiper-container .swiper-pagination-bullet {
     @apply !w-2 !h-2 !bg-white !opacity-100 !mx-0.5 !rounded-full;
   }
-  
+
   .swiper-container .swiper-pagination-bullet-active {
     @apply !w-2 !h-2 !bg-black !rounded-full;
   }
   .swiper-container .swiper-button-prev {
     @apply text-white;
-  } 
+  }
   .swiper-container .swiper-button-next {
     @apply text-white;
-  }   
+  }
   .swiper2-container .swiper-button-prev {
     @apply text-white;
-  } 
+  }
   .swiper2-container .swiper-button-next {
     @apply text-white;
-  }   
+  }
   .dark {
     --background: 20 14.3% 4.1%;
     --foreground: 0 0% 95%;
@@ -103,15 +103,23 @@
 }
 
 ::-webkit-scrollbar-thumb {
-  background: #5555555e;
+  background: #ff4242e5;
   border-radius: 20px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: #555555ad;
+  /* background: #555555ad; */
+  background: #ff2c2ce5;
 }
 
 ::-webkit-scrollbar {
   width: 8px;
   height: 10px;
+}
+
+.playfair {
+  font-family: "Playfair", serif;
+  font-optical-sizing: auto;
+  font-style: normal;
+  font-variation-settings: "wdth" 100;
 }
