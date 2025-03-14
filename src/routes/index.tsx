@@ -21,6 +21,8 @@ import AboutUs from "@/pages/AboutUs/AboutUs";
 import Services from "@/pages/Home/services";
 import ContentPolicy from "@/pages/AboutUs/ContentPrivacy";
 import PrivacyPolicy from "@/pages/AboutUs/PrivacyPolicy";
+import QuizPage from "@/pages/Quiz/quizpage";
+import AllTherapist from "@/pages/Therapists/allTherapist";
 import NotFound from "@/pages/AboutUs/AboutUs";
 import { Suspense } from "react";
 import { Navigate, Outlet, useRoutes } from "react-router-dom";
@@ -113,15 +115,15 @@ export default function AppRouter() {
     {
       path: "/",
       element: (
-        <HomeLayout>
-          <Suspense>
-            <Outlet />
-          </Suspense>
-        </HomeLayout>
+        //<HomeLayout>
+        <Suspense>
+          <Outlet />
+        </Suspense>
+        //</HomeLayout>
       ),
       children: [
         {
-          element: <AboutUs />,
+          element: <AllTherapist />,
           index: true,
         },
         { path: "/login", element: <LoginPage /> },
