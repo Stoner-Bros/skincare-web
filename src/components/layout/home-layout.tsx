@@ -1,16 +1,19 @@
-import React from "react";
+import React, { useState } from "react";
 import Header from "../header";
 import Footer from "../footer";
 import { Button } from "../ui/button";
 import { Phone, Calendar, MessageCircle } from "lucide-react";
+import BookService from "./book-service";
 
 export default function HomeLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
+  const [showBooking, setShowBooking] = useState(false);
+
   return (
-    <div>
+    <div className="w-full relative">
       <Header />
       {children}
       <Footer />
@@ -30,6 +33,7 @@ export default function HomeLayout({
           className="bg-pink-500 hover:bg-pink-600 text-white py-2 rounded-full 
           flex items-center gap-2 group transform hover:-translate-x-2 transition-all duration-300 
           shadow-lg hover:shadow-xl w-[160px]"
+          onClick={() => setShowBooking(true)}
         >
           <div className="bg-white/20 p-2 rounded-full group-hover:scale-110 transition-transform">
             <Calendar size={18} className="animate-bounce" />
@@ -48,6 +52,12 @@ export default function HomeLayout({
           <span className="font-medium">Tư Vấn</span>
         </Button>
       </div>
+
+      {showBooking && (
+        <div className="fixed inset-0 bg-gray-500 bg-opacity-50 flex justify-center items-center z-[100000]">
+          <BookService onClose={() => setShowBooking(false)} />
+        </div>
+      )}
     </div>
   );
 }

@@ -21,6 +21,7 @@ import AboutUs from "@/pages/AboutUs/AboutUs";
 import Services from "@/pages/Home/services";
 import ContentPolicy from "@/pages/AboutUs/ContentPrivacy";
 import PrivacyPolicy from "@/pages/AboutUs/PrivacyPolicy";
+import Questionpage from "@/pages/Quiz/questionpage";
 import QuizPage from "@/pages/Quiz/quizpage";
 import AllTherapist from "@/pages/Therapists/allTherapist";
 import NotFound from "@/pages/AboutUs/AboutUs";
@@ -115,18 +116,25 @@ export default function AppRouter() {
     {
       path: "/",
       element: (
-        //<HomeLayout>
-        <Suspense>
-          <Outlet />
-        </Suspense>
-        //</HomeLayout>
+        <HomeLayout>
+          <Suspense>
+            <Outlet />
+          </Suspense>
+        </HomeLayout>
       ),
       children: [
         {
-          element: <AllTherapist />,
+          element: <Home />,
           index: true,
         },
         { path: "/login", element: <LoginPage /> },
+        { path: "/quiz", element: <QuizPage /> },
+        { path: "/about-us", element: <AboutUs /> },
+        { path: "/therapist", element: <AllTherapist /> },
+        { path: "/question", element: <Questionpage /> },
+        { path: "/services", element: <Services /> },
+        { path: "/content-policy", element: <ContentPolicy /> },
+        { path: "/privacy-policy", element: <PrivacyPolicy /> },
       ],
     },
   ];

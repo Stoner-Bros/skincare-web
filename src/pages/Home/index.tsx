@@ -86,36 +86,7 @@ export default function Home() {
 
   return (
     <div className="w-full min-h-screen bg-white">
-      {/* <header className="flex justify-between items-center my-4 mx-72">
-        <div className="flex items-center">
-          <Link to="/" className="text-3xl font-bold text-red-600">
-            <span className="text-xl text-red-600">Thẩm Mỹ Viện</span> Luxspa.vn
-          </Link>
-        </div>
-        <div className="flex flex-col items-end space-y-3 ">
-          <div className="flex justify-between items-center space-x-6">
-            <div className="flex items-center space-x-2">
-              <Button className="text-xl ">Hotline: 1800 3333</Button>
-            </div>
-            <div className="flex space-x-4 ">
-              <input
-                type="text"
-                placeholder="Tìm kiếm ..."
-                className="px-4 py-2 border rounded-lg text-gray-600 "
-              />
-            </div>
-          </div>
 
-          <nav className="flex justify-center space-x-8 w-full">
-            <Link to="/about" className="text-red-600 font-bold hover:text-gray-800">VỀ CHÚNG TÔI</Link>
-            <Link to="/services" className="text-red-600 font-bold hover:text-gray-800">DỊCH VỤ LÀM ĐẸP</Link>
-            <Link to="/phun-xam" className="text-red-600 font-bold hover:text-gray-800">PHUN XĂM THẨM MỸ</Link>
-            <Link to="/doctor" className="text-red-600 font-bold hover:text-gray-800">BÁC SĨ</Link>
-            <Link to="/tips" className="text-red-600 font-bold hover:text-gray-800">TIPS LÀM ĐẸP</Link>
-            <Link to="/franchise" className="text-red-600 font-bold hover:text-gray-800">NHƯỢNG QUYỀN</Link>
-          </nav>
-        </div>
-      </header> */}
 
       <section className="swiper-container">
         <Swiper

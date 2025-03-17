@@ -31,7 +31,7 @@ export default function Header() {
   ];
 
   return (
-    <header className="flex justify-between items-center my-4 mx-72">
+    <header className="flex justify-between items-center my-5 px-72 sticky top-0 z-[9999] bg-white">
       <div className="flex items-center">
         <Link to="/" className="text-5xl font-bold text-red-600 playfair">
           <span className="text-xl text-red-600">Thẩm Mỹ Viện</span> Luxspa.vn
@@ -96,7 +96,7 @@ export default function Header() {
             </Link>
           ))}
         </nav>
-      </div>
-    </header>
+      </div >
+    </header >
   );
 }
