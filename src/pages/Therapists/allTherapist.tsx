@@ -5,7 +5,7 @@ import { Autoplay, Navigation, Pagination, Thumbs } from 'swiper/modules';
 
 export default function AllTherapist() {
     return (
-        <div className='w-full h-screen bg-white'>
+        <div className='w-full min-h-screen flex flex-col bg-white'>
             <section className="swiper-container">
                 <Swiper
                     modules={[Autoplay, Pagination, Navigation]}
@@ -129,27 +129,27 @@ export default function AllTherapist() {
                                 <img
                                     src={doctor.img}
                                     alt={doctor.name}
-                                    className="w-40 h-40 object-cover "
+                                    className="w-40 h-40 object-contain "
                                 />
                                 <div>
                                     <h3 className="text-xl font-semibold text-red-500">{doctor.name}</h3>
-                                    {/* Dòng đầu tiên với icon học vấn */}
+
                                     <p className="text-gray-600 flex items-center space-x-2">
                                         <svg className="w-5 h-5 text-red-500" fill="currentColor" viewBox="0 0 20 20">
                                             <path d="M10 2L2 6l8 4 6-3.1V14h2V6l-8-4zM2 14h2v-3.1l-2-1V14zm8 4l-5-2.5V12.6l5 2.5 5-2.5v2.9L10 18z" />
                                         </svg>
                                         <span>{doctor.title1}</span>
                                     </p>
-                                    {/* Dòng thứ hai với icon chuyên môn */}
+
                                     <p className="text-gray-600 flex items-center space-x-2">
                                         <svg className="w-5 h-5 text-red-500" fill="currentColor" viewBox="0 0 20 20">
                                             <path d="M10 2a8 8 0 100 16 8 8 0 000-16zm1 11H9v-1h2v1zm0-3H9V5h2v5z" />
                                         </svg>
                                         <span>{doctor.title2}</span>
                                     </p>
-                                    <button className="mt-2 text-white bg-red-500 px-4 py-2 rounded">
+                                    {/* <button className="mt-2 text-white bg-red-500 px-4 py-2 rounded">
                                         Xem thêm
-                                    </button>
+                                    </button> */}
                                 </div>
                             </div>
                         ))}

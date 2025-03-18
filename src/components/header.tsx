@@ -1,11 +1,15 @@
 import { Link } from "react-router-dom";
 import { Button } from "./ui/button";
 import { Phone } from "lucide-react";
+import { useState } from "react";
+import ServiceDetail from "../pages/Services/serviceDetail";
 
 export default function Header() {
+  const [showServiceDetail, setShowServiceDetail] = useState(false);
+
   const navigationLinks = [
     {
-      path: "/about",
+      path: "/about-us",
       label: "VỀ CHÚNG TÔI",
     },
     {
@@ -17,7 +21,7 @@ export default function Header() {
       label: "PHUN XĂM THẨM MỸ",
     },
     {
-      path: "/doctor",
+      path: "/therapist",
       label: "BÁC SĨ",
     },
     {
@@ -31,10 +35,11 @@ export default function Header() {
   ];
 
   return (
-    <header className="flex justify-between items-center my-5 px-72 sticky top-0 z-[9999] bg-white">
+    <header className="flex justify-between items-center my-5 px-72 sticky top-0 z-[100] bg-white">
       <div className="flex items-center">
         <Link to="/" className="text-5xl font-bold text-red-600 playfair">
-          <span className="text-xl text-red-600">Thẩm Mỹ Viện</span> Luxspa.vn
+          {/* <span className="text-xl text-red-600">Thẩm Mỹ Viện</span> Luxspa.vn */}
+          <img src="/logo.gif" alt="Slide 1" className="w-full object-cover" />
         </Link>
       </div>
       <div className="flex flex-col items-end space-y-3 ">
@@ -86,14 +91,26 @@ export default function Header() {
 
         <nav className="flex justify-center space-x-8 w-full">
           {navigationLinks.map((link, index) => (
-            <Link
+            <div
               key={index}
-              to={link.path}
-              className="text-red-600 font-bold group"
+              onMouseEnter={() => link.path === "/services" && setShowServiceDetail(true)}
+              onMouseLeave={() => link.path === "/services" && setShowServiceDetail(false)}
             >
-              {link.label}
-              <div className="w-0 h-1 bg-red-600 rounded-full group-hover:w-full transition-all duration-300"></div>
-            </Link>
+              {link.path === "/services" ? (
+                <span className="text-red-600 font-bold group cursor-pointer">
+                  {link.label}
+                  <div className="w-0 h-1 bg-red-600 rounded-full group-hover:w-full transition-all duration-300"></div>
+                </span>
+              ) : (
+                <Link to={link.path} className="text-red-600 font-bold group">
+                  {link.label}
+                  <div className="w-0 h-1 bg-red-600 rounded-full group-hover:w-full transition-all duration-300"></div>
+                </Link>
+              )}
+              {link.path === "/services" && showServiceDetail && (
+                <ServiceDetail />
+              )}
+            </div>
           ))}
         </nav>
       </div >

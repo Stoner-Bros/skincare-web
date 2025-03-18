@@ -13,7 +13,7 @@ export default function HomeLayout({
   const [showBooking, setShowBooking] = useState(false);
 
   return (
-    <div className="w-full relative">
+    <div className="w-full">
       <Header />
       {children}
       <Footer />

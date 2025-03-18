@@ -296,7 +296,7 @@ export default function Home() {
                 </SwiperSlide>
               </Swiper>
               <div className="mt-4 text-start">
-                <Link to="/doctor" className="text-red-600 px-4 py-2 font-bold ">
+                <Link to="/therapist" className="text-red-600 px-4 py-2 font-bold ">
                   Xem thêm
                 </Link>
               </div>
