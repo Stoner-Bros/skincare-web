@@ -93,8 +93,12 @@ export default function Header() {
           {navigationLinks.map((link, index) => (
             <div
               key={index}
-              onMouseEnter={() => link.path === "/services" && setShowServiceDetail(true)}
-              onMouseLeave={() => link.path === "/services" && setShowServiceDetail(false)}
+              onMouseEnter={() =>
+                link.path === "/services" && setShowServiceDetail(true)
+              }
+              onMouseLeave={() =>
+                link.path === "/services" && setShowServiceDetail(false)
+              }
             >
               {link.path === "/services" ? (
                 <span className="text-red-600 font-bold group cursor-pointer">
@@ -113,7 +117,7 @@ export default function Header() {
             </div>
           ))}
         </nav>
-      </div >
-    </header >
+      </div>
+    </header>
   );
 }
