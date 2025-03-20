@@ -4,10 +4,7 @@ export default function Footer() {
       <div className="container mx-auto flex flex-col lg:flex-row justify-between">
         <div className="flex flex-col mb-8 lg:mb-0 w-full lg:w-1/3">
           <div className="flex items-center mb-4">
-            <img src="/mun.jpg" alt="LuxSpa Logo" className="w-12 h-12 mr-4" />
-            <p className="font-bold text-xl text-[#F1588D]">
-              TÁI ĐỊNH VỊ THƯƠNG HIỆU
-            </p>
+            <img src="/logo.gif" alt="Slide 1" className="w-full object-cover" />
           </div>
           <p className="text-sm text-gray-600 mb-4 w-[400px]">
             Thẩm mỹ viện LuxSpa.Vn với nhiều chi nhánh trải dài trên toàn quốc,
