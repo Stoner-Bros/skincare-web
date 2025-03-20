@@ -1,11 +1,6 @@
-import { Button } from "@/components/ui/button";
-import React from "react";
-import { Link } from "react-router-dom";
+import { Autoplay, Navigation } from "swiper/modules";
 import { Swiper, SwiperSlide } from "swiper/react";
 import "swiper/swiper-bundle.css";
-import { Autoplay, Navigation, Pagination, Thumbs } from "swiper/modules";
-import { Phone } from "lucide-react";
-import Header from "@/components/header";
 
 export default function AboutUs() {
   const services = [

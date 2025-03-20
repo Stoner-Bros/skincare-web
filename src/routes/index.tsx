@@ -1,5 +1,11 @@
 import DashboardLayout from "@/components/layout/dashboard-layout";
+import HomeLayout from "@/components/layout/home-layout";
+import NotFound from "@/pages/404";
+import AboutUs from "@/pages/AboutUs/AboutUs";
+import ContentPolicy from "@/pages/AboutUs/ContentPrivacy";
+import PrivacyPolicy from "@/pages/AboutUs/PrivacyPolicy";
 import LoginPage from "@/pages/Auth/Login";
+import SignUpPage from "@/pages/Auth/SignUp";
 import WaitingBlog from "@/pages/Dashboard/Blog/WaitingBlog";
 import Feedbacks from "@/pages/Dashboard/Feedbacks";
 import AllOrder from "@/pages/Dashboard/Order/AllOrder";
@@ -17,17 +23,12 @@ import Customer from "@/pages/Dashboard/User/Customer";
 import SkinTherapist from "@/pages/Dashboard/User/SkinTherapist";
 import Staff from "@/pages/Dashboard/User/Staff";
 import Home from "@/pages/Home";
-import AboutUs from "@/pages/AboutUs/AboutUs";
 import Services from "@/pages/Home/services";
-import ContentPolicy from "@/pages/AboutUs/ContentPrivacy";
-import PrivacyPolicy from "@/pages/AboutUs/PrivacyPolicy";
 import Questionpage from "@/pages/Quiz/questionpage";
 import QuizPage from "@/pages/Quiz/quizpage";
 import AllTherapist from "@/pages/Therapists/allTherapist";
-import NotFound from "@/pages/AboutUs/AboutUs";
 import { Suspense } from "react";
 import { Navigate, Outlet, useRoutes } from "react-router-dom";
-import HomeLayout from "@/components/layout/home-layout";
 
 // ----------------------------------------------------------------------
 
@@ -128,6 +129,7 @@ export default function AppRouter() {
           index: true,
         },
         { path: "/login", element: <LoginPage /> },
+        { path: "/sign-up", element: <SignUpPage /> },
         { path: "/quiz", element: <QuizPage /> },
         { path: "/about-us", element: <AboutUs /> },
         { path: "/therapist", element: <AllTherapist /> },
