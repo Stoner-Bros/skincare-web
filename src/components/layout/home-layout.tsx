@@ -1,8 +1,8 @@
+import { Calendar, MessageCircle } from "lucide-react";
 import React, { useState } from "react";
-import Header from "../header";
 import Footer from "../footer";
+import Header from "../header";
 import { Button } from "../ui/button";
-import { Phone, Calendar, MessageCircle } from "lucide-react";
 import BookService from "./book-service";
 
 export default function HomeLayout({
@@ -18,10 +18,9 @@ export default function HomeLayout({
       {children}
       <Footer />
       <div className="fixed bottom-1/2 right-0 m-4 flex flex-col gap-3 translate-y-1/2 z-50">
-
         <Button
-          className="bg-pink-500 hover:bg-pink-600 text-white py-2 rounded-full 
-          flex items-center gap-2 group transform hover:-translate-x-2 transition-all duration-300 
+          className="bg-pink-500 hover:bg-pink-600 text-white py-2 rounded-full
+          flex items-center gap-2 group transform hover:-translate-x-2 transition-all duration-300
           shadow-lg hover:shadow-xl w-[160px]"
           onClick={() => setShowBooking(true)}
         >
@@ -32,8 +31,8 @@ export default function HomeLayout({
         </Button>
 
         <Button
-          className="bg-rose-500 hover:bg-rose-600 text-white py-2 rounded-full 
-          flex items-center gap-2 group transform hover:-translate-x-2 transition-all duration-300 
+          className="bg-rose-500 hover:bg-rose-600 text-white py-2 rounded-full
+          flex items-center gap-2 group transform hover:-translate-x-2 transition-all duration-300
           shadow-lg hover:shadow-xl w-[160px]"
         >
           <div className="bg-white/20 p-2 rounded-full group-hover:scale-110 transition-transform">

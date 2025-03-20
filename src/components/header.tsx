@@ -1,13 +1,61 @@
 import { Phone } from "lucide-react";
-import { useState } from "react";
-import { Link } from "react-router-dom";
+import { useState, useEffect } from "react";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import ServiceDetail from "../pages/Services/serviceDetail";
 import ServiceDetail1 from "../pages/Services/serviceDetail1";
 import { Button } from "./ui/button";
+import AuthDialog from "@/pages/Auth";
+import { useAuth } from "@/hooks/use-auth";
+import { UserAvatarMenu } from "./user-avatar-menu";
 
 export default function Header() {
   const [showServiceDetail, setShowServiceDetail] = useState(false);
   const [showServiceDetail1, setShowServiceDetail1] = useState(false);
+  const [showAuthDialog, setShowAuthDialog] = useState(false);
+  const [authDialogTab, setAuthDialogTab] = useState<"login" | "signup">(
+    "login"
+  );
+
+  const { user } = useAuth();
+
+  const location = useLocation();
+  const navigate = useNavigate();
+
+  // Check for auth parameter in URL on component mount and route changes
+  useEffect(() => {
+    const searchParams = new URLSearchParams(location.search);
+    const authParam = searchParams.get("auth");
+
+    if (authParam === "login") {
+      setAuthDialogTab("login");
+      setShowAuthDialog(true);
+    } else if (authParam === "signup") {
+      setAuthDialogTab("signup");
+      setShowAuthDialog(true);
+    } else {
+      setShowAuthDialog(false);
+    }
+  }, [location]);
+
+  // Handle login button click
+  const handleLoginClick = (e: React.MouseEvent) => {
+    e.preventDefault();
+    setAuthDialogTab("login");
+    setShowAuthDialog(true);
+
+    // Update URL with query parameter
+    navigate(`${location.pathname}?auth=login`, { replace: true });
+  };
+
+  // Handle signup button click
+  const handleSignupClick = (e: React.MouseEvent) => {
+    e.preventDefault();
+    setAuthDialogTab("signup");
+    setShowAuthDialog(true);
+
+    // Update URL with query parameter
+    navigate(`${location.pathname}?auth=signup`, { replace: true });
+  };
 
   const navigationLinks = [
     {
@@ -45,7 +93,7 @@ export default function Header() {
   ];
 
   return (
-    <header className="flex flex-col items-center py-5 px-80 sticky top-0 z-[100] bg-white text-nowrap">
+    <header className="flex flex-col items-center py-5 px-80 sticky top-0 z-[50] bg-white text-nowrap">
       <div className="flex justify-between items-center w-full gap-12">
         <div className="flex items-center">
           <Link to="/" className="text-5xl font-bold text-red-600 playfair">
@@ -96,17 +144,24 @@ export default function Header() {
               </svg>
             </div>
           </div>
-          <Link to="/login">
-            <Button className="bg-white text-black border-2 border-pink-500 px-4 py-2 rounded-full">
-              Đăng nhập
-            </Button>
-          </Link>
-          <Link
-            to="/sign-up"
-            className="bg-pink-500 text-white px-4 py-2 rounded-full"
-          >
-            Đăng ký
-          </Link>
+          {user ? (
+            <UserAvatarMenu />
+          ) : (
+            <>
+              <Button
+                className="bg-white text-black border-2 border-pink-500 px-4 py-3 h-fit rounded-full hover:text-white"
+                onClick={handleLoginClick}
+              >
+                Đăng nhập
+              </Button>
+              <Button
+                className="bg-pink-500 text-white px-4 py-3 h-fit rounded-full "
+                onClick={handleSignupClick}
+              >
+                Đăng ký
+              </Button>
+            </>
+          )}
         </div>
       </div>
       <nav className="flex justify-center space-x-8 gap-6 w-full mt-4">
@@ -142,6 +197,13 @@ export default function Header() {
           </div>
         ))}
       </nav>
+
+      {/* Auth Dialog */}
+      <AuthDialog
+        open={showAuthDialog}
+        onOpenChange={setShowAuthDialog}
+        defaultTab={authDialogTab}
+      />
     </header>
   );
 }
