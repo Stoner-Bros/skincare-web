@@ -83,12 +83,12 @@ export default function Footer() {
             <p className="font-bold text-xl text-[#F1588D] mb-4">CHÍNH SÁCH</p>
             <ul className="text-sm text-gray-600 space-y-2">
               <li>
-                <a href="#" className="hover:text-[#F1588D]">
+                <a href="/privacy-policy" className="hover:text-[#F1588D]">
                   Chính sách bảo mật thông tin
                 </a>
               </li>
               <li>
-                <a href="#" className="hover:text-[#F1588D]">
+                <a href="/content-policy" className="hover:text-[#F1588D]">
                   Chính sách biên tập nội dung
                 </a>
               </li>

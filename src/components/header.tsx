@@ -87,7 +87,7 @@ export default function Header() {
       label: "LÀM ĐẸP",
     },
     {
-      path: "/blogs",
+      path: "/add-blog",
       label: "BLOGS",
     },
   ];

@@ -1,17 +1,19 @@
 import { Button } from "@/components/ui/button";
+import { useState } from "react";
 import { Link } from "react-router-dom";
+import { Autoplay, Navigation, Pagination } from 'swiper/modules';
 import { Swiper, SwiperSlide } from 'swiper/react';
 import 'swiper/swiper-bundle.css';
-import { Autoplay, Navigation, Pagination, Thumbs } from 'swiper/modules';
-import { useState } from "react";
+// import AddService from "../Services/add-service";
 
 
 export default function Home() {
   const [index, setIndex] = useState(0);
+  const [isAddServiceOpen, setAddServiceOpen] = useState(false);
   const bacSi = [
     {
       name: "Nguyễn Kim Khoa",
-      description: "Nguyễn Kim Khoa là bác sĩ giàu kinh nghiệm trong lĩnh vực da liễu và tạo hình thẩm mỹ, được biết đến với chuyên môn sâu rộng và uy tín vững chắc. Ông được xem là một trong những bậc thầy gạo cội, đã dành cả cuộc đời mình để cống hiến cho ngành làm đẹp, để lại dấu ấn sâu đậm với vô số thành tựu. Hơn 30 năm miệt mài trong ngành da liễu và thẩm mỹ tạo hình, bác sĩ Khoa đã gặt hái được những thành tựu đáng ngưỡng mộ. Sở hữu thế mạnh vượt trội về chăm sóc da liễu chuyên sâu, phẫu thuật tạo hình thẩm mỹ mắt – mũi – môi, kết hợp với kinh nghiệm giảng dạy chuyên ngành thẩm mỹ, ông đã xây dựng nên một sự nghiệp lừng lẫy, ghi dấu ấn vang dội. Hành trình cống hiến của bác sĩ Khoa không chỉ dừng lại ở những con số, mà còn là giá trị nhân văn sâu sắc khi mang đến cái đẹp và sự tự tin cho đời. Minh chứng rõ ràng nhất là danh hiệu “Thầy Thuốc Ưu Tú” cao quý mà ông vinh dự được trao tặng lần thứ 13 và 14 vào năm 2020 và 2022. Hơn thế nữa, ông đã thay đổi ngoạn mục nhan sắc cho hơn 15.000 khách hàng, mang đến cho họ một diện mạo mới, mở ra cánh cửa đến cuộc sống tích cực và hạnh phúc hơn.",
+      description: "Nguyễn Kim Khoa là bác sĩ giàu kinh nghiệm trong lĩnh vực da liễu và tạo hình thẩm mỹ, được biết đến với chuyên môn sâu rộng và uy tín vững chắc. Ông được xem là một trong những bậc thầy gạo cội, đã dành cả cuộc đời mình để cống hiến cho ngành làm đẹp, để lại dấu ấn sâu đậm với vô số thành tựu. Hơn 30 năm miệt mài trong ngành da liễu và thẩm mỹ tạo hình, bác sĩ Khoa đã gặt hái được những thành tựu đáng ngưỡng mộ. Sở hữu thế mạnh vượt trội về chăm sóc da liễu chuyên sâu, phẫu thuật tạo hình thẩm mỹ mắt – mũi – môi, kết hợp với kinh nghiệm giảng dạy chuyên ngành thẩm mỹ, ông đã xây dựng nên một sự nghiệp lừng lẫy, ghi dấu ấn vang dội. Hành trình cống hiến của bác sĩ Khoa không chỉ dừng lại ở những con số, mà còn là giá trị nhân văn sâu sắc khi mang đến cái đẹp và sự tự tin cho đời. Minh chứng rõ ràng nhất là danh hiệu \"Thầy Thuốc Ưu Tú\" cao quý mà ông vinh dự được trao tặng lần thứ 13 và 14 vào năm 2020 và 2022. Hơn thế nữa, ông đã thay đổi ngoạn mục nhan sắc cho hơn 15.000 khách hàng, mang đến cho họ một diện mạo mới, mở ra cánh cửa đến cuộc sống tích cực và hạnh phúc hơn.",
       image: "/nguyenkimkhoa.webp"
     },
     {
@@ -83,6 +85,14 @@ export default function Home() {
       image: "da6.jpg",
     },
   ];
+
+  const handleAddServiceClick = () => {
+    setAddServiceOpen(true);
+  };
+
+  const handleCloseModal = () => {
+    setAddServiceOpen(false);
+  };
 
   return (
     <div className="w-full min-h-screen bg-white">
@@ -172,6 +182,9 @@ export default function Home() {
 
             </div>
 
+          </div>
+          <div className="mt-8">
+          <Button className="bg-gray-300 text-gray-800" onClick={handleAddServiceClick}>Thêm dịch vụ</Button>
           </div>
         </div>
       </section>
@@ -458,98 +471,52 @@ export default function Home() {
         </div>
       </section>
 
+      <section
+        className="relative bg-white py-16"
+        style={{
+          backgroundImage:
+            "url(https://cdn.diemnhangroup.com/seoulcenter/2023/08/Group-1.png)",
+          backgroundSize: "cover",
+          backgroundPosition: "center",
+          backgroundRepeat: "no-repeat",
+        }}
+      >
+        <div className="w-1/2 mx-auto flex flex-col md:flex-row items-center justify-between px-6">
+          <div className="w-full md:w-1/2 flex justify-center">
+            <img
+              src="https://cdn.diemnhangroup.com/seoulcenter/2023/08/HINH-BAC-SY-1.png"
+              alt="Đội ngũ bác sĩ"
+              className="w-full max-w-md object-cover"
+            />
+          </div>
 
-
-
-
-
-      {/* <footer className="bg-[#F8F8F8] text-gray-900 py-12 mt-12">
-        <div className="container mx-auto flex flex-col lg:flex-row justify-between">
-
-          <div className="flex flex-col mb-8 lg:mb-0 w-full lg:w-1/3">
-            <div className="flex items-center mb-4">
-              <img src="/mun.jpg" alt="LuxSpa Logo" className="w-12 h-12 mr-4" />
-              <p className="font-bold text-xl text-[#F1588D]">TÁI ĐỊNH VỊ THƯƠNG HIỆU</p>
-            </div>
-            <p className="text-sm text-gray-600 mb-4">
-              Thẩm mỹ viện LuxSpa.Vn với nhiều chi nhánh trải dài trên toàn quốc, tự hào sở hữu đội ngũ bác sĩ chuyên môn cao, tiên phong công nghệ tiên tiến để đem đến giải pháp làm đẹp tối ưu.
+          <div className="w-full md:w-1/2 text-center md:text-left mt-8 md:mt-0">
+            <h2 className="text-2xl md:text-3xl font-bold text-pink-500 mb-2 text-center">
+              ĐĂNG KÝ NGAY
+            </h2>
+            <p className="text-gray-600 mb-4 text-center">
+              để được tư vấn miễn phí
             </p>
-            <div className="space-y-2">
-              <p className="text-lg font-semibold">THÔNG TIN LIÊN HỆ</p>
-              <p className="text-sm text-gray-600">120 Ni Sư Huỳnh Liên, Phường 10, Tân Bình, TP.HCM</p>
-              <p className="text-sm text-gray-600">1800 3333 (CSKH)</p>
-              <p className="text-sm text-gray-600">0911 025 477 (Tư Vấn Nhượng Quyền)</p>
-              <p className="text-sm text-gray-600">cskh@luxspa.vn</p>
-              <p className="text-sm text-gray-600">Thời gian làm việc: Từ 8:45 đến 19:30 hàng ngày</p>
-              <p className="text-sm text-gray-600">-----------------</p>
-              <p className="text-sm text-gray-600">Theo dõi chúng tôi tại</p>
-              <div className="flex space-x-1">
-                <img
-                  src="/facebook.png"
-                  alt="facebook"
-                  className="w-[35px] h-[35px] object-cover rounded-lg" />
-                <img
-                  src="/instagram.png"
-                  alt="Instagram"
-                  className="w-[35px] h-[35px] object-cover rounded-lg" />
-                <img
-                  src="/youtube.png"
-                  alt="Youtube"
-                  className="w-[35px] h-[35px] object-cover rounded-lg" />
-                <img
-                  src="/gmail.png"
-                  alt="gmail"
-                  className="w-[35px] h-[35px] object-cover rounded-lg" />
-              </div>
-
-
-            </div>
-          </div>
-
-          <div className="flex flex-col w-full lg:w-1/3 mb-8 lg:mb-0">
-            <p className="font-bold text-xl text-[#F1588D] mb-4">BÀI VIẾT NỔI BẬT</p>
-            <ul className="text-sm text-gray-600 space-y-2">
-              <li><a href="#" className="hover:text-[#F1588D]">Bảng giá dịch vụ spa</a></li>
-              <li><a href="#" className="hover:text-[#F1588D]">Điều khác chân mày giá bao nhiêu</a></li>
-              <li><a href="#" className="hover:text-[#F1588D]">Tắm trắng bao nhiêu tiền</a></li>
-              <li><a href="#" className="hover:text-[#F1588D]">Triệt lông vĩnh viễn giá bao nhiêu</a></li>
-            </ul>
-
-            <p className="font-bold text-xl text-[#F1588D] mt-8 mb-4">CHÍNH SÁCH</p>
-            <ul className="text-sm text-gray-600 space-y-2">
-              <li><a href="#" className="hover:text-[#F1588D]">Chính sách bảo mật thông tin</a></li>
-              <li><a href="#" className="hover:text-[#F1588D]">Chính sách biên tập nội dung</a></li>
-              <li><a href="#" className="hover:text-[#F1588D]">Chính sách đổi trả hàng</a></li>
-              <li><a href="#" className="hover:text-[#F1588D]">Chính sách vận chuyển và thanh toán</a></li>
-            </ul>
-          </div>
-
-          <div className="flex flex-col w-full lg:w-1/3 text-center">
-            <p className="font-bold text-xl text-[#F1588D] mb-4">TẢI ỨNG DỤNG</p>
-            <div className="flex justify-center space-x-4 mb-6">
-              <a href="#" className="text-white">
-                <img src="/Googleplay.png" alt="Google Play" className="w-32" />
-              </a>
-              <a href="#" className="text-white">
-                <img src="/Appstore.png" alt="App Store" className="w-32" />
-              </a>
-            </div>
-
-            <div className="flex justify-center space-x-4">
-              <a href="#" className="text-white text-xl hover:text-[#F1588D]">
-                <i className="fab fa-facebook"></i>
-              </a>
-              <a href="#" className="text-white text-xl hover:text-[#F1588D]">
-                <i className="fab fa-youtube"></i>
-              </a>
-              <a href="#" className="text-white text-xl hover:text-[#F1588D]">
-                <i className="fab fa-instagram"></i>
-              </a>
-            </div>
+            <form className="space-y-4">
+              <input
+                type="text"
+                placeholder="Nhập họ và tên"
+                className="w-full p-3 border border-slate-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-500 border-l-4"
+              />
+              <input
+                type="text"
+                placeholder="Nhập số điện thoại"
+                className="w-full p-3 border border-slate-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-500 border-l-4"
+              />
+              <button className="w-full bg-red-500 text-white py-3 rounded-lg text-lg font-semibold hover:bg-pink-600">
+                NHẬN TƯ VẤN
+              </button>
+            </form>
           </div>
         </div>
-      </footer> */}
+      </section>
 
+      {/* <AddService open={isAddServiceOpen} onClose={handleCloseModal} /> */}
 
     </div>
   );

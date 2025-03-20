@@ -25,8 +25,11 @@ import Services from "@/pages/Home/services";
 import Questionpage from "@/pages/Quiz/questionpage";
 import QuizPage from "@/pages/Quiz/quizpage";
 import AllTherapist from "@/pages/Therapists/allTherapist";
+import NewsDetails from "@/pages/Blogs/blog-detail";
 import { Suspense } from "react";
 import { Navigate, Outlet, useRoutes } from "react-router-dom";
+import MyProfile from "@/pages/Profile";
+import BookingHistory from "@/pages/BookingHistory";
 
 // ----------------------------------------------------------------------
 
@@ -133,6 +136,8 @@ export default function AppRouter() {
         { path: "/services", element: <Services /> },
         { path: "/content-policy", element: <ContentPolicy /> },
         { path: "/privacy-policy", element: <PrivacyPolicy /> },
+        { path: "/booking-history", element: <BookingHistory /> },
+        { path: "/profile", element: <MyProfile /> },
       ],
     },
   ];
