@@ -1,9 +1,4 @@
-import axios, {
-  AxiosError,
-  AxiosRequestConfig,
-  AxiosResponse,
-  InternalAxiosRequestConfig,
-} from "axios";
+import axios, { AxiosError, AxiosRequestConfig, AxiosResponse } from "axios";
 import { getToken, removeToken, setToken } from "../lib/token";
 
 // Tạo axios instance
@@ -48,42 +43,42 @@ api.interceptors.response.use(
     }
 
     // Kiểm tra nếu lỗi là 401 (token hết hạn) và chưa thử refresh token
-    // if (error.response?.status === 401 && !originalRequest._retry) {
-    //   originalRequest._retry = true;
+    if (error.response?.status === 401 && !originalRequest._retry) {
+      originalRequest._retry = true;
 
-    //   try {
-    //     const refreshToken = getToken()?.refreshToken;
+      try {
+        const refreshToken = getToken()?.refreshToken;
 
-    //     if (!refreshToken) {
-    //       // Nếu không có refresh token, đăng xuất và chuyển người dùng về trang đăng nhập
-    //       removeToken();
-    //       window.location.href = "/?auth=login";
-    //       return Promise.reject(error);
-    //     }
+        if (!refreshToken) {
+          // Nếu không có refresh token, đăng xuất và chuyển người dùng về trang đăng nhập
+          removeToken();
+          window.location.href = "/?auth=login";
+          return Promise.reject(error);
+        }
 
-    //     // Gọi API để refresh token
-    //     const response = await axios.post(
-    //       `${import.meta.env.VITE_API_URL}/auth/refresh-token`,
-    //       { refreshToken }
-    //     );
+        // Gọi API để refresh token
+        const response = await axios.post(
+          `${import.meta.env.VITE_API_URL}/auth/refresh-token`,
+          { refreshToken }
+        );
 
-    //     // Lưu token mới
-    //     const { accessToken, refreshToken: newRefreshToken } = response.data;
-    //     setToken({ accessToken, refreshToken: newRefreshToken });
+        // Lưu token mới
+        const { accessToken, refreshToken: newRefreshToken } = response.data;
+        setToken({ accessToken, refreshToken: newRefreshToken });
 
-    //     // Cập nhật header cho request gốc và thử lại
-    //     if (originalRequest.headers) {
-    //       originalRequest.headers.Authorization = `Bearer ${accessToken}`;
-    //     }
+        // Cập nhật header cho request gốc và thử lại
+        if (originalRequest.headers) {
+          originalRequest.headers.Authorization = `Bearer ${accessToken}`;
+        }
 
-    //     return api(originalRequest);
-    //   } catch (refreshError) {
-    //     // Nếu refresh token thất bại, đăng xuất và chuyển người dùng về trang đăng nhập
-    //     removeToken();
-    //     window.location.href = "/?auth=login";
-    //     return Promise.reject(refreshError);
-    //   }
-    // }
+        return api(originalRequest);
+      } catch (refreshError) {
+        // Nếu refresh token thất bại, đăng xuất và chuyển người dùng về trang đăng nhập
+        removeToken();
+        window.location.href = "/?auth=login";
+        return Promise.reject(refreshError);
+      }
+    }
 
     return Promise.reject(error);
   }

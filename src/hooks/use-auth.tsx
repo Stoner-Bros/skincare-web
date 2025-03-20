@@ -1,7 +1,7 @@
 import { isAuthenticated } from "@/lib/token";
 import authServices from "@/services/auth.services";
 import { LoginRequest, RegisterRequest } from "@/types/auth.types";
-import { User } from "@/types/types";
+import { User } from "@/types/user.types";
 import React, {
   createContext,
   useState,

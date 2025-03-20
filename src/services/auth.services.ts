@@ -6,7 +6,7 @@ import {
   RefreshTokenRequest,
   RegisterRequest,
 } from "@/types/auth.types";
-import { User } from "@/types/types";
+import { User } from "@/types/user.types";
 
 class AuthService {
   // Đăng nhập

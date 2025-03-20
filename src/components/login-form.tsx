@@ -83,7 +83,7 @@ export default function LoginForm({ onSuccess }: LoginFormProps) {
               <FormLabel>Email</FormLabel>
               <FormControl>
                 <Input
-                  placeholder="you@example.com"
+                  placeholder="Nhập email của bạn"
                   {...field}
                   className="border-pink-200 focus-visible:ring-pink-400"
                   disabled={loading}
@@ -102,7 +102,7 @@ export default function LoginForm({ onSuccess }: LoginFormProps) {
               <FormControl>
                 <Input
                   type="password"
-                  placeholder="********"
+                  placeholder="Nhập mật khẩu của bạn"
                   {...field}
                   className="border-pink-200 focus-visible:ring-pink-400"
                   disabled={loading}
