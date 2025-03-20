@@ -4,8 +4,6 @@ import NotFound from "@/pages/404";
 import AboutUs from "@/pages/AboutUs/AboutUs";
 import ContentPolicy from "@/pages/AboutUs/ContentPrivacy";
 import PrivacyPolicy from "@/pages/AboutUs/PrivacyPolicy";
-import LoginPage from "@/pages/Auth/Login";
-import SignUpPage from "@/pages/Auth/SignUp";
 import WaitingBlog from "@/pages/Dashboard/Blog/WaitingBlog";
 import Feedbacks from "@/pages/Dashboard/Feedbacks";
 import AllOrder from "@/pages/Dashboard/Order/AllOrder";
@@ -128,8 +126,6 @@ export default function AppRouter() {
           element: <Home />,
           index: true,
         },
-        { path: "/login", element: <LoginPage /> },
-        { path: "/sign-up", element: <SignUpPage /> },
         { path: "/quiz", element: <QuizPage /> },
         { path: "/about-us", element: <AboutUs /> },
         { path: "/therapist", element: <AllTherapist /> },
