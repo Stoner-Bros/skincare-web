@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import { useState } from "react";
 
 const serviceCategories = [
   {
@@ -68,11 +68,10 @@ const ServiceDetail = () => {
           {serviceCategories.map((category) => (
             <button
               key={category.name}
-              className={`block w-full text-left px-3 py-2 rounded-md transition-colors ${
-                selectedCategory.name === category.name
+              className={`block w-full text-left px-3 py-2 rounded-md transition-colors ${selectedCategory.name === category.name
                   ? "bg-pink-500 text-white"
                   : "bg-white text-pink-500"
-              }`}
+                }`}
               onMouseEnter={() => setSelectedCategory(category)}
             >
               {category.name}

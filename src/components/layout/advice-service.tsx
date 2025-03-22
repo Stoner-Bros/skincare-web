@@ -1,5 +1,3 @@
-import React, { useState } from "react";
-
 export default function AdviceService({ onClose }: { onClose: () => void }) {
   return (
     <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">

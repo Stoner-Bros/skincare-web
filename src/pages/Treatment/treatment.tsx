@@ -1,10 +1,3 @@
-import { Button } from '@/components/ui/button'
-import React from 'react'
-import { Link } from 'react-router-dom'
-import { Swiper, SwiperSlide } from 'swiper/react';
-import 'swiper/swiper-bundle.css';
-import { Autoplay, Navigation, Pagination, Thumbs } from 'swiper/modules';
-
 export default function Treatment() {
     return (
         <div className="w-full min-h-screen bg-white">

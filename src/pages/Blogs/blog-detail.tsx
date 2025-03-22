@@ -1,6 +1,6 @@
 import MDEditor from "@uiw/react-md-editor";
-import { useEffect, useState } from "react";
-import { useParams } from "react-router-dom";
+import { useState } from "react";
+// import { useParams } from "react-router-dom";
 
 interface Blog {
   blogId: string;
@@ -19,23 +19,23 @@ interface RecommendedBlog {
   createdAt: string;
 }
 
-const placeholderImage = "https://placehold.co/300x500/gray/white?text=Beauty+Tips";
+// const placeholderImage = "https://placehold.co/300x500/gray/white?text=Beauty+Tips";
 
 const fakeBlogData: Blog = {
   blogId: "1",
   title: "Bí quyết làm đẹp với công nghệ mới nhất 2023",
   content: `# Bí quyết làm đẹp với công nghệ mới nhất 2023
-  
+
   ## 1. Công nghệ Laser tái tạo da
-  
+
   Công nghệ laser tái tạo da giúp làn da trở nên trẻ trung, săn chắc và rạng rỡ hơn.
-  
+
   ## 2. Liệu pháp Hydrafacial
-  
+
   Hydrafacial là một liệu pháp làm đẹp không xâm lấn, phù hợp với mọi loại da.
-  
+
   ## 3. Tiêm Botox và Filler
-  
+
   Botox làm giãn cơ và giảm nếp nhăn, trong khi Filler bổ sung thể tích cho các vùng bị lõm.`,
   imageUrl: "https://placehold.co/600x400/pink/white?text=Beauty+Blog",
   authorFullName: "Nguyễn Thị Hương",
@@ -59,9 +59,9 @@ const fakeRecommendedBlogs: RecommendedBlog[] = [
 ];
 
 export default function NewsDetails() {
-  const { id } = useParams<{ id: string }>();
-  const [blog, setBlog] = useState<Blog>(fakeBlogData);
-  const [recommended, setRecommended] = useState<RecommendedBlog[]>(fakeRecommendedBlogs);
+  // const { id } = useParams<{ id: string }>();
+  const [blog] = useState<Blog>(fakeBlogData);
+  const [recommended] = useState<RecommendedBlog[]>(fakeRecommendedBlogs);
 
   return (
     <div className="container mx-auto px-4 py-8">
@@ -70,22 +70,22 @@ export default function NewsDetails() {
           <h1 className="text-3xl font-bold text-start text-red-600">{blog.title}</h1>
           <div className="flex items-center text-start text-gray-500 text-sm mt-2">
             <img src="https://cdn.diemnhangroup.com/seoulspa/2023/11/profile-circle.png" alt="" className="icon-profile mr-2" />
-            Tác giả: {blog.authorFullName} 
+            Tác giả: {blog.authorFullName}
             <img src="https://cdn.diemnhangroup.com/seoulspa/2023/11/clock.png" alt="" className="icon-clock mx-2" />
             Cập nhật: {new Date(blog.createdAt).toLocaleDateString()}
           </div>
         </div>
         <div className="flex flex-col md:flex-row">
-          
+
           <div className="w-full md:w-1/4 p-4 flex justify-center items-start">
             <img src="/khachdacbiet.jpg" alt="Fixed Beauty Image" className="rounded-lg shadow-md" />
           </div>
-          
-        
+
+
           <div className="w-full md:w-2/4 p-4">
             <div className="mb-4">
-              <img 
-                src={blog.imageUrl} 
+              <img
+                src={blog.imageUrl}
                 alt={blog.title}
                 className="w-full h-64 object-cover rounded-lg"
               />

@@ -1,5 +1,4 @@
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
@@ -36,10 +35,9 @@ type AddServiceProps = {
 
 export default function AddService({ open, onClose }: AddServiceProps) {
   const { toast } = useToast();
-  const navigate = useNavigate();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [thumbnailFile, setThumbnailFile] = useState<File | null>(null);
-  const [previewUrl, setPreviewUrl] = useState<string>("");
+  // const [previewUrl, setPreviewUrl] = useState<string>("");
 
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
@@ -54,22 +52,22 @@ export default function AddService({ open, onClose }: AddServiceProps) {
     const file = event.target.files?.[0];
     if (file) {
       setThumbnailFile(file);
-      const fileUrl = URL.createObjectURL(file);
-      setPreviewUrl(fileUrl);
+      // const fileUrl = URL.createObjectURL(file);
+      // setPreviewUrl(fileUrl);
     }
   };
 
   const onSubmit = async (data: FormValues) => {
     try {
       setIsSubmitting(true);
-      
+
       let thumbnailUrl = data.serviceThumbnailUrl || "";
-      
+
       if (thumbnailFile) {
         // Upload file trước
         const formData = new FormData();
         formData.append("file", thumbnailFile);
-        
+
         const response = await fetch(`${import.meta.env.VITE_API_URL}/upload`, {
           method: 'POST',
           headers: {
@@ -77,17 +75,17 @@ export default function AddService({ open, onClose }: AddServiceProps) {
           },
           body: formData,
         });
-        
+
         if (!response.ok) {
           throw new Error('Lỗi khi upload hình ảnh');
         }
-        
+
         // Phân tích cú pháp JSON thay vì sử dụng response.text()
         const responseData = await response.json();
         // Lấy tên file từ phản hồi JSON, bỏ đường dẫn /Uploads
         thumbnailUrl = responseData.data.fileName;
       }
-      
+
       // Tạo đối tượng request để gửi đến API
       const serviceData: ServiceCreateRequest = {
         serviceName: data.serviceName,
@@ -97,12 +95,12 @@ export default function AddService({ open, onClose }: AddServiceProps) {
 
       // Sử dụng serviceService thay vì gọi API trực tiếp
       await serviceService.createService(serviceData);
-      
+
       toast({
         title: "Thành công",
         description: "Đã thêm dịch vụ mới thành công",
       });
-      
+
       // Chuyển hướng về trang danh sách dịch vụ
       // navigate("/Home");
     } catch (error) {
@@ -179,7 +177,7 @@ export default function AddService({ open, onClose }: AddServiceProps) {
                   onChange={handleFileChange}
                   className="cursor-pointer"
                 />
-                
+
                 {/* {previewUrl && (
                   <div className="mt-2">
                     <p className="text-sm mb-2">Xem trước:</p>

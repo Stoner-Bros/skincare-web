@@ -124,15 +124,17 @@ export default function Home() {
                 console.error(`Lỗi khi lấy hình ảnh cho dịch vụ ${id}:`, imageError);
               }
             }
+            // @ts-ignore
             return service.data;
           } catch (error) {
             console.error(`Không tìm thấy dịch vụ có ID ${id}:`, error);
             return null;
           }
         });
-        
+
         const results = await Promise.all(servicesPromises);
         console.log(results);
+        // @ts-ignore
         const validServices = results.filter(service => service !== null) as Service[];
         setFeaturedServices(validServices);
       } catch (error) {
@@ -143,13 +145,13 @@ export default function Home() {
     };
 
     fetchFeaturedServices();
-    
+
   }, []);
 
   return (
     <div className="w-full min-h-screen bg-white">
 
-    
+
       <section className="swiper-container">
         <Swiper
           modules={[Autoplay, Pagination, Navigation]}
@@ -191,9 +193,9 @@ export default function Home() {
                     src={`https://skincare-api.azurewebsites.net/api/upload/${service.serviceThumbnailUrl}`}
                     alt={service.serviceName}
                     className="w-full h-64 object-cover rounded-t-lg"
-                    // onError={(e) => {
-                    //   (e.target as HTMLImageElement).src = "/mun.jpg";
-                    // }}
+                  // onError={(e) => {
+                  //   (e.target as HTMLImageElement).src = "/mun.jpg";
+                  // }}
                   />
                   <h3 className="text-xl font-semibold text-red-600 mt-4">{service.serviceName}</h3>
                   <p className="text-gray-600 mt-2 line-clamp-3">{service.serviceDescription}</p>
@@ -208,8 +210,8 @@ export default function Home() {
             ) : (
               <div className="col-span-3 text-center py-8">
                 <p>Không tìm thấy dịch vụ nào.</p>
-                <Button 
-                  className="bg-red-600 text-white mt-4" 
+                <Button
+                  className="bg-red-600 text-white mt-4"
                   onClick={handleAddServiceClick}
                 >
                   Thêm dịch vụ mới
@@ -321,7 +323,7 @@ export default function Home() {
                 // autoplay={{ delay: 3000 }}
                 navigation
                 className="w-full h-[200px] grid grid-cols-5 gap-4 select-none"
-                onSlideChange={(e) => {
+                onSlideChange={() => {
                   setIndex((index + 1) % bacSi.length)
                 }}
               // className="w-80%"
@@ -501,8 +503,8 @@ export default function Home() {
               </div>
             </div>
             <div className="mt-8">
-            <Button className="bg-red-600 text-white" onClick={handleAddBlogClick}>Thêm Blog</Button>
-          </div>
+              <Button className="bg-red-600 text-white" onClick={handleAddBlogClick}>Thêm Blog</Button>
+            </div>
           </div>
         </div>
       </section>
