@@ -37,6 +37,16 @@ class ServiceService {
     }
   }
 
+  async getServiceImage(filename: string): Promise<string> {
+    try {
+      const response = await api.get(`/api/upload/${filename}`);
+      return response.data;
+    } catch (error) {
+      console.error(`Error fetching service image ${filename}:`, error);
+      throw error;
+    }
+  }
+
   async createService(serviceData: ServiceCreateRequest): Promise<Service> {
     try {
       const response = await api.post(`${this.baseUrl}`, serviceData);
