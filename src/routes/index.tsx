@@ -21,7 +21,7 @@ import Customer from "@/pages/Dashboard/User/Customer";
 import SkinTherapist from "@/pages/Dashboard/User/SkinTherapist";
 import Staff from "@/pages/Dashboard/User/Staff";
 import Home from "@/pages/Home";
-import Services from "@/pages/Home/services";
+import Treatment from "@/pages/Treatment/treatment";
 import Questionpage from "@/pages/Quiz/questionpage";
 import QuizPage from "@/pages/Quiz/quizpage";
 import AllTherapist from "@/pages/Therapists/allTherapist";
@@ -30,6 +30,7 @@ import { Suspense } from "react";
 import { Navigate, Outlet, useRoutes } from "react-router-dom";
 import MyProfile from "@/pages/Profile";
 import BookingHistory from "@/pages/BookingHistory";
+import ShowService from "@/pages/Services/show-service";
 
 // ----------------------------------------------------------------------
 
@@ -133,7 +134,8 @@ export default function AppRouter() {
         { path: "/about-us", element: <AboutUs /> },
         { path: "/therapist", element: <AllTherapist /> },
         { path: "/question", element: <Questionpage /> },
-        { path: "/services", element: <Services /> },
+        { path: "/treatment", element: <Treatment /> },
+        { path: "/services/:id", element: <ShowService /> },
         { path: "/content-policy", element: <ContentPolicy /> },
         { path: "/privacy-policy", element: <PrivacyPolicy /> },
         { path: "/booking-history", element: <BookingHistory /> },

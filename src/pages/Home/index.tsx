@@ -1,15 +1,21 @@
 import { Button } from "@/components/ui/button";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { Autoplay, Navigation, Pagination } from 'swiper/modules';
 import { Swiper, SwiperSlide } from 'swiper/react';
 import 'swiper/swiper-bundle.css';
-// import AddService from "../Services/add-service";
+import AddService from "../Services/add-service";
+import serviceService from "@/services/service.services";
+import { Service } from "@/types/service.types";
+import AddBlog from "../Blogs/add-blog";
 
 
 export default function Home() {
   const [index, setIndex] = useState(0);
   const [isAddServiceOpen, setAddServiceOpen] = useState(false);
+  const [isAddBlogOpen, setAddBlogOpen] = useState(false);
+  const [featuredServices, setFeaturedServices] = useState<Service[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
   const bacSi = [
     {
       name: "Nguyễn Kim Khoa",
@@ -94,10 +100,56 @@ export default function Home() {
     setAddServiceOpen(false);
   };
 
+  const handleAddBlogClick = () => {
+    setAddBlogOpen(true);
+  };
+
+  const handleCloseModalBlog = () => {
+    setAddBlogOpen(false);
+  };
+
+  useEffect(() => {
+    const fetchFeaturedServices = async () => {
+      setIsLoading(true);
+      try {
+        const serviceIds = [14, 12, 15, 16];
+        const servicesPromises = serviceIds.map(async id => {
+          try {
+            const service = await serviceService.getServiceById(id);
+            if (service && service.serviceThumbnailUrl) {
+              try {
+                const imageUrl = await serviceService.getServiceImage(`/api/upload/${service.serviceThumbnailUrl}`);
+                service.serviceThumbnailUrl = imageUrl;
+              } catch (imageError) {
+                console.error(`Lỗi khi lấy hình ảnh cho dịch vụ ${id}:`, imageError);
+              }
+            }
+            return service.data;
+          } catch (error) {
+            console.error(`Không tìm thấy dịch vụ có ID ${id}:`, error);
+            return null;
+          }
+        });
+        
+        const results = await Promise.all(servicesPromises);
+        console.log(results);
+        const validServices = results.filter(service => service !== null) as Service[];
+        setFeaturedServices(validServices);
+      } catch (error) {
+        console.error("Lỗi khi lấy dịch vụ nổi bật:", error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchFeaturedServices();
+    
+  }, []);
+
   return (
     <div className="w-full min-h-screen bg-white">
 
-
+    
       <section className="swiper-container">
         <Swiper
           modules={[Autoplay, Pagination, Navigation]}
@@ -130,61 +182,43 @@ export default function Home() {
         <div className="container mx-auto text-center">
           <h2 className="text-3xl font-bold text-rose-600 mb-8">DỊCH VỤ NỔI BẬT</h2>
           <div className="grid grid-cols-3 gap-8">
-            <div className="border rounded-lg p-4 border-red-500">
-              <img src="/mun.jpg" alt="Chăm sóc da" className="w-full h-48 object-cover rounded-t-lg" />
-              <h3 className="text-xl font-semibold text-red-600 mt-4">Chăm sóc da</h3>
-              <div className="flex mt-4 items-center justify-center">
-                <Button className="bg-red-600 text-white">Xem chi tiết</Button>
-                <Button className="bg-gray-300 text-gray-800">Nhận tư vấn</Button>
+            {isLoading ? (
+              <div className="col-span-3 text-center py-8">Đang tải dịch vụ...</div>
+            ) : featuredServices.length > 0 ? (
+              featuredServices.map((service) => (
+                <div key={service.serviceId} className=" border rounded-lg p-4 border-red-500">
+                  <img
+                    src={`https://skincare-api.azurewebsites.net/api/upload/${service.serviceThumbnailUrl}`}
+                    alt={service.serviceName}
+                    className="w-full h-64 object-cover rounded-t-lg"
+                    // onError={(e) => {
+                    //   (e.target as HTMLImageElement).src = "/mun.jpg";
+                    // }}
+                  />
+                  <h3 className="text-xl font-semibold text-red-600 mt-4">{service.serviceName}</h3>
+                  <p className="text-gray-600 mt-2 line-clamp-3">{service.serviceDescription}</p>
+                  <div className="flex mt-4 items-center justify-center">
+                    <Link to={`/services/${service.serviceId}`}>
+                      <Button className="bg-red-600 text-white">Xem chi tiết</Button>
+                    </Link>
+                    <Button className="bg-gray-300 text-gray-800 ml-2">Nhận tư vấn</Button>
+                  </div>
+                </div>
+              ))
+            ) : (
+              <div className="col-span-3 text-center py-8">
+                <p>Không tìm thấy dịch vụ nào.</p>
+                <Button 
+                  className="bg-red-600 text-white mt-4" 
+                  onClick={handleAddServiceClick}
+                >
+                  Thêm dịch vụ mới
+                </Button>
               </div>
-            </div>
-
-            <div className="border rounded-lg p-4 border-red-500">
-              <img src="/mun.jpg" alt="Điều trị mụn" className="w-full h-48 object-cover rounded-t-lg" />
-              <h3 className="text-xl font-semibold text-red-600 mt-4">Điều trị mụn</h3>
-              <div className="flex justify-center mt-4">
-                <Button className="bg-red-600 text-white">Xem chi tiết</Button>
-                <Button className="bg-gray-300 text-gray-800">Nhận tư vấn</Button>
-              </div>
-            </div>
-            <div className="border rounded-lg p-4 border-red-500">
-              <img src="/mun.jpg" alt="Điều trị mụn" className="w-full h-48 object-cover rounded-t-lg" />
-              <h3 className="text-xl font-semibold text-red-600 mt-4">Điều trị mụn</h3>
-              <div className="flex justify-center mt-4">
-                <Button className="bg-red-600 text-white">Xem chi tiết</Button>
-                <Button className="bg-gray-300 text-gray-800">Nhận tư vấn</Button>
-              </div>
-            </div>
-            <div className="border rounded-lg p-4 border-red-500">
-              <img src="/mun.jpg" alt="Điều trị mụn" className="w-full h-48 object-cover rounded-t-lg" />
-              <h3 className="text-xl font-semibold text-red-600 mt-4">Điều trị mụn</h3>
-              <div className="flex justify-center mt-4">
-                <Button className="bg-red-600 text-white">Xem chi tiết</Button>
-                <Button className="bg-gray-300 text-gray-800">Nhận tư vấn</Button>
-              </div>
-            </div>
-            <div className="border rounded-lg p-4 border-red-500">
-              <img src="/mun.jpg" alt="Điều trị mụn" className="w-full h-48 object-cover rounded-t-lg" />
-              <h3 className="text-xl font-semibold text-red-600 mt-4">Điều trị mụn</h3>
-              <div className="flex justify-center mt-4">
-                <Button className="bg-red-600 text-white">Xem chi tiết</Button>
-                <Button className="bg-gray-300 text-gray-800">Nhận tư vấn</Button>
-              </div>
-            </div>
-
-            <div className="border rounded-lg p-4 border-red-500">
-              <img src="/mun.jpg" alt="Tắm trắng" className="w-full h-48 object-cover rounded-t-lg" />
-              <h3 className="text-xl font-semibold text-rose-600 mt-4">Tắm trắng</h3>
-              <div className="flex justify-center mt-4">
-                <Button className="bg-red-600 text-white">Xem chi tiết</Button>
-                <Button className="bg-gray-300 text-gray-800">Nhận tư vấn</Button>
-              </div>
-
-            </div>
-
+            )}
           </div>
           <div className="mt-8">
-          <Button className="bg-gray-300 text-gray-800" onClick={handleAddServiceClick}>Thêm dịch vụ</Button>
+            <Button className="bg-red-600 text-white" onClick={handleAddServiceClick}>Thêm dịch vụ</Button>
           </div>
         </div>
       </section>
@@ -466,7 +500,9 @@ export default function Home() {
                 <a href="#" className="text-blue-600 font-semibold mt-2">Xem chi tiết</a>
               </div>
             </div>
-
+            <div className="mt-8">
+            <Button className="bg-red-600 text-white" onClick={handleAddBlogClick}>Thêm Blog</Button>
+          </div>
           </div>
         </div>
       </section>
@@ -516,7 +552,8 @@ export default function Home() {
         </div>
       </section>
 
-      {/* <AddService open={isAddServiceOpen} onClose={handleCloseModal} /> */}
+      <AddService open={isAddServiceOpen} onClose={handleCloseModal} />
+      <AddBlog open={isAddBlogOpen} onClose={handleCloseModalBlog} />
 
     </div>
   );
