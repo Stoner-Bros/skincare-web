@@ -1,8 +1,10 @@
-import { useState } from "react";
-import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
+import MDEditor from "@uiw/react-md-editor";
+import { Image, Loader2 } from "lucide-react";
+import { useRef, useState } from "react";
+import { useForm } from "react-hook-form";
+import { useNavigate } from "react-router-dom";
 import * as z from "zod";
-import { Loader2 } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -14,109 +16,144 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
-import { ServiceCreateRequest } from "@/types/service.types";
 import { useToast } from "@/hooks/use-toast";
-import serviceService from "@/services/service.services";
-// import uploadService from "@/services/upload.services";
+import blogService from "@/services/blog.services";
+import { BlogCreateRequest } from "@/types/blog.types";
 
 const formSchema = z.object({
-  serviceName: z.string().min(1, "Tên dịch vụ không được để trống"),
-  serviceDescription: z.string().min(1, "Mô tả không được để trống"),
-  serviceThumbnailUrl: z.string().optional(),
+  title: z.string().min(1, "Tiêu đề không được để trống"),
+  content: z.string().min(1, "Nội dung không được để trống"),
+  thumbnailUrl: z.string().optional(),
+  tags: z.string().min(1, "Tags không được để trống"),
 });
 
 type FormValues = z.infer<typeof formSchema>;
 
-type AddServiceProps = {
+type AddBlogProps = {
   open: boolean;
   onClose: () => void;
 };
 
-export default function AddService({ open, onClose }: AddServiceProps) {
+export default function AddBlog({ open, onClose }: AddBlogProps) {
   const { toast } = useToast();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [thumbnailFile, setThumbnailFile] = useState<File | null>(null);
-  // const [previewUrl, setPreviewUrl] = useState<string>("");
+  const [previewUrl, setPreviewUrl] = useState<string>("");
+  const [markdownPreview, setMarkdownPreview] = useState(false);
+  const [mdContent, setMdContent] = useState<string>("");
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      serviceName: "",
-      serviceDescription: "",
-      serviceThumbnailUrl: "",
+      title: "",
+      content: "",
+      thumbnailUrl: "",
+      tags: "",
     },
   });
 
-  const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFileChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
-    if (file) {
-      setThumbnailFile(file);
-      // const fileUrl = URL.createObjectURL(file);
-      // setPreviewUrl(fileUrl);
+    if (!file) return;
+    
+    setThumbnailFile(file);
+    const fileUrl = URL.createObjectURL(file);
+    setPreviewUrl(fileUrl);
+    
+    try {
+      // Upload file ngay lập tức
+      const formData = new FormData();
+      formData.append("file", file);
+      
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/upload`, {
+        method: 'POST',
+        headers: {
+          'Accept': '*/*',
+        },
+        body: formData,
+      });
+      
+      if (!response.ok) {
+        throw new Error('Lỗi khi upload hình ảnh');
+      }
+      
+      const responseData = await response.json();
+      const thumbnailUrl = responseData.data.fileName;
+      form.setValue("thumbnailUrl", thumbnailUrl);
+      
+      // Chèn hình ảnh vào nội dung Markdown
+      const imageMarkdown = `![image](${import.meta.env.VITE_API_URL}/upload/${thumbnailUrl})`;
+      const newContent = mdContent ? `${mdContent}\n${imageMarkdown}` : imageMarkdown;
+      setMdContent(newContent);
+      form.setValue("content", newContent);
+      
+      toast({
+        title: "Thành công",
+        description: "Hình ảnh đã được tải lên",
+      });
+    } catch (error) {
+      console.error("Lỗi khi tải hình ảnh:", error);
+      toast({
+        variant: "destructive",
+        title: "Lỗi",
+        description: "Không thể tải hình ảnh lên. Vui lòng thử lại sau.",
+      });
+    }
+    
+    // Reset input file
+    if (fileInputRef.current) {
+      fileInputRef.current.value = "";
     }
   };
 
   const onSubmit = async (data: FormValues) => {
     try {
       setIsSubmitting(true);
-
-      let thumbnailUrl = data.serviceThumbnailUrl || "";
-
-      if (thumbnailFile) {
-        // Upload file trước
-        const formData = new FormData();
-        formData.append("file", thumbnailFile);
-
-        const response = await fetch(`${import.meta.env.VITE_API_URL}/upload`, {
-          method: 'POST',
-          headers: {
-            'Accept': '*/*',
-          },
-          body: formData,
-        });
-
-        if (!response.ok) {
-          throw new Error('Lỗi khi upload hình ảnh');
-        }
-
-        // Phân tích cú pháp JSON thay vì sử dụng response.text()
-        const responseData = await response.json();
-        // Lấy tên file từ phản hồi JSON, bỏ đường dẫn /Uploads
-        thumbnailUrl = responseData.data.fileName;
-      }
-
+      
+      // Sử dụng thumbnailUrl đã được set từ handleFileChange
+      let thumbnailUrl = data.thumbnailUrl || "";
+      
       // Tạo đối tượng request để gửi đến API
-      const serviceData: ServiceCreateRequest = {
-        serviceName: data.serviceName,
-        serviceDescription: data.serviceDescription,
-        serviceThumbnailUrl: thumbnailUrl,
+      const blogData: BlogCreateRequest = {
+        title: data.title,
+        content: mdContent || data.content,
+        thumbnailUrl: thumbnailUrl,
+        tags: data.tags,
       };
 
-      // Sử dụng serviceService thay vì gọi API trực tiếp
-      await serviceService.createService(serviceData);
-
+      // Sử dụng blogService thay vì gọi API trực tiếp
+      await blogService.createBlog(blogData);
+      
       toast({
         title: "Thành công",
-        description: "Đã thêm dịch vụ mới thành công",
+        description: "Đã thêm bài viết mới thành công",
       });
-
-      // Chuyển hướng về trang danh sách dịch vụ
-      // navigate("/Home");
+      
+      // Reset form và đóng modal
+      resetForm();
+      onClose();
     } catch (error) {
-      console.error("Lỗi khi thêm dịch vụ:", error);
+      console.error("Lỗi khi thêm bài viết:", error);
       toast({
         variant: "destructive",
         title: "Lỗi",
-        description: "Không thể thêm dịch vụ. Vui lòng thử lại sau.",
+        description: "Không thể thêm bài viết. Vui lòng thử lại sau.",
       });
     } finally {
       setIsSubmitting(false);
     }
   };
 
-  const handleClose = () => {
+  const resetForm = () => {
     form.reset();
+    setMdContent("");
+    setThumbnailFile(null);
+    setPreviewUrl("");
+  };
+
+  const handleClose = () => {
+    resetForm();
     onClose();
   };
 
@@ -126,7 +163,7 @@ export default function AddService({ open, onClose }: AddServiceProps) {
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
       <div className="bg-white rounded-lg shadow-xl w-full max-w-2xl">
         <div className="flex justify-between items-center p-6 border-b">
-          <h1 className="text-2xl font-bold">Thêm dịch vụ mới</h1>
+          <h1 className="text-2xl font-bold">Thêm bài viết mới</h1>
           <Button
             variant="outline"
             onClick={handleClose}
@@ -140,12 +177,12 @@ export default function AddService({ open, onClose }: AddServiceProps) {
             <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
               <FormField
                 control={form.control}
-                name="serviceName"
+                name="title"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Tên dịch vụ</FormLabel>
+                    <FormLabel>Tiêu đề</FormLabel>
                     <FormControl>
-                      <Input placeholder="Nhập tên dịch vụ" {...field} />
+                      <Input placeholder="Nhập tiêu đề bài viết" {...field} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -154,41 +191,56 @@ export default function AddService({ open, onClose }: AddServiceProps) {
 
               <FormField
                 control={form.control}
-                name="serviceDescription"
+                name="tags"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Mô tả dịch vụ</FormLabel>
+                    <FormLabel>Tags</FormLabel>
                     <FormControl>
-                      <Textarea
-                        placeholder="Nhập mô tả chi tiết về dịch vụ"
-                        {...field}
-                      />
+                      <Input placeholder="Nhập tags (phân cách bằng dấu phẩy)" {...field} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
                 )}
               />
 
-              <div className="space-y-2">
-                <FormLabel>Hình ảnh thumbnail</FormLabel>
-                <Input
-                  type="file"
-                  accept="image/*"
-                  onChange={handleFileChange}
-                  className="cursor-pointer"
-                />
-
-                {/* {previewUrl && (
-                  <div className="mt-2">
-                    <p className="text-sm mb-2">Xem trước:</p>
-                    <img
-                      src={previewUrl}
-                      alt="Preview"
-                      className="max-w-xs rounded-md border border-gray-200"
-                    />
-                  </div>
-                )} */}
-              </div>
+              <FormItem>
+                <FormLabel className="block mb-2">Nội dung</FormLabel>
+                <div className="flex items-center mb-2">
+                  <input
+                    type="file"
+                    ref={fileInputRef}
+                    onChange={handleFileChange}
+                    accept="image/*"
+                    style={{ display: 'none' }}
+                  />
+                  <Button 
+                    type="button" 
+                    variant="outline" 
+                    size="sm"
+                    onClick={() => fileInputRef.current?.click()}
+                    className="flex items-center"
+                  >
+                    <Image className="mr-2 h-4 w-4" />
+                    Thêm hình ảnh
+                  </Button>
+                </div>
+                <div data-color-mode="light">
+                  <MDEditor
+                    value={mdContent}
+                    onChange={(value) => {
+                      setMdContent(value || "");
+                      form.setValue("content", value || "");
+                    }}
+                    height={350}
+                    preview="live"
+                  />
+                </div>
+                {form.formState.errors.content && (
+                  <p className="text-sm font-medium text-destructive mt-2">
+                    {form.formState.errors.content.message}
+                  </p>
+                )}
+              </FormItem>
 
               <div className="flex justify-end space-x-3 mt-6">
                 <Button variant="outline" type="button" onClick={handleClose}>
@@ -201,7 +253,7 @@ export default function AddService({ open, onClose }: AddServiceProps) {
                       Đang xử lý...
                     </>
                   ) : (
-                    "Thêm dịch vụ"
+                    "Thêm bài viết"
                   )}
                 </Button>
               </div>

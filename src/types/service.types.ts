@@ -23,3 +23,11 @@ export interface ServiceListResponse {
   totalRecords: number;
   totalPages: number;
 }
+
+export interface ApiResponse<T> {
+  status: number;
+  message: string;
+  extras?: string;
+  debug_info?: string;
+  data: T;
+}

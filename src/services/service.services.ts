@@ -4,6 +4,7 @@ import {
   ServiceCreateRequest,
   ServiceListResponse,
   ServiceUpdateRequest,
+  ApiResponse,
 } from "@/types/service.types";
 
 class ServiceService {
@@ -12,7 +13,7 @@ class ServiceService {
   async getServices(
     pageNumber: number = 1,
     pageSize: number = 10
-  ): Promise<ServiceListResponse> {
+  ): Promise<ServiceListResponse | Service[]> {
     try {
       const response = await api.get(`${this.baseUrl}`, {
         params: {
@@ -20,7 +21,33 @@ class ServiceService {
           pageSize,
         },
       });
-      return response.data;
+      
+      // Log toàn bộ phản hồi từ API để debug
+      console.log("Raw API Response from getServices:", response);
+      
+      const responseData = response.data;
+      
+      // Xử lý trường hợp phản hồi API theo định dạng ApiResponse<ServiceListResponse>
+      if (responseData && responseData.data && responseData.status !== undefined) {
+        console.log("API trả về dạng ApiResponse", responseData.data);
+        return responseData.data as ServiceListResponse;
+      }
+      
+      // Xử lý trường hợp phản hồi API trực tiếp là ServiceListResponse
+      if (responseData && responseData.items) {
+        console.log("API trả về dạng ServiceListResponse", responseData);
+        return responseData as ServiceListResponse;
+      }
+      
+      // Xử lý trường hợp phản hồi API là mảng Service[]
+      if (Array.isArray(responseData)) {
+        console.log("API trả về dạng mảng Service[]", responseData);
+        return responseData as Service[];
+      }
+      
+      // Fallback: trả về mảng rỗng nếu không khớp với bất kỳ định dạng nào
+      console.error("Định dạng dữ liệu API không nhận dạng được:", responseData);
+      return { items: [], pageNumber, pageSize, totalPages: 0, totalRecords: 0 };
     } catch (error) {
       console.error("Error fetching services:", error);
       throw error;

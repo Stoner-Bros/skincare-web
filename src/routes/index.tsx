@@ -30,6 +30,7 @@ import { Navigate, Outlet, useRoutes } from "react-router-dom";
 import MyProfile from "@/pages/Profile";
 import BookingHistory from "@/pages/BookingHistory";
 import ShowService from "@/pages/Services/show-service";
+import ServicesList from "@/pages/Services";
 
 // ----------------------------------------------------------------------
 
@@ -134,7 +135,10 @@ export default function AppRouter() {
         { path: "/therapist", element: <AllTherapist /> },
         { path: "/question", element: <Questionpage /> },
         { path: "/treatment", element: <Treatment /> },
-        { path: "/services/:id", element: <ShowService /> },
+        { path: "/treatment/:id", element: <Treatment /> },
+        { path: "/treatment/detail/:id", element: <Treatment /> },
+        { path: "/services", element: <ServicesList /> },
+        // { path: "/services/:id", element: <ShowService /> },
         { path: "/content-policy", element: <ContentPolicy /> },
         { path: "/privacy-policy", element: <PrivacyPolicy /> },
         { path: "/booking-history", element: <BookingHistory /> },
