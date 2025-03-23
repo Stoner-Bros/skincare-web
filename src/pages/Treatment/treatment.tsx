@@ -1,14 +1,12 @@
-import { Button } from '@/components/ui/button'
-import React, { useEffect, useState } from 'react'
-import { Link, useParams, useNavigate } from 'react-router-dom'
-import { Swiper, SwiperSlide } from 'swiper/react';
-import 'swiper/swiper-bundle.css';
-import { Autoplay, Navigation, Pagination, Thumbs } from 'swiper/modules';
-import treatmentService from '@/services/treatment.services';
+import { Button } from '@/components/ui/button';
 import serviceService from '@/services/service.services';
+import treatmentService from '@/services/treatment.services';
 import { Service } from '@/types/service.types';
 import type { Treatment } from '@/types/treatment.types';
 import { ArrowLeft, Loader2 } from 'lucide-react';
+import { useEffect, useState } from 'react';
+import { Link, useNavigate, useParams } from 'react-router-dom';
+import 'swiper/swiper-bundle.css';
 
 export default function Treatment() {
     const { id } = useParams();

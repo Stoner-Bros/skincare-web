@@ -1,10 +1,10 @@
-import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
 import serviceService from '@/services/service.services';
 import treatmentService from '@/services/treatment.services';
 import { Service } from '@/types/service.types';
 import { Treatment } from '@/types/treatment.types';
 import { Loader2 } from 'lucide-react';
+import { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 
 export default function ServicesList() {
   const navigate = useNavigate();

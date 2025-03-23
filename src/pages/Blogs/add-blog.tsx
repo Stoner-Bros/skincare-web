@@ -1,11 +1,10 @@
-import { useState, useRef } from "react";
-import { useNavigate } from "react-router-dom";
-import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import * as z from "zod";
-import { Loader2, Image } from "lucide-react";
-import ReactMarkdown from "react-markdown";
 import MDEditor from "@uiw/react-md-editor";
+import { Image, Loader2 } from "lucide-react";
+import { useRef, useState } from "react";
+import { useForm } from "react-hook-form";
+import { useNavigate } from "react-router-dom";
+import * as z from "zod";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -17,10 +16,9 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
-import { BlogCreateRequest } from "@/types/blog.types";
 import { useToast } from "@/hooks/use-toast";
 import blogService from "@/services/blog.services";
+import { BlogCreateRequest } from "@/types/blog.types";
 
 const formSchema = z.object({
   title: z.string().min(1, "Tiêu đề không được để trống"),
