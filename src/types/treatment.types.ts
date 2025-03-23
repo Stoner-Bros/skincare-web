@@ -6,6 +6,7 @@ export interface Treatment {
   duration: number;
   price: number;
   isAvailable: boolean;
+  treatmentThumbnailUrl?: string;
 }
 
 export interface TreatmentCreateRequest {
@@ -14,6 +15,7 @@ export interface TreatmentCreateRequest {
   description: string;
   duration: number;
   price: number;
+  treatmentThumbnailUrl: string;
 }
 
 export interface TreatmentUpdateRequest {
@@ -23,6 +25,7 @@ export interface TreatmentUpdateRequest {
   duration: number;
   price: number;
   isAvailable?: boolean;
+  treatmentThumbnailUrl?: string;
 }
 
 export interface TreatmentListResponse {

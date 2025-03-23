@@ -65,6 +65,7 @@ export default function Header() {
     {
       path: "/services",
       label: "DỊCH VỤ LÀM ĐẸP",
+      directLink: true,
     },
     {
       path: "/phun-xam",
@@ -169,15 +170,15 @@ export default function Header() {
           <div
             key={index}
             onMouseEnter={() => {
-              if (link.path === "/services") setShowServiceDetail(true);
+              if (link.path === "/services" && !link.directLink) setShowServiceDetail(true);
               if (link.path === "/phun-xam") setShowServiceDetail1(true);
             }}
             onMouseLeave={() => {
-              if (link.path === "/services") setShowServiceDetail(false);
+              if (link.path === "/services" && !link.directLink) setShowServiceDetail(false);
               if (link.path === "/phun-xam") setShowServiceDetail1(false);
             }}
           >
-            {link.path === "/services" || link.path === "/phun-xam" ? (
+            {(link.path === "/services" && !link.directLink) || link.path === "/phun-xam" ? (
               <span className="text-red-600 font-bold group cursor-pointer">
                 {link.label}
                 <div className="w-0 h-1 bg-red-600 rounded-full group-hover:w-full transition-all duration-300"></div>
@@ -188,7 +189,7 @@ export default function Header() {
                 <div className="w-0 h-1 bg-red-600 rounded-full group-hover:w-full transition-all duration-300"></div>
               </Link>
             )}
-            {link.path === "/services" && showServiceDetail && (
+            {link.path === "/services" && !link.directLink && showServiceDetail && (
               <ServiceDetail />
             )}
             {link.path === "/phun-xam" && showServiceDetail1 && (

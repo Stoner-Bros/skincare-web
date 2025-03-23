@@ -96,8 +96,12 @@ export default function ShowService() {
               <Button className="bg-rose-600 text-white">
                 Đặt lịch ngay
               </Button>
-              <Button variant="outline" className="border-rose-600 text-rose-600">
-                Liên hệ tư vấn
+              <Button 
+                variant="outline" 
+                className="border-rose-600 text-rose-600"
+                onClick={() => navigate(`/treatment/${service.serviceId}`)}
+              >
+                Xem các liệu trình
               </Button>
             </div>
           </div>

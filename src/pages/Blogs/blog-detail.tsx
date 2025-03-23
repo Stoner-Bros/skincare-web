@@ -10,6 +10,11 @@ interface Blog {
   authorFullName: string;
   createdAt: string;
   hashtags: string[];
+  authorName?: string;
+  thumbnailUrl?: string;
+  viewCount?: number;
+  tags?: string[];
+  isDeleted?: boolean;
 }
 
 interface RecommendedBlog {
@@ -20,28 +25,6 @@ interface RecommendedBlog {
 }
 
 const placeholderImage = "https://placehold.co/300x500/gray/white?text=Beauty+Tips";
-
-const fakeBlogData: Blog = {
-  blogId: "1",
-  title: "Bí quyết làm đẹp với công nghệ mới nhất 2023",
-  content: `# Bí quyết làm đẹp với công nghệ mới nhất 2023
-  
-  ## 1. Công nghệ Laser tái tạo da
-  
-  Công nghệ laser tái tạo da giúp làn da trở nên trẻ trung, săn chắc và rạng rỡ hơn.
-  
-  ## 2. Liệu pháp Hydrafacial
-  
-  Hydrafacial là một liệu pháp làm đẹp không xâm lấn, phù hợp với mọi loại da.
-  
-  ## 3. Tiêm Botox và Filler
-  
-  Botox làm giãn cơ và giảm nếp nhăn, trong khi Filler bổ sung thể tích cho các vùng bị lõm.`,
-  imageUrl: "https://placehold.co/600x400/pink/white?text=Beauty+Blog",
-  authorFullName: "Nguyễn Thị Hương",
-  createdAt: new Date().toISOString(),
-  hashtags: ["làmđẹp", "công nghệ", "spa", "chămsócda", "trendmới"],
-};
 
 const fakeRecommendedBlogs: RecommendedBlog[] = [
   {
@@ -60,8 +43,55 @@ const fakeRecommendedBlogs: RecommendedBlog[] = [
 
 export default function NewsDetails() {
   const { id } = useParams<{ id: string }>();
-  const [blog, setBlog] = useState<Blog>(fakeBlogData);
+  const [blog, setBlog] = useState<Blog | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [recommended, setRecommended] = useState<RecommendedBlog[]>(fakeRecommendedBlogs);
+
+  useEffect(() => {
+    const fetchBlogData = async () => {
+      try {
+        setLoading(true);
+        const response = await fetch(`https://skincare-api.azurewebsites.net/api/blogs/8`);
+        
+        if (!response.ok) {
+          throw new Error('Không thể tải thông tin bài viết');
+        }
+        
+        const data = await response.json();
+        
+        // Chuyển đổi dữ liệu từ API sang định dạng Blog
+        const formattedBlog: Blog = {
+          blogId: data.blogId.toString(),
+          title: data.title,
+          content: data.content,
+          imageUrl: data.content.match(/\(https:\/\/skincare-api\.azurewebsites\.net\/api\/uploads\/.*\.png\)/g)?.[0]?.slice(1, -1) || placeholderImage,
+          authorFullName: data.authorName,
+          createdAt: data.createdAt,
+          hashtags: data.tags || ["spa"],
+          thumbnailUrl: data.thumbnailUrl,
+          viewCount: data.viewCount
+        };
+        
+        setBlog(formattedBlog);
+      } catch (err) {
+        setError(err instanceof Error ? err.message : 'Đã xảy ra lỗi');
+        console.error('Error fetching blog:', err);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchBlogData();
+  }, []);
+
+  if (loading) {
+    return <div className="container mx-auto px-4 py-8 text-center">Đang tải...</div>;
+  }
+
+  if (error || !blog) {
+    return <div className="container mx-auto px-4 py-8 text-center text-red-500">Lỗi: {error || 'Không tìm thấy bài viết'}</div>;
+  }
 
   return (
     <div className="container mx-auto px-4 py-8">
@@ -73,6 +103,12 @@ export default function NewsDetails() {
             Tác giả: {blog.authorFullName} 
             <img src="https://cdn.diemnhangroup.com/seoulspa/2023/11/clock.png" alt="" className="icon-clock mx-2" />
             Cập nhật: {new Date(blog.createdAt).toLocaleDateString()}
+            {blog.viewCount !== undefined && (
+              <span className="ml-2">
+                <i className="fas fa-eye mr-1"></i>
+                Lượt xem: {blog.viewCount}
+              </span>
+            )}
           </div>
         </div>
         <div className="flex flex-col md:flex-row">
@@ -85,22 +121,26 @@ export default function NewsDetails() {
           <div className="w-full md:w-2/4 p-4">
             <div className="mb-4">
               <img 
-                src={blog.imageUrl} 
+                src={blog.thumbnailUrl ? `https://skincare-api.azurewebsites.net/api/upload/${blog.thumbnailUrl}` : blog.imageUrl} 
                 alt={blog.title}
                 className="w-full h-64 object-cover rounded-lg"
+                onError={(e) => {
+                  const target = e.target as HTMLImageElement;
+                  target.src = placeholderImage;
+                }}
               />
             </div>
             <div className="p-2">
               <div data-color-mode="light">
                 <MDEditor.Markdown source={blog.content} />
               </div>
-              <div className="mt-6 flex flex-wrap gap-2">
+              {/* <div className="mt-6 flex flex-wrap gap-2">
                 {blog.hashtags.map((tag, index) => (
                   <span key={index} className="bg-blue-100 text-blue-800 text-xs px-2 py-1 rounded-full">
                     #{tag}
                   </span>
                 ))}
-              </div>
+              </div> */}
             </div>
           </div>
           <div className="w-full md:w-1/4 p-4">
