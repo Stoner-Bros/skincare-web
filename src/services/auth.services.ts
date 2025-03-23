@@ -1,18 +1,10 @@
 import api from "@/lib/api";
 import { getToken, removeToken, setToken } from "@/lib/token";
-import {
-  AuthResponse,
-  LoginRequest,
-  RefreshTokenRequest,
-  RegisterRequest,
-} from "@/types/auth.types";
-import { User } from "@/types/user.types";
 
 class AuthService {
-  // Đăng nhập
-  async login(credentials: LoginRequest): Promise<void> {
+  async login(credentials: any): Promise<void> {
     try {
-      const response = await api.post<AuthResponse>("/auth/login", credentials);
+      const response = await api.post<any>("/auth/login", credentials);
       setToken({
         accessToken: response.data.data.accessToken,
         refreshToken: response.data.data.refreshToken,
@@ -22,10 +14,9 @@ class AuthService {
     }
   }
 
-  // Đăng ký
-  async register(userData: RegisterRequest): Promise<void> {
+  async register(anyData: any): Promise<void> {
     try {
-      const response = await api.post<AuthResponse>("/auth/register", userData);
+      const response = await api.post<any>("/auth/register", anyData);
       setToken({
         accessToken: response.data.data.accessToken,
         refreshToken: response.data.data.refreshToken,
@@ -35,12 +26,10 @@ class AuthService {
     }
   }
 
-  // Đăng xuất
   async logout(): Promise<void> {
     try {
       const token = getToken();
       if (token) {
-        // Gọi API để vô hiệu hóa refresh token ở phía server (nếu backend hỗ trợ)
         await api.post("/auth/logout", {
           accessToken: token.accessToken,
           refreshToken: token.refreshToken,
@@ -53,12 +42,9 @@ class AuthService {
     }
   }
 
-  // Refresh token
-  async refreshToken(
-    refreshRequest: RefreshTokenRequest
-  ): Promise<AuthResponse> {
+  async refreshToken(refreshRequest: any): Promise<any> {
     try {
-      const response = await api.post<AuthResponse>(
+      const response = await api.post<any>(
         "/auth/refresh-token",
         refreshRequest
       );
@@ -73,8 +59,7 @@ class AuthService {
     }
   }
 
-  // Lấy thông tin người dùng hiện tại
-  async getCurrentUser(): Promise<User> {
+  async getCurrentUser(): Promise<any> {
     try {
       const response = await api.get<any>("/auth/profile");
       return response.data.data;
@@ -83,20 +68,16 @@ class AuthService {
     }
   }
 
-  // Xử lý lỗi
   private handleError(error: any): Error {
     if (error.response) {
-      // Server đã trả về response với status code không trong dải 2xx
       return new Error(
         error.response.data.message || "An error occurred during authentication"
       );
     } else if (error.request) {
-      // Request đã được gửi nhưng không nhận được response
       return new Error(
         "No response from server. Please check your internet connection"
       );
     } else {
-      // Có lỗi khi thiết lập request
       return new Error("Error setting up request");
     }
   }

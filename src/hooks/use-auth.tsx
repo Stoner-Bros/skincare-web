@@ -1,7 +1,5 @@
 import { isAuthenticated } from "@/lib/token";
 import authServices from "@/services/auth.services";
-import { LoginRequest, RegisterRequest } from "@/types/auth.types";
-import { User } from "@/types/user.types";
 import React, {
   createContext,
   useState,
@@ -11,12 +9,12 @@ import React, {
 } from "react";
 
 interface AuthContextType {
-  user: User | null;
+  user: any;
   loading: boolean;
   error: string | null;
   isLoggedIn: boolean;
-  login: (credentials: LoginRequest) => Promise<void>;
-  register: (userData: RegisterRequest) => Promise<void>;
+  login: (credentials: any) => Promise<void>;
+  register: (userData: any) => Promise<void>;
   logout: () => Promise<void>;
 }
 
@@ -27,7 +25,7 @@ interface AuthProviderProps {
 }
 
 export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
-  const [user, setUser] = useState<User | null>(null);
+  const [user, setUser] = useState<any>(null);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
   const [isLoggedIn, setIsLoggedIn] = useState<boolean>(false);
@@ -50,7 +48,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     checkAuth();
   }, []);
 
-  const login = async (credentials: LoginRequest) => {
+  const login = async (credentials: any) => {
     setLoading(true);
     setError(null);
     try {
@@ -66,7 +64,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     }
   };
 
-  const register = async (userData: RegisterRequest) => {
+  const register = async (userData: any) => {
     setLoading(true);
     setError(null);
     try {
@@ -76,7 +74,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       // Nếu đăng ký thành công, tự động đăng nhập
       try {
         // Sử dụng thông tin đăng ký để đăng nhập
-        const loginData: LoginRequest = {
+        const loginData: any = {
           email: userData.email,
           password: userData.password,
         };

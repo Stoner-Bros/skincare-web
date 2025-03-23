@@ -1,12 +1,4 @@
 import api from "../lib/api";
-import {
-  Account,
-  AccountCreateRequest,
-  AccountUpdateRequest,
-  AccountListResponse,
-  ApiResponse,
-  AccountInfo,
-} from "../types/account.types";
 
 class AccountService {
   private baseUrl = "/accounts";
@@ -14,7 +6,7 @@ class AccountService {
   async getAccounts(
     pageNumber: number = 1,
     pageSize: number = 10
-  ): Promise<ApiResponse<AccountListResponse>> {
+  ): Promise<any> {
     try {
       const response = await api.get(`${this.baseUrl}`, {
         params: {
@@ -29,7 +21,7 @@ class AccountService {
     }
   }
 
-  async getAccountById(id: number): Promise<ApiResponse<Account>> {
+  async getAccountById(id: number): Promise<any> {
     try {
       const response = await api.get(`${this.baseUrl}/${id}`);
       return response.data;
@@ -39,9 +31,7 @@ class AccountService {
     }
   }
 
-  async createAccount(
-    accountData: AccountCreateRequest
-  ): Promise<ApiResponse<Account>> {
+  async createAccount(accountData: any): Promise<any> {
     try {
       const response = await api.post(`${this.baseUrl}`, accountData);
       return response.data;
@@ -51,10 +41,7 @@ class AccountService {
     }
   }
 
-  async updateAccount(
-    id: number,
-    accountData: AccountUpdateRequest
-  ): Promise<ApiResponse<AccountInfo>> {
+  async updateAccount(id: number, accountData: any): Promise<any> {
     try {
       const response = await api.put(`${this.baseUrl}/${id}`, accountData);
       return response.data;

@@ -1,11 +1,4 @@
 import api from "@/lib/api";
-import {
-  Treatment,
-  TreatmentCreateRequest,
-  TreatmentListResponse,
-  TreatmentUpdateRequest,
-} from "@/types/treatment.types";
-
 class TreatmentService {
   private baseUrl = "/treatments";
 
@@ -13,7 +6,7 @@ class TreatmentService {
     serviceId?: number,
     pageNumber: number = 1,
     pageSize: number = 10
-  ): Promise<TreatmentListResponse> {
+  ): Promise<any> {
     try {
       const params: any = {
         pageNumber,
@@ -34,7 +27,7 @@ class TreatmentService {
     }
   }
 
-  async getTreatmentById(id: number): Promise<Treatment> {
+  async getTreatmentById(id: number): Promise<any> {
     try {
       const response = await api.get(`${this.baseUrl}/${id}`);
       return response.data;
@@ -44,9 +37,7 @@ class TreatmentService {
     }
   }
 
-  async createTreatment(
-    treatmentData: TreatmentCreateRequest
-  ): Promise<Treatment> {
+  async createTreatment(treatmentData: any): Promise<any> {
     try {
       const response = await api.post(`${this.baseUrl}`, treatmentData);
       return response.data;
@@ -56,10 +47,7 @@ class TreatmentService {
     }
   }
 
-  async updateTreatment(
-    id: number,
-    treatmentData: TreatmentUpdateRequest
-  ): Promise<Treatment> {
+  async updateTreatment(id: number, treatmentData: any): Promise<any> {
     try {
       const response = await api.put(`${this.baseUrl}/${id}`, treatmentData);
       return response.data;
