@@ -1,32 +1,30 @@
-import React from 'react'
-
 export default function Quizpage() {
-    const navigationLinks = [
-        {
-            path: "/about",
-            label: "VỀ CHÚNG TÔI",
-        },
-        {
-            path: "/services",
-            label: "DỊCH VỤ LÀM ĐẸP",
-        },
-        {
-            path: "/phun-xam",
-            label: "PHUN XĂM THẨM MỸ",
-        },
-        {
-            path: "/doctor",
-            label: "BÁC SĨ",
-        },
-        {
-            path: "/tips",
-            label: "TIPS LÀM ĐẸP",
-        },
-        {
-            path: "/franchise",
-            label: "NHƯỢNG QUYỀN",
-        },
-    ];
+    // const navigationLinks = [
+    //     {
+    //         path: "/about",
+    //         label: "VỀ CHÚNG TÔI",
+    //     },
+    //     {
+    //         path: "/services",
+    //         label: "DỊCH VỤ LÀM ĐẸP",
+    //     },
+    //     {
+    //         path: "/phun-xam",
+    //         label: "PHUN XĂM THẨM MỸ",
+    //     },
+    //     {
+    //         path: "/doctor",
+    //         label: "BÁC SĨ",
+    //     },
+    //     {
+    //         path: "/tips",
+    //         label: "TIPS LÀM ĐẸP",
+    //     },
+    //     {
+    //         path: "/franchise",
+    //         label: "NHƯỢNG QUYỀN",
+    //     },
+    // ];
 
     return (
 

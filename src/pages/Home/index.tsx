@@ -156,12 +156,14 @@ export default function Home() {
                 );
               }
             }
+            // @ts-ignore
             return service.data;
           } catch (error) {
             console.error(`Không tìm thấy dịch vụ có ID ${id}:`, error);
             return null;
           }
         });
+
 
         const results = await Promise.all(servicesPromises);
         console.log(results);
@@ -239,9 +241,9 @@ export default function Home() {
                     src={`https://skincare-api.azurewebsites.net/api/upload/${service.serviceThumbnailUrl}`}
                     alt={service.serviceName}
                     className="w-full h-64 object-cover rounded-t-lg"
-                    // onError={(e) => {
-                    //   (e.target as HTMLImageElement).src = "/mun.jpg";
-                    // }}
+                  // onError={(e) => {
+                  //   (e.target as HTMLImageElement).src = "/mun.jpg";
+                  // }}
                   />
                   <h3 className="text-xl font-semibold text-red-600 mt-4">
                     {service.serviceName}

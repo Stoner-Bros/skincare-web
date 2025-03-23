@@ -1,7 +1,6 @@
-import React from 'react'
 import { Swiper, SwiperSlide } from 'swiper/react';
 import 'swiper/swiper-bundle.css';
-import { Autoplay, Navigation, Pagination, Thumbs } from 'swiper/modules';
+import { Autoplay, Navigation, Pagination } from 'swiper/modules';
 
 export default function AllTherapist() {
     return (

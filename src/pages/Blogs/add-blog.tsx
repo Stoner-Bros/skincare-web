@@ -36,7 +36,6 @@ type AddBlogProps = {
 
 export default function AddBlog({ open, onClose }: AddBlogProps) {
   const { toast } = useToast();
-  const navigate = useNavigate();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [thumbnailFile, setThumbnailFile] = useState<File | null>(null);
   const [previewUrl, setPreviewUrl] = useState<string>("");
