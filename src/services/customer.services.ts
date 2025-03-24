@@ -1,4 +1,4 @@
-import api from "@/lib/api";
+import api from "../lib/api";
 
 class CustomerService {
   private baseUrl = "/customers";
@@ -31,12 +31,12 @@ class CustomerService {
     }
   }
 
-  async createCustomer(customerData: any): Promise<any> {
+  async updateCustomer(id: number, customerData: any): Promise<any> {
     try {
-      const response = await api.post(`${this.baseUrl}`, customerData);
+      const response = await api.put(`${this.baseUrl}/${id}`, customerData);
       return response.data;
     } catch (error) {
-      console.error("Error creating customer:", error);
+      console.error(`Error updating customer with id ${id}:`, error);
       throw error;
     }
   }
