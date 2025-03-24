@@ -1,4 +1,4 @@
-export default function Quizpage() {
+export default function QuizPage() {
     // const navigationLinks = [
     //     {
     //         path: "/about",

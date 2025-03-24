@@ -85,7 +85,7 @@ export default function Header() {
     },
     {
       path: "/dao-tao",
-      label: "LÀM ĐẸP",
+      label: "SKIN TEST",
     },
     {
       path: "/add-blog",

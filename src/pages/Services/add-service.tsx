@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
@@ -15,10 +15,9 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { ServiceCreateRequest } from "@/types/service.types";
 import { useToast } from "@/hooks/use-toast";
 import serviceService from "@/services/service.services";
-// import uploadService from "@/services/upload.services";
+import { useLocation, useNavigate } from "react-router-dom";
 
 const formSchema = z.object({
   serviceName: z.string().min(1, "Tên dịch vụ không được để trống"),
@@ -35,7 +34,8 @@ type AddServiceProps = {
 
 export default function AddService({ open, onClose }: AddServiceProps) {
   const { toast } = useToast();
-  // const navigate = useNavigate();
+  const navigate = useNavigate();
+  const location = useLocation();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [thumbnailFile, setThumbnailFile] = useState<File | null>(null);
   // const [previewUrl, setPreviewUrl] = useState<string>("");
@@ -48,6 +48,14 @@ export default function AddService({ open, onClose }: AddServiceProps) {
       serviceThumbnailUrl: "",
     },
   });
+
+  // Reset form when modal is closed
+  useEffect(() => {
+    if (!open) {
+      form.reset();
+      setThumbnailFile(null);
+    }
+  }, [open, form]);
 
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
@@ -88,7 +96,7 @@ export default function AddService({ open, onClose }: AddServiceProps) {
       }
 
       // Tạo đối tượng request để gửi đến API
-      const serviceData: ServiceCreateRequest = {
+      const serviceData: any = {
         serviceName: data.serviceName,
         serviceDescription: data.serviceDescription,
         serviceThumbnailUrl: thumbnailUrl,
@@ -102,8 +110,17 @@ export default function AddService({ open, onClose }: AddServiceProps) {
         description: "Đã thêm dịch vụ mới thành công",
       });
 
-      // Chuyển hướng về trang danh sách dịch vụ
-      // navigate("/Home");
+      // Đóng modal
+      onClose();
+
+      // Cập nhật lại trang nếu đang ở trang dịch vụ
+      if (location.pathname.includes('/services') || location.pathname.includes('/dashboard')) {
+        // Refresh trang để cập nhật danh sách
+        window.location.reload();
+      } else {
+        // Chuyển hướng về trang dịch vụ
+        navigate("/services");
+      }
     } catch (error) {
       console.error("Lỗi khi thêm dịch vụ:", error);
       toast({

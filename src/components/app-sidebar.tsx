@@ -8,6 +8,7 @@ import {
   UserRound,
 } from "lucide-react";
 import * as React from "react";
+import { useEffect, useState } from "react";
 
 import { NavMain } from "@/components/nav-main";
 import { NavUser } from "@/components/nav-user";
@@ -18,8 +19,10 @@ import {
   SidebarHeader,
   SidebarRail,
 } from "@/components/ui/sidebar";
+import serviceService from "@/services/service.services";
 
-const data = {
+// Khởi tạo trạng thái ban đầu
+const initialNavData = {
   navMain: [
     {
       title: "Tổng quan",
@@ -52,7 +55,7 @@ const data = {
         },
         {
           title: "Bảng giá",
-          url: "/dashboard/detox",
+          url: "/dashboard/price",
         },
       ],
     },
@@ -139,13 +142,58 @@ const data = {
 };
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
+  const [navData, setNavData] = useState(initialNavData);
+
+  // Lấy danh sách dịch vụ từ API và cập nhật menu
+  useEffect(() => {
+    const fetchServices = async () => {
+      try {
+        const response = await serviceService.getServices();
+        
+        let servicesList: any[] = [];
+        if (Array.isArray(response)) {
+          servicesList = response;
+        } else if ('items' in response) {
+          servicesList = response.items;
+        }
+
+        // Nếu có danh sách dịch vụ, cập nhật lại menu
+        if (servicesList && servicesList.length > 0) {
+          const newNavData = { ...navData };
+          
+          // Tìm menu dịch vụ
+          const serviceMenuIndex = newNavData.navMain.findIndex(item => item.title === "Dịch vụ");
+          
+          if (serviceMenuIndex !== -1) {
+            // Tạo items mới từ danh sách dịch vụ
+            const serviceItems = servicesList.map(service => ({
+              title: service.serviceName,
+              url: `/dashboard/services/treatments/${service.serviceId}`,
+            }));
+            
+            
+            // Cập nhật items cho menu dịch vụ
+            newNavData.navMain[serviceMenuIndex].items = serviceItems;
+            
+            // Cập nhật state
+            setNavData(newNavData);
+          }
+        }
+      } catch (error) {
+        console.error("Lỗi khi tải danh sách dịch vụ:", error);
+      }
+    };
+
+    fetchServices();
+  }, []);
+
   return (
     <Sidebar collapsible="icon" {...props}>
       <SidebarHeader>
         <img src="/logo.gif" alt="logo" />
       </SidebarHeader>
       <SidebarContent>
-        <NavMain items={data.navMain} />
+        <NavMain items={navData.navMain} />
       </SidebarContent>
       <SidebarFooter>
         <NavUser />
