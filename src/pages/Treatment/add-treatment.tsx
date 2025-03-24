@@ -16,8 +16,6 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { TreatmentCreateRequest } from "@/types/treatment.types";
-import { Service } from "@/types/service.types";
 import { useToast } from "@/hooks/use-toast";
 import treatmentService from "@/services/treatment.services";
 import serviceService from "@/services/service.services";
@@ -53,7 +51,7 @@ export default function AddTreatment({ open, onClose, serviceId }: AddTreatmentP
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [thumbnailFile, setThumbnailFile] = useState<File | null>(null);
   const [previewUrl, setPreviewUrl] = useState<string>("");
-  const [services, setServices] = useState<Service[]>([]);
+  const [services, setServices] = useState<any[]>([]);
   const [isLoadingServices, setIsLoadingServices] = useState(false);
 
   const form = useForm<FormValues>({
@@ -85,7 +83,7 @@ export default function AddTreatment({ open, onClose, serviceId }: AddTreatmentP
         // Debug log để kiểm tra dữ liệu
         console.log("Response from getServices in component:", response);
         
-        let serviceItems: Service[] = [];
+        let serviceItems: any[] = [];
         
         // Xử lý kết quả trả về từ serviceService.getServices đã được sửa
         if (Array.isArray(response)) {
@@ -170,7 +168,7 @@ export default function AddTreatment({ open, onClose, serviceId }: AddTreatmentP
       }
       
       // Tạo đối tượng request để gửi đến API
-      const treatmentData: TreatmentCreateRequest = {
+      const treatmentData: any = {
         serviceId: Number(data.serviceId),
         treatmentName: data.treatmentName,
         description: data.description,

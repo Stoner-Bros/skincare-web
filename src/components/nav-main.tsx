@@ -1,6 +1,7 @@
 "use client";
 
-import { ChevronRight, type LucideIcon } from "lucide-react";
+import { ChevronRight, Plus, type LucideIcon } from "lucide-react";
+import { useState } from "react";
 
 import {
   Collapsible,
@@ -17,6 +18,7 @@ import {
   SidebarMenuSubItem,
 } from "@/components/ui/sidebar";
 import { Link } from "react-router-dom";
+import AddService from "@/pages/Services/add-service";
 
 export function NavMain({
   items,
@@ -32,6 +34,18 @@ export function NavMain({
     }[];
   }[];
 }) {
+  const [isAddServiceOpen, setIsAddServiceOpen] = useState(false);
+
+  const handleAddServiceClick = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsAddServiceOpen(true);
+  };
+
+  const handleAddServiceClose = () => {
+    setIsAddServiceOpen(false);
+  };
+
   return (
     <SidebarGroup>
       <SidebarMenu>
@@ -49,7 +63,15 @@ export function NavMain({
                     <SidebarMenuButton tooltip={item.title}>
                       {item.icon && <item.icon />}
                       <span>{item.title}</span>
-                      <ChevronRight className="ml-auto transition-transform duration-200 group-data-[state=open]/collapsible:rotate-90" />
+                      {item.title === "Dịch vụ" && (
+                        <Plus
+                          className="ml-auto h-4 w-4 cursor-pointer text-gray-500 hover:text-gray-800"
+                          onClick={handleAddServiceClick}
+                        />
+                      )}
+                      {item.title !== "Dịch vụ" && (
+                        <ChevronRight className="ml-auto transition-transform duration-200 group-data-[state=open]/collapsible:rotate-90" />
+                      )}
                     </SidebarMenuButton>
                   </CollapsibleTrigger>
                   <CollapsibleContent>
@@ -78,6 +100,9 @@ export function NavMain({
           </Collapsible>
         ))}
       </SidebarMenu>
+      
+      {/* Modal thêm dịch vụ */}
+      <AddService open={isAddServiceOpen} onClose={handleAddServiceClose} />
     </SidebarGroup>
   );
 }

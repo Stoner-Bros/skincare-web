@@ -1,6 +1,6 @@
 import { useState } from "react";
 
-export default function Questionpage() {
+export default function QuestionPage() {
     const [selectedOption, setSelectedOption] = useState<string | null>(null);
 
     const handleOptionClick = (option: string) => {
