@@ -9,21 +9,21 @@ import {
 } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { 
-  Dialog, 
-  DialogContent, 
-  DialogHeader, 
-  DialogTitle, 
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
   DialogFooter,
-  DialogClose
+  DialogClose,
 } from "@/components/ui/dialog";
-import { 
-  Form, 
-  FormControl, 
-  FormField, 
-  FormItem, 
-  FormLabel, 
-  FormMessage 
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
 } from "@/components/ui/form";
 import { Textarea } from "@/components/ui/textarea";
 import { useForm } from "react-hook-form";
@@ -31,7 +31,15 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import treatmentService from "@/services/treatment.services";
 import serviceService from "@/services/service.services";
-import { PlusCircle, Pencil, Trash2, Search, Image, Loader2, ArrowLeft } from "lucide-react";
+import {
+  PlusCircle,
+  Pencil,
+  Trash2,
+  Search,
+  Image,
+  Loader2,
+  ArrowLeft,
+} from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import AddTreatment from "@/pages/Treatment/add-treatment";
 import { useParams, useNavigate } from "react-router-dom";
@@ -44,7 +52,7 @@ const treatmentSchema = z.object({
   price: z.coerce.number().min(1, "Giá phải lớn hơn 0"),
   treatmentThumbnailUrl: z.string().optional(),
   serviceId: z.coerce.number().optional(),
-  image: z.any().optional()
+  image: z.any().optional(),
 });
 
 type TreatmentFormValues = z.infer<typeof treatmentSchema>;
@@ -75,8 +83,10 @@ export default function TreatmentsList() {
   const [treatments, setTreatments] = useState<Treatment[]>([]);
   const [service, setService] = useState<Service | null>(null);
   const [loading, setLoading] = useState(true);
-  const [searchTerm,  setSearchTerm] = useState("");
-  const [selectedTreatment, setSelectedTreatment] = useState<Treatment | null>(null);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [selectedTreatment, setSelectedTreatment] = useState<Treatment | null>(
+    null
+  );
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
@@ -105,9 +115,11 @@ export default function TreatmentsList() {
   // Lấy thông tin service
   const fetchService = async () => {
     if (!serviceId) return;
-    
+
     try {
-      const serviceData = await serviceService.getServiceById(Number(serviceId));
+      const serviceData = await serviceService.getServiceById(
+        Number(serviceId)
+      );
       setService(serviceData);
     } catch (error) {
       console.error("Error fetching service:", error);
@@ -122,10 +134,14 @@ export default function TreatmentsList() {
   // Lấy danh sách treatments
   const fetchTreatments = async (page = 1) => {
     if (!serviceId) return;
-    
+
     setLoading(true);
     try {
-      const response = await treatmentService.getTreatments(Number(serviceId), page, 10);
+      const response = await treatmentService.getTreatments(
+        Number(serviceId),
+        page,
+        10
+      );
       if (response.data && response.data.items) {
         setTreatments(response.data.items);
         setTotalPages(Math.ceil(response.data.totalCount / 10));
@@ -162,35 +178,35 @@ export default function TreatmentsList() {
   // Xử lý chỉnh sửa treatment
   const handleEditTreatment = async (data: TreatmentFormValues) => {
     if (!selectedTreatment) return;
-    
+
     setIsSubmitting(true);
     try {
       let thumbnailUrl = data.treatmentThumbnailUrl || "";
-      
+
       if (selectedFile) {
         // Upload file trước
         const formData = new FormData();
         formData.append("file", selectedFile);
-        
+
         const response = await fetch(`${import.meta.env.VITE_API_URL}/upload`, {
-          method: 'POST',
+          method: "POST",
           headers: {
-            'Accept': '*/*',
+            Accept: "*/*",
           },
           body: formData,
         });
-        
+
         if (!response.ok) {
-          throw new Error('Lỗi khi upload hình ảnh');
+          throw new Error("Lỗi khi upload hình ảnh");
         }
-        
+
         // Phân tích cú pháp JSON
         const responseData = await response.json();
         console.log("Response upload file:", responseData);
         // Lấy tên file từ phản hồi JSON
         thumbnailUrl = responseData.data.fileName;
       }
-      
+
       // Tạo đối tượng request để gửi đến API
       const treatmentData = {
         treatmentName: data.treatmentName,
@@ -200,9 +216,12 @@ export default function TreatmentsList() {
         serviceId: Number(serviceId),
         treatmentThumbnailUrl: thumbnailUrl,
       };
-      
-      const updateResponse = await treatmentService.updateTreatment(selectedTreatment.treatmentId, treatmentData);
-      
+
+      const updateResponse = await treatmentService.updateTreatment(
+        selectedTreatment.treatmentId,
+        treatmentData
+      );
+
       toast({
         title: "Thành công",
         description: "Cập nhật liệu trình thành công",
@@ -211,14 +230,18 @@ export default function TreatmentsList() {
       fetchTreatments(currentPage);
     } catch (error: any) {
       console.error("Error updating treatment:", error);
-      
+
       let errorMessage = "Không thể cập nhật liệu trình";
-      if (error.response && error.response.data && error.response.data.message) {
+      if (
+        error.response &&
+        error.response.data &&
+        error.response.data.message
+      ) {
         errorMessage = error.response.data.message;
       } else if (error.message) {
         errorMessage = error.message;
       }
-      
+
       toast({
         title: "Lỗi",
         description: errorMessage,
@@ -232,7 +255,7 @@ export default function TreatmentsList() {
   // Xử lý xóa treatment
   const handleDeleteTreatment = async () => {
     if (!selectedTreatment) return;
-    
+
     setIsSubmitting(true);
     try {
       await treatmentService.deleteTreatment(selectedTreatment.treatmentId);
@@ -286,32 +309,38 @@ export default function TreatmentsList() {
 
   // Format URL hình ảnh
   const getImageUrl = (url: string | undefined) => {
-    if (!url) return '/default-treatment.jpg';
-    
+    if (!url) return "/default-treatment.jpg";
+
     // Nếu URL đã là đường dẫn đầy đủ, trả về luôn
-    if (url.startsWith('http')) return url;
-    
+    if (url.startsWith("http")) return url;
+
     // Nếu URL chỉ là tên file, thêm base URL
     return `${import.meta.env.VITE_API_URL}/upload/${url}`;
   };
 
   // Filter treatments theo search term
-  const filteredTreatments = treatments.filter(treatment =>
+  const filteredTreatments = treatments.filter((treatment) =>
     treatment.treatmentName.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
   // Format giá tiền
   const formatPrice = (price: number) => {
-    return new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(price);
+    return new Intl.NumberFormat("vi-VN", {
+      style: "currency",
+      currency: "VND",
+    }).format(price);
   };
 
   return (
-    <div className="container bg-gray-50 mx-auto py-6 px-4 md:px-8">
+    <div className="container w-full bg-gray-50 mx-auto py-6 px-4 md:px-8">
       <div className="flex items-center justify-between mb-6">
         <h1 className="text-2xl font-bold text-gray-800 hidden md:block">
-          {service?.serviceName || 'Quản lý liệu trình'}
+          {service?.serviceName || "Quản lý liệu trình"}
         </h1>
-        <Button onClick={() => setIsAddDialogOpen(true)} className="bg-blue-600 hover:bg-blue-700 ml-auto">
+        <Button
+          onClick={() => setIsAddDialogOpen(true)}
+          className="bg-blue-600 hover:bg-blue-700 ml-auto"
+        >
           <PlusCircle className="h-4 w-4 mr-2" /> Thêm liệu trình mới
         </Button>
       </div>
@@ -342,24 +371,37 @@ export default function TreatmentsList() {
             <div className="rounded-md border overflow-hidden min-w-full">
               <Table className="min-w-full">
                 <TableHeader>
-                  <TableRow className="bg-gray-50">
-                    <TableHead className="w-[80px] font-semibold">ID</TableHead>
-                    <TableHead className="font-semibold w-[240px]">Tên liệu trình</TableHead>
-                    <TableHead className="font-semibold w-[100px]">Hình ảnh</TableHead>
-                    <TableHead className="w-[120px] font-semibold text-center">Thời gian (phút)</TableHead>
-                    <TableHead className="w-[150px] font-semibold">Giá</TableHead>
-                    <TableHead className="text-center w-[120px] font-semibold">Thao tác</TableHead>
+                  <TableRow className="font-semibold bg-gray-50">
+                    <TableHead className="">ID</TableHead>
+                    <TableHead className="">Tên liệu trình</TableHead>
+                    <TableHead className="">Hình ảnh</TableHead>
+                    <TableHead className="text-center">
+                      Thời gian (phút)
+                    </TableHead>
+                    <TableHead className="">Giá</TableHead>
+                    <TableHead className="text-center">Thao tác</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
                   {filteredTreatments.length > 0 ? (
                     filteredTreatments.map((treatment) => (
-                      <TableRow key={treatment.treatmentId} className="hover:bg-gray-50">
-                        <TableCell className="font-medium text-center">{treatment.treatmentId}</TableCell>
-                        <TableCell className="font-medium text-blue-600">{treatment.treatmentName}</TableCell>
-                        <TableCell className="text-center">
-                          <div className="relative h-12 w-12 cursor-pointer rounded-md overflow-hidden border mx-auto" 
-                               onClick={() => openImageDialog(treatment.treatmentThumbnailUrl)}>
+                      <TableRow
+                        key={treatment.treatmentId}
+                        className="hover:bg-gray-50"
+                      >
+                        <TableCell className="font-medium">
+                          {treatment.treatmentId}
+                        </TableCell>
+                        <TableCell className="font-medium text-blue-600">
+                          {treatment.treatmentName}
+                        </TableCell>
+                        <TableCell className="">
+                          <div
+                            className="relative h-12 w-12 cursor-pointer rounded-md overflow-hidden border "
+                            onClick={() =>
+                              openImageDialog(treatment.treatmentThumbnailUrl)
+                            }
+                          >
                             <img
                               src={getImageUrl(treatment.treatmentThumbnailUrl)}
                               alt={treatment.treatmentName}
@@ -367,20 +409,24 @@ export default function TreatmentsList() {
                             />
                           </div>
                         </TableCell>
-                        <TableCell className="text-center">{treatment.duration}</TableCell>
-                        <TableCell className="font-medium">{formatPrice(treatment.price)}</TableCell>
+                        <TableCell className="text-center">
+                          {treatment.duration}
+                        </TableCell>
+                        <TableCell className="font-medium">
+                          {formatPrice(treatment.price)}
+                        </TableCell>
                         <TableCell>
                           <div className="flex justify-center space-x-2">
-                            <Button 
-                              variant="outline" 
-                              size="sm" 
+                            <Button
+                              variant="outline"
+                              size="sm"
                               onClick={() => openEditDialog(treatment)}
                               className="h-9 w-9 p-0"
                             >
                               <Pencil className="h-4 w-4 text-blue-600" />
                             </Button>
-                            <Button 
-                              variant="outline" 
+                            <Button
+                              variant="outline"
                               size="sm"
                               onClick={() => openDeleteDialog(treatment)}
                               className="h-9 w-9 p-0 border-red-200 hover:bg-red-50 hover:text-red-600"
@@ -393,7 +439,10 @@ export default function TreatmentsList() {
                     ))
                   ) : (
                     <TableRow>
-                      <TableCell colSpan={6} className="text-center py-10 text-gray-500">
+                      <TableCell
+                        colSpan={6}
+                        className="text-center py-10 text-gray-500"
+                      >
                         Không có liệu trình nào cho dịch vụ này
                       </TableCell>
                     </TableRow>
@@ -409,7 +458,7 @@ export default function TreatmentsList() {
           <div className="flex justify-center mt-6 gap-2">
             <Button
               variant="outline"
-              onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
+              onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
               disabled={currentPage === 1}
               className="px-4"
             >
@@ -420,14 +469,16 @@ export default function TreatmentsList() {
                 key={page}
                 variant={currentPage === page ? "default" : "outline"}
                 onClick={() => setCurrentPage(page)}
-                className={currentPage === page ? "bg-blue-600 hover:bg-blue-700" : ""}
+                className={
+                  currentPage === page ? "bg-blue-600 hover:bg-blue-700" : ""
+                }
               >
                 {page}
               </Button>
             ))}
             <Button
               variant="outline"
-              onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
+              onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
               disabled={currentPage === totalPages}
               className="px-4"
             >
@@ -438,8 +489,8 @@ export default function TreatmentsList() {
       </div>
 
       {/* Sử dụng component AddTreatment */}
-      <AddTreatment 
-        open={isAddDialogOpen} 
+      <AddTreatment
+        open={isAddDialogOpen}
         onClose={() => {
           setIsAddDialogOpen(false);
           fetchTreatments(currentPage);
@@ -454,7 +505,10 @@ export default function TreatmentsList() {
             <DialogTitle>Chỉnh sửa liệu trình</DialogTitle>
           </DialogHeader>
           <Form {...editForm}>
-            <form onSubmit={editForm.handleSubmit(handleEditTreatment)} className="space-y-4">
+            <form
+              onSubmit={editForm.handleSubmit(handleEditTreatment)}
+              className="space-y-4"
+            >
               <FormField
                 control={editForm.control}
                 name="treatmentName"
@@ -517,7 +571,7 @@ export default function TreatmentsList() {
                     <FormLabel>Hình ảnh liệu trình</FormLabel>
                     <FormControl>
                       <div className="flex flex-col items-center space-y-4">
-                        {(previewImage || field.value) ? (
+                        {previewImage || field.value ? (
                           <div className="relative h-40 w-40 rounded-md overflow-hidden border">
                             <img
                               src={previewImage || getImageUrl(field.value)}
@@ -541,7 +595,9 @@ export default function TreatmentsList() {
                             <div className="h-40 w-40 border-2 border-dashed border-gray-300 rounded-md flex items-center justify-center bg-gray-50">
                               <label className="cursor-pointer flex flex-col items-center p-4">
                                 <Image className="h-8 w-8 text-gray-400 mb-2" />
-                                <span className="text-sm text-gray-500">Click để tải lên hình ảnh</span>
+                                <span className="text-sm text-gray-500">
+                                  Click để tải lên hình ảnh
+                                </span>
                                 <input
                                   type="file"
                                   className="hidden"
@@ -552,10 +608,11 @@ export default function TreatmentsList() {
                             </div>
                           </div>
                         )}
-                        
+
                         {selectedFile && (
                           <p className="text-xs text-green-600">
-                            Đã chọn: {selectedFile.name} ({Math.round(selectedFile.size / 1024)} KB)
+                            Đã chọn: {selectedFile.name} (
+                            {Math.round(selectedFile.size / 1024)} KB)
                           </p>
                         )}
                       </div>
@@ -566,7 +623,9 @@ export default function TreatmentsList() {
               />
               <DialogFooter>
                 <Button type="submit" disabled={isSubmitting}>
-                  {isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                  {isSubmitting && (
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  )}
                   Cập nhật
                 </Button>
               </DialogFooter>
@@ -582,18 +641,21 @@ export default function TreatmentsList() {
             <DialogTitle>Xác nhận xóa</DialogTitle>
           </DialogHeader>
           <div className="py-4">
-            Bạn có chắc chắn muốn xóa liệu trình "{selectedTreatment?.treatmentName}" không?
+            Bạn có chắc chắn muốn xóa liệu trình "
+            {selectedTreatment?.treatmentName}" không?
           </div>
           <DialogFooter className="flex space-x-2 justify-end">
             <DialogClose asChild>
               <Button variant="outline">Hủy</Button>
             </DialogClose>
-            <Button 
-              variant="destructive" 
+            <Button
+              variant="destructive"
               onClick={handleDeleteTreatment}
               disabled={isSubmitting}
             >
-              {isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+              {isSubmitting && (
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+              )}
               Xóa
             </Button>
           </DialogFooter>
@@ -608,9 +670,9 @@ export default function TreatmentsList() {
           </DialogHeader>
           <div className="flex justify-center">
             {selectedImage && (
-              <img 
-                src={selectedImage} 
-                alt="Treatment" 
+              <img
+                src={selectedImage}
+                alt="Treatment"
                 className="max-w-full max-h-[400px] object-contain"
               />
             )}
@@ -624,4 +686,4 @@ export default function TreatmentsList() {
       </Dialog>
     </div>
   );
-} 
+}
