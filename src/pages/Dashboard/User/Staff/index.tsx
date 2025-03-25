@@ -40,7 +40,7 @@ import { PaginatedStaffResponse, Staff } from "@/types/staff.types";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { format } from "date-fns";
 import { Loader2 } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { useForm } from "react-hook-form";
 import * as z from "zod";
 
@@ -82,6 +82,7 @@ export default function Staffs() {
   const [isUpdateDialogOpen, setIsUpdateDialogOpen] = useState(false);
   const [staffToDelete, setStaffToDelete] = useState<number | null>(null);
   const [selectedStaff, setSelectedStaff] = useState<Staff | null>(null);
+  const isMounted = useRef(false);
 
   const createForm = useForm<CreateFormValues>({
     resolver: zodResolver(createFormSchema),
@@ -108,7 +109,10 @@ export default function Staffs() {
   });
 
   useEffect(() => {
-    fetchStaffs(currentPage);
+    if (!isMounted.current) {
+      isMounted.current = true;
+      fetchStaffs(currentPage);
+    }
   }, [currentPage]);
 
   const fetchStaffs = async (page: number) => {

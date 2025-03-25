@@ -29,7 +29,7 @@ import CustomerService from "@/services/customer.services";
 import { Customer, PaginatedCustomerResponse } from "@/types/customer.types";
 import { format } from "date-fns";
 import { Loader2 } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 
 export default function Customers() {
   const [customers, setCustomers] = useState<Customer[]>([]);
@@ -39,9 +39,13 @@ export default function Customers() {
   const [pageSize] = useState(10);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [customerToDelete, setCustomerToDelete] = useState<number | null>(null);
+  const isMounted = useRef(false);
 
   useEffect(() => {
-    fetchCustomers(currentPage);
+    if (!isMounted.current) {
+      isMounted.current = true;
+      fetchCustomers(currentPage);
+    }
   }, [currentPage]);
 
   const fetchCustomers = async (page: number) => {

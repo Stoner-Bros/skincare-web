@@ -10,11 +10,6 @@ import Feedbacks from "@/pages/Dashboard/Feedbacks";
 import AllOrder from "@/pages/Dashboard/Order/AllOrder";
 import CheckInOrder from "@/pages/Dashboard/Order/CheckIn";
 import Overview from "@/pages/Dashboard/Overview";
-import Detox from "@/pages/Dashboard/Services/Detox";
-import HairRemoval from "@/pages/Dashboard/Services/HairRemoval";
-import Pricing from "@/pages/Dashboard/Services/Pricing";
-import Skincare from "@/pages/Dashboard/Services/Skincare";
-import WhiteningBath from "@/pages/Dashboard/Services/WhiteningBath";
 import ManageConsultingOrders from "@/pages/Dashboard/SupportCustomer/ManageConsultingOrders";
 import Skinsenger from "@/pages/Dashboard/SupportCustomer/Skinsenger";
 import Accounts from "@/pages/Dashboard/User/Accounts";
@@ -55,26 +50,6 @@ export default function AppRouter() {
           index: true,
         },
         {
-          path: "/dashboard/skin-care",
-          element: <Skincare />,
-        },
-        {
-          path: "/dashboard/hair-removal",
-          element: <HairRemoval />,
-        },
-        {
-          path: "/dashboard/whitening-bath",
-          element: <WhiteningBath />,
-        },
-        {
-          path: "/dashboard/detox",
-          element: <Detox />,
-        },
-        {
-          path: "/dashboard/pricing",
-          element: <Pricing />,
-        },
-        {
           path: "/dashboard/services/treatments/:serviceId",
           element: <TreatmentsList />,
         },
@@ -90,7 +65,6 @@ export default function AppRouter() {
           path: "/dashboard/skin-test",
           element: <SkinTest />,
         },
-        
         {
           path: "/dashboard/order-checkin",
           element: <CheckInOrder />,

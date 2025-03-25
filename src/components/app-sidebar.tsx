@@ -169,32 +169,34 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
     const fetchServices = async () => {
       try {
         const response = await serviceService.getServices();
-        
+
         let servicesList: any[] = [];
         if (Array.isArray(response)) {
           servicesList = response;
-        } else if ('items' in response) {
+        } else if ("items" in response) {
           servicesList = response.items;
         }
 
         // Nếu có danh sách dịch vụ, cập nhật lại menu
         if (servicesList && servicesList.length > 0) {
           const newNavData = { ...navData };
-          
+
           // Tìm menu dịch vụ
-          const serviceMenuIndex = newNavData.navMain.findIndex(item => item.title === "Dịch vụ");
-          
+          const serviceMenuIndex = newNavData.navMain.findIndex(
+            (item) => item.title === "Dịch vụ"
+          );
+
           if (serviceMenuIndex !== -1) {
             // Tạo items mới từ danh sách dịch vụ
-            const serviceItems = servicesList.map(service => ({
+            const serviceItems = servicesList.map((service) => ({
               title: service.serviceName,
               url: `/dashboard/services/treatments/${service.serviceId}`,
+              serviceId: service.serviceId,
             }));
-            
-            
+
             // Cập nhật items cho menu dịch vụ
             newNavData.navMain[serviceMenuIndex].items = serviceItems;
-            
+
             // Cập nhật state
             setNavData(newNavData);
           }

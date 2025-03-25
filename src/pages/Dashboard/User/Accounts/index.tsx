@@ -39,7 +39,7 @@ import { Account, PaginatedResponse } from "@/types/account.types";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { format } from "date-fns";
 import { Loader2 } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { useForm } from "react-hook-form";
 import * as z from "zod";
 
@@ -79,6 +79,7 @@ export default function Accounts() {
   const [isUpdateDialogOpen, setIsUpdateDialogOpen] = useState(false);
   const [accountToDelete, setAccountToDelete] = useState<number | null>(null);
   const [selectedAccount, setSelectedAccount] = useState<Account | null>(null);
+  const isMounted = useRef(false);
 
   const createForm = useForm<CreateFormValues>({
     resolver: zodResolver(createFormSchema),
@@ -103,7 +104,10 @@ export default function Accounts() {
   });
 
   useEffect(() => {
-    fetchAccounts(currentPage);
+    if (!isMounted.current) {
+      isMounted.current = true;
+      fetchAccounts(currentPage);
+    }
   }, [currentPage]);
 
   const fetchAccounts = async (page: number) => {

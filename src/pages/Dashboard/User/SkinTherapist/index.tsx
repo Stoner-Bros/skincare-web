@@ -38,7 +38,7 @@ import SkinTherapistService from "@/services/skin-therapist.services";
 import { SkinTherapist } from "@/types/skin-therapist.types";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Loader2 } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { useForm } from "react-hook-form";
 import * as z from "zod";
 
@@ -75,6 +75,7 @@ export default function SkinTherapists() {
   const [therapistToDelete, setTherapistToDelete] = useState<number | null>(
     null
   );
+  const isMounted = useRef(false);
 
   const createForm = useForm<CreateFormValues>({
     resolver: zodResolver(createFormSchema),
@@ -90,7 +91,10 @@ export default function SkinTherapists() {
   });
 
   useEffect(() => {
-    fetchTherapists(currentPage);
+    if (!isMounted.current) {
+      isMounted.current = true;
+      fetchTherapists(currentPage);
+    }
   }, [currentPage]);
 
   const fetchTherapists = async (page: number) => {

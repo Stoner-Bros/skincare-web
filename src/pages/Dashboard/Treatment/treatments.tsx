@@ -1,21 +1,11 @@
-import { useState, useEffect } from "react";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import {
   Dialog,
+  DialogClose,
   DialogContent,
+  DialogFooter,
   DialogHeader,
   DialogTitle,
-  DialogFooter,
-  DialogClose,
 } from "@/components/ui/dialog";
 import {
   Form,
@@ -25,24 +15,37 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
-import { Textarea } from "@/components/ui/textarea";
-import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import * as z from "zod";
-import treatmentService from "@/services/treatment.services";
-import serviceService from "@/services/service.services";
+import { Input } from "@/components/ui/input";
 import {
-  PlusCircle,
-  Pencil,
-  Trash2,
-  Search,
-  Image,
-  Loader2,
-  ArrowLeft,
-} from "lucide-react";
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+import { Textarea } from "@/components/ui/textarea";
+import { useDebouncedSearch } from "@/hooks/use-debounced-search";
+import { useImageUpload } from "@/hooks/use-image-upload";
 import { useToast } from "@/hooks/use-toast";
 import AddTreatment from "@/pages/Treatment/add-treatment";
-import { useParams, useNavigate } from "react-router-dom";
+import serviceService from "@/services/service.services";
+import treatmentService from "@/services/treatment.services";
+import { zodResolver } from "@hookform/resolvers/zod";
+import {
+  ChevronLeft as ChevronLeftIcon,
+  ChevronRight as ChevronRightIcon,
+  Image,
+  Loader2,
+  Pencil,
+  PlusCircle,
+  Search,
+  Trash2,
+} from "lucide-react";
+import { useEffect, useState } from "react";
+import { useForm } from "react-hook-form";
+import { useParams } from "react-router-dom";
+import * as z from "zod";
 
 // Định nghĩa schema cho form
 const treatmentSchema = z.object({
@@ -77,13 +80,23 @@ interface Service {
   serviceThumbnailUrl?: string;
 }
 
+interface PaginatedResponse<T> {
+  status: number;
+  message: string;
+  data: {
+    items: T[];
+    pageNumber: number;
+    pageSize: number;
+    totalRecords: number;
+    totalPages: number;
+  };
+}
+
 export default function TreatmentsList() {
   const { serviceId } = useParams<{ serviceId: string }>();
-  const navigate = useNavigate();
   const [treatments, setTreatments] = useState<Treatment[]>([]);
   const [service, setService] = useState<Service | null>(null);
   const [loading, setLoading] = useState(true);
-  const [searchTerm, setSearchTerm] = useState("");
   const [selectedTreatment, setSelectedTreatment] = useState<Treatment | null>(
     null
   );
@@ -95,11 +108,27 @@ export default function TreatmentsList() {
   const [totalPages, setTotalPages] = useState(1);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
-  const [previewImage, setPreviewImage] = useState<string | null>(null);
-  const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const { toast } = useToast();
+  const pageSize = 10;
+  const [totalRecords, setTotalRecords] = useState(0);
 
-  // Form cho chỉnh sửa
+  // Use custom hooks
+  const {
+    searchTerm,
+    setSearchTerm,
+    filteredItems: filteredTreatments,
+  } = useDebouncedSearch<Treatment>(treatments, "treatmentName");
+
+  const {
+    selectedFile,
+    previewImage,
+    handleImageChange,
+    uploadImage,
+    resetImage,
+    setPreviewImage,
+  } = useImageUpload();
+
+  // Form initialization
   const editForm = useForm<TreatmentFormValues>({
     resolver: zodResolver(treatmentSchema),
     defaultValues: {
@@ -112,7 +141,27 @@ export default function TreatmentsList() {
     },
   });
 
-  // Lấy thông tin service
+  // Reset form and image when dialog closes
+  useEffect(() => {
+    if (!isEditDialogOpen) {
+      resetImage();
+      editForm.reset();
+    }
+  }, [isEditDialogOpen]);
+
+  // Fetch data only once on mount
+  useEffect(() => {
+    fetchService();
+    fetchTreatments(currentPage);
+  }, [serviceId, currentPage]);
+
+  // Reset page when serviceId changes
+  useEffect(() => {
+    setCurrentPage(1);
+    setTreatments([]);
+  }, [serviceId]);
+
+  // API calls
   const fetchService = async () => {
     if (!serviceId) return;
 
@@ -131,23 +180,19 @@ export default function TreatmentsList() {
     }
   };
 
-  // Lấy danh sách treatments
   const fetchTreatments = async (page = 1) => {
     if (!serviceId) return;
 
     setLoading(true);
     try {
-      const response = await treatmentService.getTreatments(
-        Number(serviceId),
-        page,
-        10
-      );
-      if (response.data && response.data.items) {
-        setTreatments(response.data.items);
-        setTotalPages(Math.ceil(response.data.totalCount / 10));
-      } else {
-        setTreatments([]);
-      }
+      const response: PaginatedResponse<Treatment> =
+        await treatmentService.getTreatments(Number(serviceId), page, pageSize);
+
+      const { items, totalPages, pageNumber, totalRecords } = response.data;
+      setTreatments(items);
+      setTotalPages(totalPages);
+      setCurrentPage(pageNumber);
+      setTotalRecords(totalRecords);
     } catch (error) {
       console.error("Error fetching treatments:", error);
       toast({
@@ -160,22 +205,7 @@ export default function TreatmentsList() {
     }
   };
 
-  useEffect(() => {
-    fetchService();
-    fetchTreatments(currentPage);
-  }, [serviceId, currentPage]);
-
-  // Xử lý khi chọn file ảnh
-  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file) {
-      setSelectedFile(file);
-      const fileUrl = URL.createObjectURL(file);
-      setPreviewImage(fileUrl);
-    }
-  };
-
-  // Xử lý chỉnh sửa treatment
+  // Event handlers
   const handleEditTreatment = async (data: TreatmentFormValues) => {
     if (!selectedTreatment) return;
 
@@ -184,30 +214,9 @@ export default function TreatmentsList() {
       let thumbnailUrl = data.treatmentThumbnailUrl || "";
 
       if (selectedFile) {
-        // Upload file trước
-        const formData = new FormData();
-        formData.append("file", selectedFile);
-
-        const response = await fetch(`${import.meta.env.VITE_API_URL}/upload`, {
-          method: "POST",
-          headers: {
-            Accept: "*/*",
-          },
-          body: formData,
-        });
-
-        if (!response.ok) {
-          throw new Error("Lỗi khi upload hình ảnh");
-        }
-
-        // Phân tích cú pháp JSON
-        const responseData = await response.json();
-        console.log("Response upload file:", responseData);
-        // Lấy tên file từ phản hồi JSON
-        thumbnailUrl = responseData.data.fileName;
+        thumbnailUrl = await uploadImage();
       }
 
-      // Tạo đối tượng request để gửi đến API
       const treatmentData = {
         treatmentName: data.treatmentName,
         description: data.description,
@@ -217,7 +226,7 @@ export default function TreatmentsList() {
         treatmentThumbnailUrl: thumbnailUrl,
       };
 
-      const updateResponse = await treatmentService.updateTreatment(
+      await treatmentService.updateTreatment(
         selectedTreatment.treatmentId,
         treatmentData
       );
@@ -232,11 +241,7 @@ export default function TreatmentsList() {
       console.error("Error updating treatment:", error);
 
       let errorMessage = "Không thể cập nhật liệu trình";
-      if (
-        error.response &&
-        error.response.data &&
-        error.response.data.message
-      ) {
+      if (error.response?.data?.message) {
         errorMessage = error.response.data.message;
       } else if (error.message) {
         errorMessage = error.message;
@@ -252,7 +257,6 @@ export default function TreatmentsList() {
     }
   };
 
-  // Xử lý xóa treatment
   const handleDeleteTreatment = async () => {
     if (!selectedTreatment) return;
 
@@ -277,11 +281,9 @@ export default function TreatmentsList() {
     }
   };
 
-  // Mở dialog chỉnh sửa và điền dữ liệu
   const openEditDialog = (treatment: Treatment) => {
     setSelectedTreatment(treatment);
     setPreviewImage(getImageUrl(treatment.treatmentThumbnailUrl));
-    setSelectedFile(null);
     editForm.reset({
       treatmentName: treatment.treatmentName,
       description: treatment.description,
@@ -293,13 +295,11 @@ export default function TreatmentsList() {
     setIsEditDialogOpen(true);
   };
 
-  // Mở dialog xóa
   const openDeleteDialog = (treatment: Treatment) => {
     setSelectedTreatment(treatment);
     setIsDeleteDialogOpen(true);
   };
 
-  // Mở dialog xem ảnh
   const openImageDialog = (imageUrl: string | undefined) => {
     if (imageUrl) {
       setSelectedImage(getImageUrl(imageUrl));
@@ -307,23 +307,14 @@ export default function TreatmentsList() {
     }
   };
 
-  // Format URL hình ảnh
+  // Utility functions
   const getImageUrl = (url: string | undefined) => {
     if (!url) return "/default-treatment.jpg";
-
-    // Nếu URL đã là đường dẫn đầy đủ, trả về luôn
-    if (url.startsWith("http")) return url;
-
-    // Nếu URL chỉ là tên file, thêm base URL
-    return `${import.meta.env.VITE_API_URL}/upload/${url}`;
+    return url.startsWith("http")
+      ? url
+      : `${import.meta.env.VITE_API_URL}/upload/${url}`;
   };
 
-  // Filter treatments theo search term
-  const filteredTreatments = treatments.filter((treatment) =>
-    treatment.treatmentName.toLowerCase().includes(searchTerm.toLowerCase())
-  );
-
-  // Format giá tiền
   const formatPrice = (price: number) => {
     return new Intl.NumberFormat("vi-VN", {
       style: "currency",
@@ -332,162 +323,173 @@ export default function TreatmentsList() {
   };
 
   return (
-    <div className="container w-full bg-gray-50 mx-auto py-6 px-4 md:px-8">
-      <div className="flex items-center justify-between mb-6">
-        <h1 className="text-2xl font-bold text-gray-800 hidden md:block">
-          {service?.serviceName || "Quản lý liệu trình"}
-        </h1>
-        <Button
-          onClick={() => setIsAddDialogOpen(true)}
-          className="bg-blue-600 hover:bg-blue-700 ml-auto"
-        >
-          <PlusCircle className="h-4 w-4 mr-2" /> Thêm liệu trình mới
-        </Button>
-      </div>
-
-      <div className="bg-white rounded-lg shadow-sm border p-4 md:p-6 mb-6">
-        <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-6 gap-4">
-          <h2 className="text-lg font-medium text-gray-700">
-            Danh sách liệu trình ({filteredTreatments.length})
-          </h2>
-          <div className="relative w-full md:w-80">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-500" />
-            <Input
-              type="text"
-              placeholder="Tìm kiếm liệu trình theo tên..."
-              className="pl-10 pr-4 py-2 w-full border-gray-300 focus:border-blue-500 focus:ring-blue-500"
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-            />
+    <>
+      <div className="container px-4 py-10 space-y-8">
+        {/* Header */}
+        <div className="flex justify-between items-center border-b pb-5">
+          <div>
+            <h1 className="text-2xl font-bold tracking-tight">
+              {service?.serviceName || "Quản lý liệu trình"}
+            </h1>
+            <p className="text-muted-foreground mt-1">
+              Quản lý các liệu trình và thông tin chi tiết
+            </p>
           </div>
+          <Button onClick={() => setIsAddDialogOpen(true)}>
+            <PlusCircle className="h-4 w-4 mr-2" /> Thêm liệu trình
+          </Button>
         </div>
 
-        {loading ? (
-          <div className="flex justify-center items-center h-64">
-            <Loader2 className="h-8 w-8 animate-spin text-blue-600" />
-          </div>
-        ) : (
-          <div className="overflow-x-auto">
-            <div className="rounded-md border overflow-hidden min-w-full">
-              <Table className="min-w-full">
-                <TableHeader>
-                  <TableRow className="font-semibold bg-gray-50">
-                    <TableHead className="">ID</TableHead>
-                    <TableHead className="">Tên liệu trình</TableHead>
-                    <TableHead className="">Hình ảnh</TableHead>
-                    <TableHead className="text-center">
-                      Thời gian (phút)
-                    </TableHead>
-                    <TableHead className="">Giá</TableHead>
-                    <TableHead className="text-center">Thao tác</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {filteredTreatments.length > 0 ? (
-                    filteredTreatments.map((treatment) => (
-                      <TableRow
-                        key={treatment.treatmentId}
-                        className="hover:bg-gray-50"
-                      >
-                        <TableCell className="font-medium">
-                          {treatment.treatmentId}
-                        </TableCell>
-                        <TableCell className="font-medium text-blue-600">
-                          {treatment.treatmentName}
-                        </TableCell>
-                        <TableCell className="">
-                          <div
-                            className="relative h-12 w-12 cursor-pointer rounded-md overflow-hidden border "
-                            onClick={() =>
-                              openImageDialog(treatment.treatmentThumbnailUrl)
-                            }
-                          >
-                            <img
-                              src={getImageUrl(treatment.treatmentThumbnailUrl)}
-                              alt={treatment.treatmentName}
-                              className="h-full w-full object-cover"
-                            />
-                          </div>
-                        </TableCell>
-                        <TableCell className="text-center">
-                          {treatment.duration}
-                        </TableCell>
-                        <TableCell className="font-medium">
-                          {formatPrice(treatment.price)}
-                        </TableCell>
-                        <TableCell>
-                          <div className="flex justify-center space-x-2">
-                            <Button
-                              variant="outline"
-                              size="sm"
-                              onClick={() => openEditDialog(treatment)}
-                              className="h-9 w-9 p-0"
-                            >
-                              <Pencil className="h-4 w-4 text-blue-600" />
-                            </Button>
-                            <Button
-                              variant="outline"
-                              size="sm"
-                              onClick={() => openDeleteDialog(treatment)}
-                              className="h-9 w-9 p-0 border-red-200 hover:bg-red-50 hover:text-red-600"
-                            >
-                              <Trash2 className="h-4 w-4 text-red-500" />
-                            </Button>
-                          </div>
+        {/* Main Content */}
+        <div className="rounded-md border shadow-sm">
+          <div className="p-4 md:p-6">
+            <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-6 gap-4">
+              <h2 className="text-lg font-medium text-gray-700">
+                Danh sách liệu trình ({filteredTreatments.length})
+              </h2>
+              <div className="relative w-full md:w-80">
+                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-500" />
+                <Input
+                  type="text"
+                  placeholder="Tìm kiếm liệu trình theo tên..."
+                  className="pl-10"
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                />
+              </div>
+            </div>
+
+            {loading ? (
+              <div className="flex justify-center items-center h-64">
+                <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+              </div>
+            ) : (
+              <div className="rounded-md border">
+                <Table>
+                  <TableHeader>
+                    <TableRow className="bg-muted/50">
+                      <TableHead className="w-[100px]">ID</TableHead>
+                      <TableHead>Tên liệu trình</TableHead>
+                      <TableHead className="w-[100px]">Hình ảnh</TableHead>
+                      <TableHead className="text-center">Thời gian</TableHead>
+                      <TableHead className="text-right">Giá</TableHead>
+                      <TableHead className="text-right w-[100px]">
+                        Thao tác
+                      </TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {filteredTreatments.length === 0 ? (
+                      <TableRow>
+                        <TableCell colSpan={6} className="text-center h-32">
+                          Không có liệu trình nào
                         </TableCell>
                       </TableRow>
-                    ))
-                  ) : (
-                    <TableRow>
-                      <TableCell
-                        colSpan={6}
-                        className="text-center py-10 text-gray-500"
-                      >
-                        Không có liệu trình nào cho dịch vụ này
-                      </TableCell>
-                    </TableRow>
-                  )}
-                </TableBody>
-              </Table>
-            </div>
-          </div>
-        )}
+                    ) : (
+                      filteredTreatments.map((treatment) => (
+                        <TableRow key={treatment.treatmentId}>
+                          <TableCell className="font-medium">
+                            {treatment.treatmentId}
+                          </TableCell>
+                          <TableCell>
+                            <div>
+                              <p className="font-medium">
+                                {treatment.treatmentName}
+                              </p>
+                              <p className="text-sm text-muted-foreground line-clamp-1">
+                                {treatment.description}
+                              </p>
+                            </div>
+                          </TableCell>
+                          <TableCell>
+                            <div
+                              className="relative h-10 w-10 cursor-pointer rounded-md overflow-hidden border"
+                              onClick={() =>
+                                openImageDialog(treatment.treatmentThumbnailUrl)
+                              }
+                            >
+                              <img
+                                src={getImageUrl(
+                                  treatment.treatmentThumbnailUrl
+                                )}
+                                alt={treatment.treatmentName}
+                                className="h-full w-full object-cover"
+                              />
+                            </div>
+                          </TableCell>
+                          <TableCell className="text-center">
+                            {treatment.duration} phút
+                          </TableCell>
+                          <TableCell className="text-right font-medium">
+                            {formatPrice(treatment.price)}
+                          </TableCell>
+                          <TableCell className="text-right">
+                            <div className="flex justify-end space-x-2">
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                onClick={() => openEditDialog(treatment)}
+                                className="h-8 w-8 p-0"
+                              >
+                                <Pencil className="h-4 w-4" />
+                              </Button>
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                onClick={() => openDeleteDialog(treatment)}
+                                className="h-8 w-8 p-0 text-red-500 border-red-200 hover:bg-red-50 hover:text-red-600"
+                              >
+                                <Trash2 className="h-4 w-4" />
+                              </Button>
+                            </div>
+                          </TableCell>
+                        </TableRow>
+                      ))
+                    )}
+                  </TableBody>
+                </Table>
+              </div>
+            )}
 
-        {/* Phân trang */}
-        {totalPages > 1 && (
-          <div className="flex justify-center mt-6 gap-2">
-            <Button
-              variant="outline"
-              onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
-              disabled={currentPage === 1}
-              className="px-4"
-            >
-              Trước
-            </Button>
-            {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
-              <Button
-                key={page}
-                variant={currentPage === page ? "default" : "outline"}
-                onClick={() => setCurrentPage(page)}
-                className={
-                  currentPage === page ? "bg-blue-600 hover:bg-blue-700" : ""
-                }
-              >
-                {page}
-              </Button>
-            ))}
-            <Button
-              variant="outline"
-              onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
-              disabled={currentPage === totalPages}
-              className="px-4"
-            >
-              Sau
-            </Button>
+            {/* Pagination */}
+            {totalPages > 1 && (
+              <div className="flex justify-between items-center mt-6 px-2">
+                <div className="text-sm text-muted-foreground">
+                  Hiển thị {treatments.length} trên tổng số {totalRecords} liệu
+                  trình
+                </div>
+                <div className="flex items-center space-x-6 lg:space-x-8">
+                  <div className="flex w-[100px] items-center justify-center text-sm font-medium">
+                    Trang {currentPage} / {totalPages}
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <Button
+                      variant="outline"
+                      className="h-8 w-8 p-0"
+                      onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
+                      disabled={currentPage === 1}
+                    >
+                      <span className="sr-only">Trang trước</span>
+                      <ChevronLeftIcon className="h-4 w-4" />
+                    </Button>
+                    <Button
+                      variant="outline"
+                      className="h-8 w-8 p-0"
+                      onClick={() =>
+                        setCurrentPage((p) => Math.min(totalPages, p + 1))
+                      }
+                      disabled={currentPage === totalPages}
+                    >
+                      <span className="sr-only">Trang sau</span>
+                      <ChevronRightIcon className="h-4 w-4" />
+                    </Button>
+                  </div>
+                </div>
+              </div>
+            )}
           </div>
-        )}
+        </div>
       </div>
-
       {/* Sử dụng component AddTreatment */}
       <AddTreatment
         open={isAddDialogOpen}
@@ -684,6 +686,6 @@ export default function TreatmentsList() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
-    </div>
+    </>
   );
 }
