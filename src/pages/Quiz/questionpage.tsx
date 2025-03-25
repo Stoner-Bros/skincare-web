@@ -1,42 +1,151 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { useParams, useNavigate } from "react-router-dom";
+import skinTestQuestionService from "@/services/skin-test-question";
 
 export default function QuestionPage() {
+    const { id } = useParams<{ id: string }>();
+    const navigate = useNavigate();
+    
+    const [questions, setQuestions] = useState<any[]>([]);
+    const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
     const [selectedOption, setSelectedOption] = useState<string | null>(null);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState<string | null>(null);
+    const [answers, setAnswers] = useState<{questionId: number, answer: string}[]>([]);
+
+    useEffect(() => {
+        const fetchQuestions = async () => {
+            try {
+                setLoading(true);
+                if (!id) {
+                    throw new Error("Không tìm thấy ID của bài kiểm tra");
+                }
+
+                const response = await skinTestQuestionService.getSkinTestQuestionsBySkinTestId(Number(id));
+                if (response && Array.isArray(response)) {
+                    setQuestions(response);
+                } else {
+                    throw new Error("Dữ liệu câu hỏi không hợp lệ");
+                }
+            } catch (err: any) {
+                setError(err.message || "Đã xảy ra lỗi khi tải câu hỏi");
+                console.error("Lỗi khi tải câu hỏi:", err);
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        fetchQuestions();
+    }, [id]);
 
     const handleOptionClick = (option: string) => {
         setSelectedOption(option);
     };
+
+    const handleNextQuestion = () => {
+        if (selectedOption && currentQuestionIndex < questions.length) {
+            // Lưu câu trả lời hiện tại
+            const currentQuestion = questions[currentQuestionIndex];
+            setAnswers([...answers, {
+                questionId: currentQuestion.id,
+                answer: selectedOption
+            }]);
+            
+            // Chuyển sang câu hỏi tiếp theo hoặc hoàn thành bài kiểm tra
+            if (currentQuestionIndex < questions.length - 1) {
+                setCurrentQuestionIndex(currentQuestionIndex + 1);
+                setSelectedOption(null);
+            } else {
+                // Ở đây bạn có thể gửi kết quả đến server hoặc chuyển hướng đến trang kết quả
+                console.log("Hoàn thành bài kiểm tra, kết quả:", answers);
+                navigate(`/result/${id}`, { state: { answers } });
+            }
+        }
+    };
+
+    if (loading) {
+        return (
+            <div className="flex justify-center items-center h-screen bg-pink-50">
+                <div className="text-center">
+                    <div className="spinner"></div>
+                    <p className="mt-4">Đang tải câu hỏi...</p>
+                </div>
+            </div>
+        );
+    }
+
+    if (error) {
+        return (
+            <div className="flex justify-center items-center h-screen bg-pink-50">
+                <div className="text-center text-red-500">
+                    <p>{error}</p>
+                    <button 
+                        className="mt-4 px-4 py-2 bg-green-200 rounded-lg" 
+                        onClick={() => navigate(-1)}
+                    >
+                        Quay lại
+                    </button>
+                </div>
+            </div>
+        );
+    }
+
+    if (questions.length === 0) {
+        return (
+            <div className="flex justify-center items-center h-screen bg-pink-50">
+                <div className="text-center">
+                    <p>Không có câu hỏi nào cho bài kiểm tra này</p>
+                    <button 
+                        className="mt-4 px-4 py-2 bg-green-200 rounded-lg" 
+                        onClick={() => navigate(-1)}
+                    >
+                        Quay lại
+                    </button>
+                </div>
+            </div>
+        );
+    }
+
+    const currentQuestion = questions[currentQuestionIndex];
+    const progressPercentage = ((currentQuestionIndex + 1) / questions.length) * 100;
 
     return (
         <div className="flex justify-center bg-pink-50 py-10">
             <div className="bg-white shadow-lg rounded-2xl p-12 w-[1200px] h-[700px] flex flex-col justify-center border border-green-300">
                 <div className="mb-4">
                     <div className="w-full bg-gray-200 rounded-full h-2.5 mb-2">
-                        <div className="bg-green-400 h-2.5 rounded-full" style={{ width: "20%" }}></div>
+                        <div 
+                            className="bg-green-400 h-2.5 rounded-full" 
+                            style={{ width: `${progressPercentage}%` }}
+                        ></div>
                     </div>
-                    <p className="text-center font-semibold">1/5</p>
+                    <p className="text-center font-semibold">{currentQuestionIndex + 1}/{questions.length}</p>
                 </div>
-                <h2 className="text-lg font-semibold mb-2">How does your skin feel a few hours after washing your face?</h2>
-                <p className="text-sm text-gray-500 mb-4">Point: 20</p>
+                <h2 className="text-lg font-semibold mb-2">{currentQuestion.questionText}</h2>
                 <div className="space-y-3">
-                    {["Very oily all over", "Somewhat oily in T-zone only", "Normal and balanced", "Dry and tight"].map(
-                        (option) => (
-                            <button
-                                key={option}
-                                onClick={() => handleOptionClick(option)}
-                                className={`w-full p-4 border rounded-lg hover:bg-green-100 transition ${selectedOption === option ? "bg-green-200" : ""
-                                    } border-green-300`}
-                            >
-                                {option}
-                            </button>
-                        )
-                    )}
+                    {[
+                        { key: "A", text: currentQuestion.optionA },
+                        { key: "B", text: currentQuestion.optionB },
+                        { key: "C", text: currentQuestion.optionC },
+                        { key: "D", text: currentQuestion.optionD }
+                    ].map((option) => (
+                        <button
+                            key={option.key}
+                            onClick={() => handleOptionClick(option.text)}
+                            className={`w-full p-4 border rounded-lg hover:bg-green-100 transition ${
+                                selectedOption === option.text ? "bg-green-200" : ""
+                            } border-green-300`}
+                        >
+                            {option.text}
+                        </button>
+                    ))}
                 </div>
                 <button
-                    className="mt-4 w-[200px] p-3 rounded-full bg-green-200 text-green-700 font-semibold mx-auto block shadow-md"
+                    onClick={handleNextQuestion}
+                    className="mt-4 w-[200px] p-3 rounded-full bg-green-200 text-green-700 font-semibold mx-auto block shadow-md hover:bg-green-300 transition"
                     disabled={!selectedOption}
                 >
-                    Next
+                    {currentQuestionIndex < questions.length - 1 ? "Tiếp theo" : "Hoàn thành"}
                 </button>
             </div>
         </div>

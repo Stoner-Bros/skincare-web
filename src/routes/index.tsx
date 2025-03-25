@@ -24,8 +24,9 @@ import Staff from "@/pages/Dashboard/User/Staff";
 import Home from "@/pages/Home";
 import Treatment from "@/pages/Treatment/treatment";
 import TreatmentDetail from "@/pages/Treatment/treatment-detail";
-import QuestionPage from "@/pages/Quiz/questionpage";
+import QuestionPage from "@/pages/Quiz/questionPage";
 import QuizPage from "@/pages/Quiz/quizpage";
+
 import AllTherapist from "@/pages/Therapists/allTherapist";
 import { Suspense } from "react";
 import { Navigate, Outlet, useRoutes } from "react-router-dom";
@@ -33,7 +34,7 @@ import MyProfile from "@/pages/Profile";
 import BookingHistory from "@/pages/BookingHistory";
 import ServicesList from "@/pages/Services";
 import TreatmentsList from "@/pages/Dashboard/Treatment/treatments";
-
+import SkinTest from "@/pages/Dashboard/SkinTest";
 
 // ----------------------------------------------------------------------
 
@@ -85,6 +86,11 @@ export default function AppRouter() {
           path: "/dashboard/waiting-blog",
           element: <WaitingBlog />,
         },
+        {
+          path: "/dashboard/skin-test",
+          element: <SkinTest />,
+        },
+        
         {
           path: "/dashboard/order-checkin",
           element: <CheckInOrder />,
@@ -138,6 +144,7 @@ export default function AppRouter() {
           index: true,
         },
         { path: "/quiz", element: <QuizPage /> },
+        { path: "/quiz/:id/questions", element: <QuestionPage /> },
         { path: "/about-us", element: <AboutUs /> },
         { path: "/therapist", element: <AllTherapist /> },
         { path: "/question", element: <QuestionPage /> },
@@ -145,7 +152,6 @@ export default function AppRouter() {
         { path: "/treatment/:id", element: <Treatment /> },
         { path: "/treatment/detail/:id", element: <TreatmentDetail /> },
         { path: "/services", element: <ServicesList /> },
-        { path: "/quiz", element: <QuizPage /> },
         // { path: "/services/:id", element: <ShowService /> },
         { path: "/content-policy", element: <ContentPolicy /> },
         { path: "/privacy-policy", element: <PrivacyPolicy /> },
