@@ -98,7 +98,7 @@ export default function Customers() {
   };
 
   return (
-    <div className="container px-4 py-10 space-y-8">
+    <div className="container mx-auto px-4 py-10 space-y-8">
       {/* Header */}
       <div className="flex justify-between items-center border-b pb-5">
         <div>

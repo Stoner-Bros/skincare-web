@@ -324,7 +324,7 @@ export default function TreatmentsList() {
 
   return (
     <>
-      <div className="container px-4 py-10 space-y-8">
+      <div className="container px-4 py-10 space-y-8 mx-auto p-4">
         {/* Header */}
         <div className="flex justify-between items-center border-b pb-5">
           <div>
