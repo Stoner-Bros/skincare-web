@@ -44,6 +44,7 @@ interface Blog {
   content?: string;
   thumbnailUrl?: string;
   viewCount?: number;
+  publishAt?: boolean;
 }
 
 export default function WaitingBlog() {
@@ -276,9 +277,21 @@ export default function WaitingBlog() {
 
   // Hàm để lấy các bài viết cho trang hiện tại
   const getCurrentPageBlogs = () => {
+    // Sắp xếp blogs để đưa những bài waiting lên đầu, sau đó sắp xếp theo thời gian
+    const sortedBlogs = [...blogs].sort((a, b) => {
+      // Đưa các bài "Waiting" lên đầu
+      if (!a.publishAt && b.publishAt) return -1;
+      if (a.publishAt && !b.publishAt) return 1;
+      
+      // Nếu cùng trạng thái, sắp xếp theo thời gian mới nhất
+      const dateA = new Date(a.createdAt).getTime();
+      const dateB = new Date(b.createdAt).getTime();
+      return dateB - dateA; // Sắp xếp giảm dần (mới nhất lên đầu)
+    });
+
     const startIndex = (currentPage - 1) * pageSize;
     const endIndex = startIndex + pageSize;
-    return blogs.slice(startIndex, endIndex);
+    return sortedBlogs.slice(startIndex, endIndex);
   };
 
   const renderPagination = () => {
@@ -394,13 +407,13 @@ export default function WaitingBlog() {
           <CardTitle>News and Blog</CardTitle>
           <div className="flex gap-2">
             <Button onClick={handleAddBlog} className="bg-blue-500">
-              <span className="mr-1">+</span> Add News
+              <span className="mr-1">+</span> Add Blogs
             </Button>
           </div>
         </CardHeader>
         <CardContent>
           <div className="mb-4">
-            <h2 className="text-xl font-bold mb-4">News</h2>
+            <h2 className="text-xl font-bold mb-4">Blog</h2>
             <div className="flex justify-between mb-4">
               <div className="w-1/3">
                 <Input
@@ -441,11 +454,11 @@ export default function WaitingBlog() {
                         <TableCell>{blog.blogId || blog.id}</TableCell>
                         <TableCell>{blog.title}</TableCell>
                         <TableCell>
-                          {blog.authorName || blog.author || "Dang Khoi"}
+                          {blog.authorName || blog.author }
                         </TableCell>
                         <TableCell>
-                          <Badge className="bg-yellow-100 text-yellow-800 border-yellow-300 px-2 py-1 rounded">
-                            Waiting
+                          <Badge className={`bg-${blog.publishAt ? 'green' : 'yellow'}-100 text-${blog.publishAt ? 'green' : 'yellow'}-800 border-${blog.publishAt ? 'green' : 'yellow'}-300 px-2 py-1 rounded`}>
+                            {blog.publishAt ? 'Published' : 'Waiting'}
                           </Badge>
                         </TableCell>
                         <TableCell>
@@ -582,29 +595,7 @@ export default function WaitingBlog() {
                     </div>
                   ) : (
                     <div className="prose prose-invert max-w-none">
-                      <p>
-                        In today's rapidly evolving world, technology is
-                        transforming every facet of our lives, and the skincare
-                        industry is no exception. With innovations ranging from
-                        artificial intelligence to biotechnology, the future of
-                        skincare is poised for a revolution that promises
-                        personalized, efficient, and sustainable solutions. This
-                        news article explores the groundbreaking technologies
-                        that are reshaping the way we understand and care for
-                        our skin, marking a new era in beauty and wellness.
-                      </p>
-                      <h3>A New Era of Personalized Skincare</h3>
-                      <p>
-                        Gone are the days when skincare was limited to
-                        one-size-fits-all products. The modern landscape now
-                        embraces personalization powered by advanced diagnostics
-                        and smart devices. Companies are deploying machine
-                        learning algorithms alongside high-resolution imaging
-                        tools to assess skin conditions accurately. These
-                        systems analyze factors such as hydration, UV exposure,
-                        and even genetic predispositions to create truly
-                        customized skincare regimens.
-                      </p>
+                      
                     </div>
                   )}
                 </div>
