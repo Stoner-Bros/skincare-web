@@ -5,6 +5,7 @@ import AboutUs from "@/pages/AboutUs/AboutUs";
 import ContentPolicy from "@/pages/AboutUs/ContentPrivacy";
 import PrivacyPolicy from "@/pages/AboutUs/PrivacyPolicy";
 import WaitingBlog from "@/pages/Dashboard/Blog/WaitingBlog";
+import AllBlog from "@/pages/Dashboard/Blog/AllBlog";
 import Feedbacks from "@/pages/Dashboard/Feedbacks";
 import AllOrder from "@/pages/Dashboard/Order/AllOrder";
 import CheckInOrder from "@/pages/Dashboard/Order/CheckIn";
@@ -30,9 +31,9 @@ import { Suspense } from "react";
 import { Navigate, Outlet, useRoutes } from "react-router-dom";
 import MyProfile from "@/pages/Profile";
 import BookingHistory from "@/pages/BookingHistory";
-import ShowService from "@/pages/Services/show-service";
 import ServicesList from "@/pages/Services";
 import TreatmentsList from "@/pages/Dashboard/Treatment/treatments";
+
 
 // ----------------------------------------------------------------------
 
@@ -78,7 +79,7 @@ export default function AppRouter() {
         },
         {
           path: "/dashboard/all-blog",
-          element: <AllOrder />,
+          element: <AllBlog />,
         },
         {
           path: "/dashboard/waiting-blog",
