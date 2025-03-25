@@ -1,7 +1,15 @@
 import { Button } from "@/components/ui/button";
 import treatmentService from "@/services/treatment.services";
 import serviceService from "@/services/service.services";
-import { ArrowLeft, Loader2 } from "lucide-react";
+import {
+  ArrowLeft,
+  Loader2,
+  Clock,
+  Tag,
+  Star,
+  Users,
+  Check,
+} from "lucide-react";
 import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 
@@ -22,14 +30,12 @@ export default function TreatmentDetail() {
         console.log("Đang tải treatment với ID:", treatmentId);
 
         if (treatmentId > 0) {
-          const response = await treatmentService.getTreatmentById(
-            treatmentId
-          );
+          const response = await treatmentService.getTreatmentById(treatmentId);
           console.log("Dữ liệu treatment nhận được:", response);
 
           // Lấy dữ liệu từ response.data
           const treatmentData = response.data;
-          
+
           if (treatmentData) {
             setTreatment(treatmentData);
 
@@ -125,163 +131,112 @@ export default function TreatmentDetail() {
   }
 
   return (
-    <div className="w-full min-h-screen bg-pink-50">
-      <div className="container mx-auto py-8 px-4">
-        {/* Breadcrumb */}
-        {/* <div className="flex items-center text-sm mb-6">
-                <a href="/" className="text-green-500 hover:underline flex items-center">
-                    <span className="mr-1">🏠</span> Home
-                </a>
-                <span className="mx-2">/</span>
-                <a href="/services" className="text-green-500 hover:underline">
-                    Services
-                </a>
-                <span className="mx-2">/</span>
-                <span className="text-gray-600">Service Details</span>
-            </div> */}
+    <div className="w-full min-h-screen bg-gradient-to-b from-pink-50 to-white">
+      <div className="container mx-auto py-8 px-4 max-w-7xl">
+        <Button
+          onClick={handleGoBack}
+          variant="outline"
+          className="mb-6 flex items-center hover:bg-pink-50"
+        >
+          <ArrowLeft className="mr-2 h-4 w-4" />
+          Quay lại
+        </Button>
 
-        {/* Main Content */}
-        <div className="bg-white rounded-lg shadow-lg overflow-hidden mb-10">
+        <div className="bg-white rounded-2xl shadow-lg overflow-hidden mb-10">
           <div className="md:flex">
-            {/* Ảnh liệu trình */}
-            <div className="md:w-1/2">
+            <div className="md:w-1/2 relative">
               <img
                 src={getImageUrl(treatment.treatmentThumbnailUrl)}
                 alt={treatment.treatmentName}
-                className="w-full h-[400px] object-cover"
+                className="w-full h-[500px] object-cover"
                 onError={(e) => {
                   (e.target as HTMLImageElement).src = "/default-treatment.jpg";
                 }}
               />
+              {treatment.isAvailable && (
+                <div className="absolute top-4 right-4 bg-green-500 text-white px-3 py-1 rounded-full text-sm font-medium">
+                  Có sẵn
+                </div>
+              )}
             </div>
 
-            {/* Thông tin chính */}
-            <div className="md:w-1/2 p-6">
+            <div className="md:w-1/2 p-8">
               <h1 className="text-3xl font-bold text-[#2F3B4B] mb-4">
                 {treatment.treatmentName}
               </h1>
 
-              {/* Giá */}
-              <div className="mb-4">
-                <p className="text-2xl font-bold text-red-500">
-                  {treatment.price
-                    ? treatment.price.toLocaleString("vi-VN")
-                    : "1320000"}{" "}
-                  VND
-                </p>
-              </div>
+              <div className="space-y-6">
+                <div className="flex items-center text-2xl font-bold text-[#AF1F45]">
+                  <Tag className="h-6 w-6 mr-2" />
+                  <span>{treatment.price?.toLocaleString("vi-VN")} VND</span>
+                </div>
 
-              {/* Thời gian */}
-              <div className="flex items-center mb-3">
-                <span className="inline-flex items-center mr-1">
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    width="20"
-                    height="20"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="2"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                  >
-                    <circle cx="12" cy="12" r="10"></circle>
-                    <polyline points="12 6 12 12 16 14"></polyline>
-                  </svg>
-                </span>
-                <span>{treatment.duration || "30"} minutes</span>
-              </div>
+                <div className="flex items-center text-gray-600">
+                  <Clock className="h-5 w-5 mr-2" />
+                  <span>{treatment.duration || "30"} phút</span>
+                </div>
 
-              {/* Đánh giá */}
-              <div className="flex items-center mb-3">
-                <span className="inline-flex items-center mr-1">
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    width="20"
-                    height="20"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="2"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                  >
-                    <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
-                    <circle cx="9" cy="7" r="4"></circle>
-                    <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
-                    <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
-                  </svg>
-                </span>
-                <span>
-                  {treatment.isAvailable ? "Có sẵn" : "Không có sẵn"}
-                </span>
-                <span className="ml-4 inline-flex items-center">
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    width="18"
-                    height="18"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="2"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                  >
-                    <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>
-                  </svg>
-                  <span className="ml-1">No reviews Rating</span>
-                </span>
-              </div>
+                <div className="flex items-center text-gray-600">
+                  <Users className="h-5 w-5 mr-2" />
+                  <span>
+                    {treatment.isAvailable ? "Có sẵn" : "Không có sẵn"}
+                  </span>
+                  <div className="mx-4 h-4 w-[1px] bg-gray-300"></div>
+                  <Star className="h-5 w-5 mr-2 text-yellow-400" />
+                  <span>Chưa có đánh giá</span>
+                </div>
 
-              {/* Button đặt lịch */}
-              <Button className="mt-4 bg-green-500 hover:bg-green-600 text-white font-semibold py-2 px-8 rounded-full">
-                Book Now
-              </Button>
+                <div className="mt-6">
+                  <h4 className="font-semibold mb-3">Mô tả:</h4>
+                  <p className="text-gray-700 leading-relaxed">
+                    {treatment.description ||
+                      `${treatment.treatmentName} là liệu trình chăm sóc da được thiết kế đặc biệt để điều trị và ngăn ngừa mụn, giảm viêm và phục hồi độ trong sáng cho da. Sử dụng kết hợp các phương pháp làm sạch sâu, tẩy tế bào chết và các thành phần kháng khuẩn, liệu trình này giúp kiểm soát mụn và giảm thiểu nguy cơ mụn tái phát.`}
+                  </p>
+                </div>
+
+                <div className="mt-6">
+                  <h4 className="font-semibold mb-3">Lợi ích chính:</h4>
+                  <ul className="space-y-2">
+                    <li className="flex items-center">
+                      <Check className="h-5 w-5 mr-2 text-green-500" />
+                      <span>Làm sạch sâu và loại bỏ tạp chất</span>
+                    </li>
+                    <li className="flex items-center">
+                      <Check className="h-5 w-5 mr-2 text-green-500" />
+                      <span>Cân bằng độ ẩm và dầu trên da</span>
+                    </li>
+                    <li className="flex items-center">
+                      <Check className="h-5 w-5 mr-2 text-green-500" />
+                      <span>Giảm thiểu dấu hiệu lão hóa</span>
+                    </li>
+                  </ul>
+                </div>
+
+                <Button className="w-full mt-8 bg-[#AF1F45] hover:bg-[#8a1936] text-white py-6 text-lg font-semibold">
+                  Đặt lịch ngay
+                </Button>
+              </div>
             </div>
           </div>
         </div>
 
-        {/* Service Information */}
-        <div className="mb-10">
-          <h2 className="text-2xl font-bold mb-4 border-b pb-2">
-            Treatment Information
-          </h2>
-
-          {/* <div className="bg-[#1E293B] text-white p-4 rounded-lg mb-4">
-                        <h3 className="text-xl font-semibold mb-2">{treatment.treatmentName}</h3>
-                    </div> */}
-
-          <div className="mb-6">
-            <h4 className="font-semibold mb-2">Overview:</h4>
-            <p className="text-gray-700">
-              {treatment.description ? (
-                treatment.description
-              ) : (
-                <span>
-                  {treatment.treatmentName} is a targeted skincare therapy
-                  designed to treat and prevent breakouts, reduce inflammation,
-                  and restore skin clarity. Using a combination of deep
-                  cleansing, exfoliation, and antibacterial ingredients, this
-                  treatment helps control acne and minimize future breakouts.
-                </span>
-              )}
-            </p>
-
-            {/* <div className="text-center mt-4">
-                        <button className="text-green-500 border border-green-500 rounded-md py-2 px-4 hover:bg-green-50 transition-colors">
-                            See More
-                        </button>
-                    </div> */}
-          </div>
-        </div>
-
         {service && (
-          <div className="mb-10">
-            <h2 className="text-2xl font-bold mb-4 border-b pb-2">
-              Related Treatments
+          <div className="bg-white rounded-2xl shadow-lg p-8">
+            <h2 className="text-2xl font-bold mb-6 text-[#2F3B4B]">
+              Dịch vụ liên quan
             </h2>
-            <div className="bg-white rounded-lg shadow p-4">
-              <p className="font-semibold text-lg">{service.serviceName}</p>
+            <div className="bg-pink-50 rounded-xl p-6">
+              <h3 className="text-xl font-semibold text-[#AF1F45] mb-3">
+                {service.serviceName}
+              </h3>
+              <p className="text-gray-600">{service.serviceDescription}</p>
+              <Button
+                variant="outline"
+                className="mt-4 border-[#AF1F45] text-[#AF1F45] hover:bg-[#AF1F45] hover:text-white"
+                onClick={() => navigate(`/services/${service.serviceId}`)}
+              >
+                Xem chi tiết dịch vụ
+              </Button>
             </div>
           </div>
         )}
