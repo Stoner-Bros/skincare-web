@@ -33,13 +33,6 @@ export function UserAvatarMenu() {
     // navigate("/?auth=login"); // Chuyển hướng đến trang đăng nhập
   };
 
-  const handleProfileClick = () => {
-    navigate("/profile"); // Chuyển hướng đến trang profile
-  };
-  const handleHistoryClick = () => {
-    navigate("/booking-history"); // Chuyển hướng đến trang booking history
-  };
-
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
@@ -65,14 +58,21 @@ export function UserAvatarMenu() {
         </div>
         <DropdownMenuSeparator />
         <DropdownMenuItem
-          onClick={handleProfileClick}
+          onClick={() => navigate("/dashboard")}
+          className="cursor-pointer font-semibold"
+        >
+          <User className="mr-2 h-4 w-4" />
+          <span>Dashboard</span>
+        </DropdownMenuItem>
+        <DropdownMenuItem
+          onClick={() => navigate("/profile")}
           className="cursor-pointer font-semibold"
         >
           <User className="mr-2 h-4 w-4" />
           <span>Tài khoản của tôi</span>
         </DropdownMenuItem>
         <DropdownMenuItem
-          onClick={handleHistoryClick}
+          onClick={() => navigate("/booking-history")}
           className="cursor-pointer font-semibold"
         >
           <History className="mr-2 h-4 w-4" />
