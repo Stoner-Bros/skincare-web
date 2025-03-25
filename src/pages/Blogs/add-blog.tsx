@@ -18,7 +18,6 @@ import {
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
 import blogService from "@/services/blog.services";
-import { BlogCreateRequest } from "@/types/blog.types";
 
 const formSchema = z.object({
   title: z.string().min(1, "Tiêu đề không được để trống"),
@@ -115,11 +114,12 @@ export default function AddBlog({ open, onClose }: AddBlogProps) {
       let thumbnailUrl = data.thumbnailUrl || "";
       
       // Tạo đối tượng request để gửi đến API
-      const blogData: BlogCreateRequest = {
+      const blogData: any = {
         title: data.title,
         content: mdContent || data.content,
         thumbnailUrl: thumbnailUrl,
         tags: data.tags,
+        isPublished: false
       };
 
       // Sử dụng blogService thay vì gọi API trực tiếp

@@ -66,11 +66,11 @@ const initialNavData = {
       isActive: false,
       items: [
         {
-          title: "Toàn bộ",
+          title: "Đã duyệt",
           url: "/dashboard/all-blog",
         },
         {
-          title: "Chờ duyệt",
+          title: "Toàn bộ",
           url: "/dashboard/waiting-blog",
         },
       ],
