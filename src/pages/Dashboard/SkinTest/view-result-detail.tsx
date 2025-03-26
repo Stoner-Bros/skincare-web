@@ -6,7 +6,6 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import {
   Select,
@@ -21,8 +20,8 @@ import { useToast } from "@/hooks/use-toast";
 import serviceService from "@/services/service.services";
 import skinTestAnswerService from "@/services/skin-test-answer";
 import skinTestQuestionService from "@/services/skin-test-question";
+import skinTestResultService from "@/services/skin-test-result";
 import treatmentService from "@/services/treatment.services";
-import { X } from "lucide-react";
 import { useEffect, useState } from "react";
 
 interface ViewResultDetailProps {
@@ -51,6 +50,7 @@ export default function ViewResultDetail({
   const [maxScore, setMaxScore] = useState<string>("");
   const [description, setDescription] = useState<string>("");
   const [duration, setDuration] = useState<string>("");
+  const [message, setMessage] = useState<string>("");
   const [isLoadingServices, setIsLoadingServices] = useState(false);
   const [isLoadingTreatments, setIsLoadingTreatments] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -79,14 +79,29 @@ export default function ViewResultDetail({
     } else {
       setTreatments([]);
       setSelectedTreatment("");
+      setDescription("");
+      setDuration("");
     }
   }, [selectedService]);
+
+  // Tự động cập nhật description và duration khi chọn treatment
+  useEffect(() => {
+    if (selectedTreatment && treatments.length > 0) {
+      const selectedTreatmentData = treatments.find(
+        (treatment) => treatment.treatmentId.toString() === selectedTreatment
+      );
+
+      if (selectedTreatmentData) {
+        setDescription(selectedTreatmentData.description || "");
+        setDuration(selectedTreatmentData.duration?.toString() || "");
+      }
+    }
+  }, [selectedTreatment, treatments]);
 
   const fetchServices = async () => {
     try {
       setIsLoadingServices(true);
       const servicesData = await serviceService.getServices();
-      console.log("Danh sách dịch vụ:", servicesData);
 
       // Xử lý đúng dạng dữ liệu trả về từ API
       if (Array.isArray(servicesData)) {
@@ -117,7 +132,6 @@ export default function ViewResultDetail({
     try {
       setIsLoadingTreatments(true);
       const treatmentsData = await treatmentService.getTreatments(serviceId);
-      console.log("Danh sách liệu trình:", treatmentsData);
 
       setTreatments(treatmentsData?.data?.items);
     } catch (error) {
@@ -148,6 +162,7 @@ export default function ViewResultDetail({
     setMaxScore("");
     setDescription("");
     setDuration("");
+    setMessage("");
   };
 
   const handleRecommendationSubmit = async () => {
@@ -163,7 +178,36 @@ export default function ViewResultDetail({
     try {
       setIsSubmitting(true);
 
-      
+      // Tìm thông tin của treatment đã chọn
+      const selectedTreatmentData = treatments.find(
+        (treatment) => treatment.treatmentId.toString() === selectedTreatment
+      );
+
+      if (!selectedTreatmentData) {
+        throw new Error("Không tìm thấy thông tin liệu trình đã chọn");
+      }
+
+      // Tạo object để gửi đến API
+      const recommendationData = {
+        result: JSON.stringify({
+          treatmentId: parseInt(selectedTreatment),
+          serviceId: parseInt(selectedService),
+          minScore: minScore ? parseInt(minScore) : null,
+          maxScore: maxScore ? parseInt(maxScore) : null,
+          description: selectedTreatmentData.description || "",
+          duration: selectedTreatmentData.duration || 0,
+          isAvailable: true,
+          price: selectedTreatmentData.price || 0,
+          treatmentName: selectedTreatmentData.treatmentName || "",
+          message: message,
+        }),
+      };
+
+      // Gọi API để tạo recommendation
+      await skinTestResultService.createSkinTestResult(
+        answerId,
+        recommendationData
+      );
 
       toast({
         title: "Thành công",
@@ -187,18 +231,10 @@ export default function ViewResultDetail({
   const fetchResultDetail = async (id: number) => {
     try {
       setLoading(true);
-      console.log(`Đang lấy dữ liệu cho bài kiểm tra với ID: ${id}`);
 
       // Lấy thông tin bài làm từ API
       const resultData = await skinTestAnswerService.getSkinTestAnswerById(id);
       setResultDetail(resultData);
-
-      // Log thông tin để debug
-      console.log("Dữ liệu kết quả bài kiểm tra:", {
-        answerId: resultData?.answerId,
-        skinTestId: resultData?.skinTestId,
-        answers: resultData?.answers,
-      });
 
       // Nếu có skinTestId, lấy danh sách câu hỏi
       if (resultData.skinTestId) {
@@ -208,8 +244,6 @@ export default function ViewResultDetail({
               resultData.skinTestId
             );
           setQuestions(questionsData);
-          console.log("Danh sách câu hỏi:", questionsData);
-          console.log("Danh sách câu trả lời:", resultData.answers);
         } catch (err) {
           console.error("Lỗi khi lấy câu hỏi từ API:", err);
           setQuestions([]);
@@ -249,14 +283,8 @@ export default function ViewResultDetail({
       !questions.length ||
       !Array.isArray(resultDetail.answers)
     ) {
-      console.log("Không có dữ liệu câu hỏi hoặc câu trả lời");
       return [];
     }
-
-    console.log("Kết hợp câu hỏi và câu trả lời:", {
-      questions: questions.length,
-      answers: resultDetail.answers.length,
-    });
 
     return questions.map((question, index) => {
       const answer =
@@ -381,7 +409,6 @@ export default function ViewResultDetail({
               className="absolute right-4 top-4"
               onClick={handleRecommendationCancel}
             >
-              <X className="h-4 w-4" />
               <span className="sr-only">Đóng</span>
             </DialogClose>
           </DialogHeader>
@@ -446,48 +473,27 @@ export default function ViewResultDetail({
 
             <div className="space-y-2">
               <Label htmlFor="description">Mô tả</Label>
-              <Textarea
-                id="description"
-                placeholder="Nhập mô tả khuyến nghị"
-                value={description}
-                onChange={(e) => setDescription(e.target.value)}
-                className="min-h-24"
-              />
+              <div className="border rounded-md p-3 bg-gray-50 min-h-24 text-sm">
+                {description || "Không có mô tả"}
+              </div>
             </div>
 
             <div className="space-y-2">
               <Label htmlFor="duration">Thời gian (phút)</Label>
-              <Input
-                id="duration"
-                placeholder="Thời gian dự kiến (phút)"
-                value={duration}
-                onChange={(e) => setDuration(e.target.value)}
-                type="number"
-              />
+              <div className="border rounded-md p-3 bg-gray-50 text-sm">
+                {duration || "0"}
+              </div>
             </div>
 
-            <div className="grid grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <Label htmlFor="minScore">Điểm tối thiểu</Label>
-                <Input
-                  id="minScore"
-                  placeholder="Nhập điểm tối thiểu"
-                  value={minScore}
-                  onChange={(e) => setMinScore(e.target.value)}
-                  type="number"
-                />
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="maxScore">Điểm tối đa</Label>
-                <Input
-                  id="maxScore"
-                  placeholder="Nhập điểm tối đa"
-                  value={maxScore}
-                  onChange={(e) => setMaxScore(e.target.value)}
-                  type="number"
-                />
-              </div>
+            <div className="space-y-2">
+              <Label htmlFor="message">Lời nhắn</Label>
+              <Textarea
+                id="message"
+                placeholder="Nhập lời nhắn"
+                value={message}
+                onChange={(e) => setMessage(e.target.value)}
+                className="min-h-20"
+              />
             </div>
 
             <div className="pt-4 flex justify-end space-x-2">

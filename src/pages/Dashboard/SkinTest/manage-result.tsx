@@ -38,14 +38,12 @@ export default function ManageResult() {
     try {
       setLoading(true);
       const response = await skinTestAnswerService.getSkinTestAnswers();
-      console.log("API Response:", response);
 
       if (response && Array.isArray(response)) {
         const sortedResults = [...response].sort(
           (a, b) => b.answerId - a.answerId
         );
         setResults(sortedResults);
-        console.log("Processed Results:", sortedResults);
       } else {
         toast({
           variant: "destructive",
@@ -65,9 +63,7 @@ export default function ManageResult() {
     }
   };
 
-  useEffect(() => {
-    console.log("Current Results State:", results);
-  }, [results]);
+  useEffect(() => {}, [results]);
 
   const viewDetail = (id: number) => {
     setSelectedAnswerId(id);
@@ -101,7 +97,7 @@ export default function ManageResult() {
           <h1 className="text-xl font-semibold">
             Quản lý kết quả bài kiểm tra da
           </h1>
-          <Button onClick={fetchResults}>Làm mới</Button>
+          {/* <Button onClick={fetchResults}>Làm mới</Button> */}
         </div>
 
         <div className="space-y-2">
@@ -119,7 +115,7 @@ export default function ManageResult() {
         <h1 className="text-xl font-semibold">
           Quản lý kết quả bài kiểm tra da
         </h1>
-        <Button onClick={fetchResults}>Làm mới</Button>
+        {/* <Button onClick={fetchResults}>Làm mới</Button> */}
       </div>
 
       <div className="rounded-md border">
