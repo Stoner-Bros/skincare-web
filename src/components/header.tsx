@@ -12,7 +12,7 @@ export default function Header() {
     "login"
   );
 
-  const { user } = useAuth();
+  const { user, isLoggedIn } = useAuth();
 
   const location = useLocation();
   const navigate = useNavigate();
@@ -53,6 +53,27 @@ export default function Header() {
     navigate(`${location.pathname}?auth=signup`, { replace: true });
   };
 
+  // Handle skin test click
+  const handleSkinTestClick = (e: React.MouseEvent) => {
+    e.preventDefault();
+    
+    // Kiểm tra trạng thái đăng nhập
+    if (!isLoggedIn) {
+      // Nếu chưa đăng nhập, hiển thị form đăng nhập
+      setAuthDialogTab("login");
+      setShowAuthDialog(true);
+      
+      // Hiển thị thông báo yêu cầu đăng nhập
+      alert("Vui lòng đăng nhập để thực hiện bài kiểm tra da.");
+      
+      // Update URL với query parameter
+      navigate(`${location.pathname}?auth=login`, { replace: true });
+    } else {
+      // Nếu đã đăng nhập, chuyển đến trang quiz
+      navigate("/quiz");
+    }
+  };
+
   const navigationLinks = [
     {
       path: "/about-us",
@@ -67,8 +88,9 @@ export default function Header() {
       label: "BÁC SĨ",
     },
     {
-      path: "/quiz",
+      path: "#",
       label: "SKIN TEST",
+      onClick: handleSkinTestClick,
     },
     {
       path: "/add-blog",
@@ -152,10 +174,21 @@ export default function Header() {
         <nav className="flex justify-center space-x-8 gap-6 w-full mt-4">
           {navigationLinks.map((link, index) => (
             <div key={index} className="relative">
-              <Link to={link.path} className="text-red-600 font-bold group">
-                {link.label}
-                <div className="w-0 h-1 bg-red-600 rounded-full group-hover:w-full transition-all duration-300"></div>
-              </Link>
+              {link.onClick ? (
+                <a
+                  href={link.path}
+                  onClick={link.onClick}
+                  className="text-red-600 font-bold group"
+                >
+                  {link.label}
+                  <div className="w-0 h-1 bg-red-600 rounded-full group-hover:w-full transition-all duration-300"></div>
+                </a>
+              ) : (
+                <Link to={link.path} className="text-red-600 font-bold group">
+                  {link.label}
+                  <div className="w-0 h-1 bg-red-600 rounded-full group-hover:w-full transition-all duration-300"></div>
+                </Link>
+              )}
             </div>
           ))}
         </nav>

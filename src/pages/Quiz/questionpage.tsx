@@ -11,7 +11,7 @@ export default function QuestionPage() {
     const [selectedOption, setSelectedOption] = useState<string | null>(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
-    const [answers, setAnswers] = useState<{questionId: number, answer: string}[]>([]);
+    const [answers, setAnswers] = useState<{questionId: number, questionText: string, answer: string}[]>([]);
 
     useEffect(() => {
         const fetchQuestions = async () => {
@@ -48,6 +48,7 @@ export default function QuestionPage() {
             const currentQuestion = questions[currentQuestionIndex];
             setAnswers([...answers, {
                 questionId: currentQuestion.id,
+                questionText: currentQuestion.questionText,
                 answer: selectedOption
             }]);
             
@@ -56,9 +57,13 @@ export default function QuestionPage() {
                 setCurrentQuestionIndex(currentQuestionIndex + 1);
                 setSelectedOption(null);
             } else {
-                // Ở đây bạn có thể gửi kết quả đến server hoặc chuyển hướng đến trang kết quả
+                // Chuyển hướng đến trang kết quả với danh sách câu trả lời
                 console.log("Hoàn thành bài kiểm tra, kết quả:", answers);
-                navigate(`/result/${id}`, { state: { answers } });
+                navigate(`/quiz/${id}/result`, { state: { answers: [...answers, {
+                    questionId: currentQuestion.id,
+                    questionText: currentQuestion.questionText,
+                    answer: selectedOption
+                }] } });
             }
         }
     };

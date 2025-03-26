@@ -16,6 +16,7 @@ interface AuthContextType {
   login: (credentials: any) => Promise<void>;
   register: (userData: any) => Promise<void>;
   logout: () => Promise<void>;
+  reloadUser: () => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -114,6 +115,15 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     }
   };
 
+  const reloadUser = async () => {
+    try {
+      const userData = await authServices.getCurrentUser();
+      setUser(userData);
+    } catch (err) {
+      console.error("Failed to reload user:", err);
+    }
+  };
+
   return (
     <AuthContext.Provider
       value={{
@@ -124,6 +134,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         login,
         register,
         logout,
+        reloadUser,
       }}
     >
       {children}

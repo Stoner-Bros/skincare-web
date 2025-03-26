@@ -77,23 +77,23 @@ const initialNavData = {
     },
     {
       title: "Skin Test",
-      url: "/dashboard/skin-test",
+      url: "#",
       icon: BookOpen,
       isActive: false,
-      // items: [
-      //   {
-      //     title: "Tổng quan",
-      //     url: "/dashboard/skin-test",
-      //   },
-      //   {
-      //     title: "Quản lý bài kiểm tra",
-      //     url: "/dashboard/skin-test/manage",
-      //   },
-      //   {
+       items: [
+         {
+          title: "Quản lý bài kiểm tra",
+           url: "/dashboard/skin-test",
+         },
+         {
+           title: "Quản lý kết quả",
+           url: "/dashboard/skin-test/manage",
+         },
+      //  {
       //     title: "Thêm mới",
       //     url: "/dashboard/skin-test/create",
       //   },
-      // ],
+       ],
     },
     {
       title: "Order",

@@ -19,9 +19,10 @@ import Staff from "@/pages/Dashboard/User/Staff";
 import Home from "@/pages/Home";
 import Treatment from "@/pages/Treatment/treatment";
 import TreatmentDetail from "@/pages/Treatment/treatment-detail";
-import QuestionPage from "@/pages/Quiz/questionPage";
+import QuestionPage from "@/pages/Quiz/questionpage";
 import QuizPage from "@/pages/Quiz/quizpage";
-
+import ResultPage from "@/pages/Quiz/resultpage";
+import ManageResult from "@/pages/Dashboard/SkinTest/manage-result";
 import AllTherapist from "@/pages/Therapists/allTherapist";
 import { Suspense } from "react";
 import { Navigate, Outlet, useRoutes } from "react-router-dom";
@@ -64,6 +65,10 @@ export default function AppRouter() {
         {
           path: "/dashboard/skin-test",
           element: <SkinTest />,
+        },
+        {
+          path: "/dashboard/skin-test/manage",
+          element: <ManageResult />,
         },
         {
           path: "/dashboard/order-checkin",
@@ -119,6 +124,7 @@ export default function AppRouter() {
         },
         { path: "/quiz", element: <QuizPage /> },
         { path: "/quiz/:id/questions", element: <QuestionPage /> },
+        { path: "/quiz/:id/result", element: <ResultPage /> },
         { path: "/about-us", element: <AboutUs /> },
         { path: "/therapist", element: <AllTherapist /> },
         { path: "/question", element: <QuestionPage /> },
