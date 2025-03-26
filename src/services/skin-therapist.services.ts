@@ -5,13 +5,15 @@ class SkinTherapistService {
 
   async getSkinTherapists(
     pageNumber: number = 1,
-    pageSize: number = 10
+    pageSize: number = 10,
+    includeDeleted: boolean = true
   ): Promise<any> {
     try {
       const response = await api.get(`${this.baseUrl}`, {
         params: {
           pageNumber,
           pageSize,
+          includeDeleted,
         },
       });
       return response.data;
@@ -59,6 +61,23 @@ class SkinTherapistService {
       await api.delete(`${this.baseUrl}/${id}`);
     } catch (error) {
       console.error(`Error deleting skin therapist with id ${id}:`, error);
+      throw error;
+    }
+  }
+
+  async getFreeSkinTherapistSlots(
+    date: string,
+    timeSlotId: string,
+    pageNumber: number = 1,
+    pageSize: number = 10
+  ): Promise<any> {
+    try {
+      const response = await api.get(`${this.baseUrl}/free`, {
+        params: { date, timeSlotId, pageNumber, pageSize },
+      });
+      return response.data;
+    } catch (error) {
+      console.error("Error fetching free skin therapist slots:", error);
       throw error;
     }
   }

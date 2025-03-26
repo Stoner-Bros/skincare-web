@@ -51,10 +51,6 @@ export default function ServicesList() {
     fetchServices();
   }, []);
 
-  const handleServiceClick = (serviceId: number) => {
-    navigate(`/services/${serviceId}`);
-  };
-
   const handleTreatmentClick = (serviceId: number) => {
     navigate(`/treatment/${serviceId}`);
   };
