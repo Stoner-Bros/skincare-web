@@ -61,15 +61,24 @@ export default function Consultation() {
       const response = await consultationService.getConsultingForms(currentPage, pageSize);
       const sortedForms = response.data.items || [];
       
-      // Sắp xếp theo trạng thái
+      // Sắp xếp theo trạng thái và ID mới nhất lên đầu
       sortedForms.sort((a: ConsultingForm, b: ConsultingForm) => {
-        if (a.status === 'pending' && b.status !== 'pending') return -1; // a lên trước
-        if (a.status !== 'pending' && b.status === 'pending') return 1; // b lên trước
-        if (a.status === 'completed' && b.status !== 'completed') return 1; // a xuống sau
-        if (a.status !== 'completed' && b.status === 'completed') return -1; // b lên trước
-        if (a.status === 'cancelled' && b.status !== 'cancelled') return 1; // a xuống sau
-        if (a.status !== 'cancelled' && b.status === 'cancelled') return -1; // b lên trước
-        return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(); // Nếu cùng trạng thái, sắp xếp theo ngày tạo
+        // Ưu tiên trạng thái pending lên đầu tiên
+        if (a.status === 'pending' && b.status !== 'pending') return -1; 
+        if (a.status !== 'pending' && b.status === 'pending') return 1;
+        
+        // Nếu cùng trạng thái, sắp xếp theo ID giảm dần (mới nhất lên đầu)
+        if (a.status === b.status) {
+          return b.consultingFormId - a.consultingFormId;
+        }
+        
+        // Sắp xếp các trạng thái khác
+        if (a.status === 'completed' && b.status !== 'completed') return 1;
+        if (a.status !== 'completed' && b.status === 'completed') return -1;
+        if (a.status === 'cancelled' && b.status !== 'cancelled') return 1;
+        if (a.status !== 'cancelled' && b.status === 'cancelled') return -1;
+        
+        return 0;
       });
 
       setConsultingForms(sortedForms);
@@ -229,20 +238,6 @@ export default function Consultation() {
     <div className="p-4 space-y-6">
       <div className="flex justify-between items-center">
         <h1 className="text-2xl font-bold">Quản lý Form Tư vấn</h1>
-        <div className="flex gap-2">
-          <select
-            className="p-2 border rounded-md"
-            value={statusFilter}
-            onChange={(e) => setStatusFilter(e.target.value)}
-          >
-            <option value="">Tất cả trạng thái</option>
-            <option value="pending">Đang chờ</option>
-            <option value="processing">Đang xử lý</option>
-            <option value="completed">Hoàn thành</option>
-            <option value="cancelled">Đã hủy</option>
-          </select>
-          <Button onClick={fetchConsultingForms}>Làm mới</Button>
-        </div>
       </div>
 
       {loading && <div className="text-center">Đang tải...</div>}
