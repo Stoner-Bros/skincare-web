@@ -34,7 +34,7 @@ export default function HomeLayout({
           </Button>
         ) : (
           <div className="mb-2">
-            <LiveChat onClose={() => setShowLiveChat(false)} />
+            <LiveChat onClose={() => setShowLiveChat(false)} customerId={7}/>
           </div>
         )}
       </div>
