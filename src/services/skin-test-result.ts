@@ -23,12 +23,63 @@ class SkinTestResultService {
     }
   }
 
-  async getSkinTestResultById(id: number): Promise<any> {
+  // Lấy kết quả khuyến nghị dựa trên skinTestAnswerId
+  async getSkinTestResultById(answerId: number): Promise<any> {
     try {
-      const response = await api.get(`${this.baseUrl}/${id}`);
-      return response.data;
-    } catch (error) {
-      console.error(`Error fetching skin test result with id ${id}:`, error);
+      console.log(`Đang tìm kết quả khuyến nghị cho bài làm với AnswerID: ${answerId}`);
+      
+      // Đầu tiên lấy tất cả kết quả để tìm kết quả có SkinTestAnswerID trùng với AnswerID
+      const response = await api.get(this.baseUrl);
+      console.log(`Đã nhận ${response.data.length} kết quả từ API`);
+      
+      // Tìm kết quả có SkinTestAnswerID khớp với answerId
+      const matchingResult = response.data.find((result: any) => 
+        result.skinTestAnswerId === answerId
+      );
+      
+      if (matchingResult) {
+        console.log(`Đã tìm thấy kết quả khuyến nghị cho AnswerID ${answerId}:`, matchingResult);
+        
+        // Kiểm tra trường "result" có tồn tại không
+        if (matchingResult.result !== undefined) {
+          console.log("Loại dữ liệu của result:", typeof matchingResult.result);
+          console.log("Giá trị của result:", matchingResult.result);
+          
+          // Thử parse nếu là chuỗi JSON
+          if (typeof matchingResult.result === 'string') {
+            try {
+              const parsed = JSON.parse(matchingResult.result);
+              console.log("Dữ liệu sau khi parse:", parsed);
+            } catch (e) {
+              console.warn("Không thể parse chuỗi JSON:", e);
+            }
+          }
+        } else {
+          console.warn("Kết quả không chứa trường 'result'");
+        }
+        
+        return matchingResult;
+      } else {
+        console.warn(`Không tìm thấy kết quả khuyến nghị nào cho AnswerID ${answerId}`);
+        throw new Error(`Không tìm thấy kết quả khuyến nghị cho AnswerID ${answerId}`);
+      }
+    } catch (error: any) {
+      console.error(`Lỗi khi tìm kết quả khuyến nghị với AnswerID ${answerId}:`, error);
+      
+      // Ghi log chi tiết lỗi nếu có
+      if (error.response) {
+        console.error("Chi tiết lỗi từ API:", {
+          status: error.response.status,
+          statusText: error.response.statusText,
+          data: error.response.data,
+          headers: error.response.headers,
+        });
+      } else if (error.request) {
+        console.error("Không nhận được phản hồi từ máy chủ:", error.request);
+      } else {
+        console.error("Lỗi cấu hình request:", error.message);
+      }
+      
       throw error;
     }
   }

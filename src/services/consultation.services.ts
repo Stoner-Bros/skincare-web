@@ -16,12 +16,13 @@ class ConsultationService {
   private baseUrl = "/consulting-forms";
 
   // Lấy tất cả form tư vấn với phân trang
-  async getConsultingForms(pageNumber: number = 1, pageSize: number = 10): Promise<any> {
+  async getConsultingForms(pageNumber: number = 1, pageSize: number = 10, phone?: string): Promise<any> {
     try {
       const response = await api.get(this.baseUrl, {
         params: {
           pageNumber,
-          pageSize
+          pageSize,
+          phone
         }
       });
       return response.data;
