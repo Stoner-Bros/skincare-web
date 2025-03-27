@@ -91,7 +91,7 @@ export default function AboutUs() {
   return (
     <div className="w-full min-h-screen bg-white">
       <div className="flex items-center justify-center h-[520px] mt-6 mb-12 bg-gray-100">
-        <div className="w-[1120px] h-[435px] rounded-2xl relative border-2 border-rose-300 px-5 flex bg-white">
+        <div className="w-[1120px]  rounded-2xl relative border-2 border-rose-300 px-5 flex bg-white">
           <div className="w-1/2 flex items-center justify-center">
             <img
               src="aboutus.jpg"
@@ -100,12 +100,6 @@ export default function AboutUs() {
             />
           </div>
           <div className="w-1/2 flex flex-col justify-center px-6 overflow-y-scroll pr-2">
-            <img
-              src="LuxSpaLogo.svg"
-              alt="Cơ sở vật chất"
-              className="w-[200px] h-[100px] rounded-xl mx-auto mb-4 overflow-y-scroll small-scrollbar"
-            />
-
             <h2 className="text-red-500 text-2xl font-semibold">
               Thẩm Mỹ Viện <span className="text-pink-500">Luxspa.vn</span>
             </h2>
@@ -290,39 +284,6 @@ export default function AboutUs() {
           </div>
         </div>
       </div>
-
-      <section className="py-12 bg-gray-50">
-        <div className="container mx-auto">
-          <h2 className="text-3xl font-bold text-center text-pink-600 mb-8">
-            CÁC DỊCH VỤ HOT
-          </h2>
-          <div className="max-w-[1200px] mx-auto grid grid-cols-1 md:grid-cols-3 gap-6 justify-center">
-            {services.map((service, index) => (
-              <div
-                key={index}
-                className="h-[500px] w-[400px] bg-white rounded-lg shadow-md p-4 border border-pink-300"
-              >
-                <img
-                  src={service.image}
-                  alt={service.title}
-                  className="w-[376px] h-[250px] object-cover rounded-md"
-                />
-                <h3 className="text-lg font-bold text-pink-600 mt-4 text-center">
-                  {service.title}
-                </h3>
-                <p className="text-gray-600 mt-2 text-base">
-                  {service.description}
-                </p>
-                <div className="flex justify-center mt-4">
-                  <button className="bg-red-500 text-white py-2 px-4 rounded-full text-sm hover:bg-red-600">
-                    TÌM HIỂU THÊM
-                  </button>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
 
       <section className="py-12 bg-white">
         <div className="container mx-auto">

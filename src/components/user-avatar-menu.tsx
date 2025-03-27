@@ -39,7 +39,9 @@ export function UserAvatarMenu() {
         <Avatar className="h-10 w-10 cursor-pointer border-2 border-pink-200 hover:border-pink-500 transition-colors">
           {user.accountInfo?.avatar ? (
             <img
-              src={user.accountInfo.avatar}
+              src={`${import.meta.env.VITE_API_URL}/upload/${
+                user.accountInfo.avatar
+              }`}
               alt={user.accountInfo.fullName || user.email}
             />
           ) : (

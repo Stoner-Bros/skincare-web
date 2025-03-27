@@ -36,6 +36,7 @@ import BlogDetail from "@/pages/Blogs/blog-detail";
 import NewsPage from "@/pages/Blogs/news";
 import OrderWaiting from "@/pages/Dashboard/Bookings/Waiting";
 import CommentPage from "@/pages/Dashboard/Comment/coment-page";
+import RegisterSchedule from "@/pages/Dashboard/Schedule";
 // ----------------------------------------------------------------------
 
 export default function AppRouter() {
@@ -121,6 +122,10 @@ export default function AppRouter() {
         {
           path: "/dashboard/order-waiting",
           element: <OrderWaiting />,
+        },
+        {
+          path: "/dashboard/schedule",
+          element: <RegisterSchedule />,
         },
       ],
     },

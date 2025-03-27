@@ -177,6 +177,12 @@ const initialNavData = {
       isActive: false,
       // items: [],
     },
+    {
+      title: "Đăng ký lịch làm việc",
+      url: "/dashboard/schedule",
+      icon: CalendarArrowDown,
+      isActive: false,
+    },
   ],
 };
 
