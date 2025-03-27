@@ -1,23 +1,10 @@
+import CreateTherapistDialog from "@/components/skin-therapist/create-therapist-dialog";
+import DeleteTherapistDialog from "@/components/skin-therapist/delete-therapist-dialog";
+import EditTherapistDialog from "@/components/skin-therapist/edit-therapist-dialog";
+import ScheduleDialog from "@/components/skin-therapist/schedule-dialog";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Calendar } from "@/components/ui/calendar";
-import {
-  Dialog,
-  DialogContent,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
-import {
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from "@/components/ui/form";
-import { Input } from "@/components/ui/input";
 import {
   Pagination,
   PaginationContent,
@@ -27,12 +14,6 @@ import {
   PaginationPrevious,
 } from "@/components/ui/pagination";
 import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover";
-import { Switch } from "@/components/ui/switch";
-import {
   Table,
   TableBody,
   TableCell,
@@ -41,52 +22,9 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { toast } from "@/hooks/use-toast";
-import { cn } from "@/lib/utils";
-import skinTherapistSchedulesServices from "@/services/skin-therapist-schedules.services";
 import SkinTherapistService from "@/services/skin-therapist.services";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { format } from "date-fns";
-import { CalendarIcon, Loader2 } from "lucide-react";
+import { Loader2 } from "lucide-react";
 import { useEffect, useReducer, useRef } from "react";
-import { useForm } from "react-hook-form";
-import * as z from "zod";
-
-const createFormSchema = z.object({
-  email: z.string().email("Invalid email address"),
-  password: z
-    .string()
-    .min(8, "Password must be at least 8 characters")
-    .regex(
-      /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)/,
-      "Password must contain at least one uppercase letter, one lowercase letter, and one number"
-    ),
-  fullName: z.string().min(2, "Full name must be at least 2 characters"),
-  specialization: z
-    .string()
-    .min(2, "Specialization must be at least 2 characters"),
-  experience: z.string().min(2, "Experience must be at least 2 characters"),
-  introduction: z
-    .string()
-    .min(10, "Introduction must be at least 10 characters"),
-  bio: z.string().min(10, "Bio must be at least 10 characters"),
-  avatar: z.string().optional(),
-  phone: z.string().min(10, "Phone number must be at least 10 characters"),
-  address: z.string().min(5, "Address must be at least 5 characters"),
-  dob: z.string(),
-  otherInfo: z.string().optional(),
-  isAvailable: z.boolean(),
-});
-
-type CreateFormValues = z.infer<typeof createFormSchema>;
-
-// Add schedule form schema
-const scheduleFormSchema = z.object({
-  date: z.date({
-    required_error: "A date is required.",
-  }),
-});
-
-type ScheduleFormValues = z.infer<typeof scheduleFormSchema>;
 
 // Define action types
 type Action =
@@ -100,8 +38,7 @@ type Action =
   | { type: "SET_SCHEDULE_DIALOG"; payload: boolean }
   | { type: "SET_THERAPIST_TO_DELETE"; payload: number | null }
   | { type: "SET_THERAPIST_TO_EDIT"; payload: any | null }
-  | { type: "SET_SELECTED_DATE"; payload: Date | null }
-  | { type: "SET_SCHEDULE_DATA"; payload: any[] };
+  | { type: "SET_SELECTED_THERAPIST"; payload: any | null };
 
 // Define state type
 interface State {
@@ -116,8 +53,7 @@ interface State {
   isScheduleDialogOpen: boolean;
   therapistToDelete: number | null;
   therapistToEdit: any | null;
-  selectedDate: Date | null;
-  scheduleData: any[];
+  selectedTherapist: any | null;
 }
 
 // Initial state
@@ -133,8 +69,7 @@ const initialState: State = {
   isScheduleDialogOpen: false,
   therapistToDelete: null,
   therapistToEdit: null,
-  selectedDate: null,
-  scheduleData: [],
+  selectedTherapist: null,
 };
 
 // Reducer function
@@ -160,10 +95,8 @@ function reducer(state: State, action: Action): State {
       return { ...state, therapistToDelete: action.payload };
     case "SET_THERAPIST_TO_EDIT":
       return { ...state, therapistToEdit: action.payload };
-    case "SET_SELECTED_DATE":
-      return { ...state, selectedDate: action.payload };
-    case "SET_SCHEDULE_DATA":
-      return { ...state, scheduleData: action.payload };
+    case "SET_SELECTED_THERAPIST":
+      return { ...state, selectedTherapist: action.payload };
     default:
       return state;
   }
@@ -172,39 +105,6 @@ function reducer(state: State, action: Action): State {
 export default function SkinTherapists() {
   const [state, dispatch] = useReducer(reducer, initialState);
   const isMounted = useRef(false);
-
-  const createForm = useForm<CreateFormValues>({
-    resolver: zodResolver(createFormSchema),
-    defaultValues: {
-      email: "",
-      password: "",
-      fullName: "",
-      specialization: "",
-      experience: "",
-      introduction: "",
-      bio: "",
-    },
-  });
-
-  const editForm = useForm<CreateFormValues>({
-    resolver: zodResolver(createFormSchema),
-    defaultValues: {
-      email: "",
-      password: "",
-      fullName: "",
-      specialization: "",
-      experience: "",
-      introduction: "",
-      bio: "",
-    },
-  });
-
-  const scheduleForm = useForm<ScheduleFormValues>({
-    resolver: zodResolver(scheduleFormSchema),
-    defaultValues: {
-      date: new Date(),
-    },
-  });
 
   useEffect(() => {
     if (!isMounted.current) {
@@ -235,145 +135,23 @@ export default function SkinTherapists() {
     }
   };
 
-  const handleCreateTherapist = async (values: CreateFormValues) => {
-    try {
-      await SkinTherapistService.createSkinTherapist(values);
-      dispatch({ type: "SET_CREATE_DIALOG", payload: false });
-      createForm.reset();
-      fetchTherapists(state.currentPage);
-      toast({
-        title: "Success",
-        description: "Skin therapist created successfully",
-      });
-    } catch (error) {
-      console.error("Error creating skin therapist:", error);
-      toast({
-        title: "Error",
-        description: "Failed to create skin therapist",
-        variant: "destructive",
-      });
-    }
-  };
-
   const handleDeleteClick = (id: number) => {
     dispatch({ type: "SET_THERAPIST_TO_DELETE", payload: id });
     dispatch({ type: "SET_DELETE_DIALOG", payload: true });
   };
 
-  const handleConfirmDelete = async () => {
-    if (!state.therapistToDelete) return;
-    try {
-      await SkinTherapistService.deleteSkinTherapist(state.therapistToDelete);
-      dispatch({ type: "SET_DELETE_DIALOG", payload: false });
-      dispatch({ type: "SET_THERAPIST_TO_DELETE", payload: null });
-      fetchTherapists(state.currentPage);
-      toast({
-        title: "Success",
-        description: "Skin therapist deleted successfully",
-      });
-    } catch (error) {
-      console.error("Error deleting skin therapist:", error);
-      toast({
-        title: "Error",
-        description: "Failed to delete skin therapist",
-        variant: "destructive",
-      });
-    }
-  };
-
   const handleEditClick = (therapist: any) => {
     dispatch({ type: "SET_THERAPIST_TO_EDIT", payload: therapist });
-    editForm.reset({
-      email: therapist.account.email,
-      fullName: therapist.account.accountInfo.fullName,
-      specialization: therapist.specialization,
-      experience: therapist.experience,
-      introduction: therapist.introduction,
-      bio: therapist.bio,
-      avatar: therapist.account.accountInfo.avatar,
-      phone: therapist.account.accountInfo.phone,
-      address: therapist.account.accountInfo.address,
-      dob: therapist.account.accountInfo.dob,
-      otherInfo: therapist.account.accountInfo.otherInfo,
-      isAvailable: therapist.isAvailable,
-    });
     dispatch({ type: "SET_EDIT_DIALOG", payload: true });
   };
 
-  const handleEditTherapist = async (values: CreateFormValues) => {
-    if (!state.therapistToEdit) return;
-    try {
-      await SkinTherapistService.updateSkinTherapist(
-        state.therapistToEdit.accountId,
-        {
-          ...values,
-          accountInfo: {
-            ...state.therapistToEdit.account.accountInfo,
-            fullName: values.fullName,
-            phone: values.phone,
-            address: values.address,
-            dob: values.dob,
-            otherInfo: values.otherInfo,
-            avatar: values.avatar,
-          },
-        }
-      );
-      dispatch({ type: "SET_EDIT_DIALOG", payload: false });
-      dispatch({ type: "SET_THERAPIST_TO_EDIT", payload: null });
-      fetchTherapists(state.currentPage);
-      toast({
-        title: "Success",
-        description: "Skin therapist updated successfully",
-      });
-    } catch (error) {
-      console.error("Error updating skin therapist:", error);
-      toast({
-        title: "Error",
-        description: "Failed to update skin therapist",
-        variant: "destructive",
-      });
-    }
-  };
-
-  const handleScheduleClick = async (therapist: any) => {
+  const handleScheduleClick = (therapist: any) => {
+    dispatch({ type: "SET_SELECTED_THERAPIST", payload: therapist });
     dispatch({ type: "SET_SCHEDULE_DIALOG", payload: true });
-    try {
-      const response: any =
-        await skinTherapistSchedulesServices.getSkinTherapistSchedules(
-          therapist.accountId
-        );
-      dispatch({ type: "SET_SCHEDULE_DATA", payload: response.data.items });
-    } catch (error) {
-      console.error("Error fetching schedules:", error);
-      toast({
-        title: "Error",
-        description: "Failed to fetch schedules",
-        variant: "destructive",
-      });
-    }
-  };
-
-  const handleDateSelect = (date: Date | null) => {
-    dispatch({ type: "SET_SELECTED_DATE", payload: date });
-    if (date) {
-      scheduleForm.setValue("date", date);
-    }
   };
 
   const handlePageChange = (page: number) => {
     dispatch({ type: "SET_CURRENT_PAGE", payload: page });
-  };
-
-  // Add function to filter schedules by date
-  const getSchedulesByDate = (date: Date) => {
-    return state.scheduleData.filter((schedule: any) => {
-      const scheduleDate = new Date(schedule.workDate);
-      return (
-        scheduleDate.getDate() === date.getDate() &&
-        scheduleDate.getMonth() === date.getMonth() &&
-        scheduleDate.getFullYear() === date.getFullYear()
-      );
-    });
   };
 
   return (
@@ -486,7 +264,10 @@ export default function SkinTherapists() {
                           <Button
                             variant="outline"
                             size="sm"
-                            onClick={() => handleEditClick(therapist)}
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleEditClick(therapist);
+                            }}
                             disabled={therapist.account.isDeleted}
                           >
                             Edit
@@ -494,9 +275,10 @@ export default function SkinTherapists() {
                           <Button
                             variant="destructive"
                             size="sm"
-                            onClick={() =>
-                              handleDeleteClick(therapist.accountId)
-                            }
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleDeleteClick(therapist.accountId);
+                            }}
                             disabled={therapist.account.isDeleted}
                           >
                             Delete
@@ -547,494 +329,36 @@ export default function SkinTherapists() {
       </div>
 
       {/* Create Therapist Dialog */}
-      <Dialog
-        open={state.isCreateDialogOpen}
-        onOpenChange={(open) =>
-          dispatch({ type: "SET_CREATE_DIALOG", payload: open })
-        }
-      >
-        <DialogContent className="sm:max-w-[600px]">
-          <DialogHeader>
-            <DialogTitle>Add New Skin Therapist</DialogTitle>
-          </DialogHeader>
-          <Form {...createForm}>
-            <div className="space-y-6 max-h-[70vh] px-1 overflow-y-auto">
-              <div className="grid grid-cols-2 gap-4">
-                <FormField
-                  control={createForm.control}
-                  name="email"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Email</FormLabel>
-                      <FormControl>
-                        <Input placeholder="Enter email" {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <FormField
-                  control={createForm.control}
-                  name="password"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Password</FormLabel>
-                      <FormControl>
-                        <Input
-                          type="password"
-                          placeholder="Enter password"
-                          {...field}
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-              </div>
-              <div className="grid grid-cols-2 gap-4">
-                <FormField
-                  control={createForm.control}
-                  name="fullName"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Full Name</FormLabel>
-                      <FormControl>
-                        <Input placeholder="Enter full name" {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <FormField
-                  control={createForm.control}
-                  name="specialization"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Specialization</FormLabel>
-                      <FormControl>
-                        <Input placeholder="Enter specialization" {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-              </div>
-              <div className="grid grid-cols-2 gap-4">
-                <FormField
-                  control={createForm.control}
-                  name="experience"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Experience</FormLabel>
-                      <FormControl>
-                        <Input placeholder="Enter experience" {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <FormField
-                  control={createForm.control}
-                  name="introduction"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Introduction</FormLabel>
-                      <FormControl>
-                        <Input placeholder="Enter introduction" {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-              </div>
-              <FormField
-                control={createForm.control}
-                name="bio"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Bio</FormLabel>
-                    <FormControl>
-                      <Input placeholder="Enter bio" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-            </div>
-            <DialogFooter>
-              <Button
-                variant="outline"
-                onClick={() =>
-                  dispatch({ type: "SET_CREATE_DIALOG", payload: false })
-                }
-              >
-                Cancel
-              </Button>
-              <Button onClick={createForm.handleSubmit(handleCreateTherapist)}>
-                Create Therapist
-              </Button>
-            </DialogFooter>
-          </Form>
-        </DialogContent>
-      </Dialog>
+      <CreateTherapistDialog
+        isOpen={state.isCreateDialogOpen}
+        onClose={() => dispatch({ type: "SET_CREATE_DIALOG", payload: false })}
+        onSuccess={() => fetchTherapists(state.currentPage)}
+      />
 
       {/* Delete Confirmation Dialog */}
-      <Dialog
-        open={state.isDeleteDialogOpen}
-        onOpenChange={(open) =>
-          dispatch({ type: "SET_DELETE_DIALOG", payload: open })
-        }
-      >
-        <DialogContent className="sm:max-w-[400px]">
-          <DialogHeader>
-            <DialogTitle>Delete Skin Therapist</DialogTitle>
-          </DialogHeader>
-          <div className="py-6">
-            <p className="text-muted-foreground">
-              Are you sure you want to delete this skin therapist? This action
-              cannot be undone.
-            </p>
-          </div>
-          <DialogFooter className="gap-2">
-            <Button
-              variant="outline"
-              onClick={() =>
-                dispatch({ type: "SET_DELETE_DIALOG", payload: false })
-              }
-            >
-              Cancel
-            </Button>
-            <Button variant="destructive" onClick={handleConfirmDelete}>
-              Delete
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+      <DeleteTherapistDialog
+        isOpen={state.isDeleteDialogOpen}
+        onClose={() => dispatch({ type: "SET_DELETE_DIALOG", payload: false })}
+        onSuccess={() => fetchTherapists(state.currentPage)}
+        therapistId={state.therapistToDelete}
+      />
 
       {/* Edit Therapist Dialog */}
-      <Dialog
-        open={state.isEditDialogOpen}
-        onOpenChange={(open) =>
-          dispatch({ type: "SET_EDIT_DIALOG", payload: open })
-        }
-      >
-        <DialogContent className="max-w-screen-lg">
-          <DialogHeader>
-            <DialogTitle>Edit Skin Therapist</DialogTitle>
-          </DialogHeader>
-          <Form {...editForm}>
-            <div className="space-y-6 max-h-[70vh] overflow-y-auto px-1">
-              {/* Personal Information Section */}
-              <div className="space-y-4">
-                <h3 className="text-lg font-medium">Personal Information</h3>
-                <div className="grid grid-cols-2 gap-4">
-                  <FormField
-                    control={editForm.control}
-                    name="fullName"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Full Name</FormLabel>
-                        <FormControl>
-                          <Input placeholder="Enter full name" {...field} />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                  <FormField
-                    control={editForm.control}
-                    name="email"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Email</FormLabel>
-                        <FormControl>
-                          <Input placeholder="Enter email" {...field} />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                </div>
-                <div className="grid grid-cols-2 gap-4">
-                  <FormField
-                    control={editForm.control}
-                    name="phone"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Phone</FormLabel>
-                        <FormControl>
-                          <Input placeholder="Enter phone number" {...field} />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                  <FormField
-                    control={editForm.control}
-                    name="dob"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Date of Birth</FormLabel>
-                        <FormControl>
-                          <Input type="date" {...field} />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                </div>
-                <FormField
-                  control={editForm.control}
-                  name="address"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Address</FormLabel>
-                      <FormControl>
-                        <Input placeholder="Enter address" {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-              </div>
-
-              {/* Professional Information Section */}
-              <div className="space-y-4">
-                <h3 className="text-lg font-medium">
-                  Professional Information
-                </h3>
-                <div className="grid grid-cols-2 gap-4">
-                  <FormField
-                    control={editForm.control}
-                    name="specialization"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Specialization</FormLabel>
-                        <FormControl>
-                          <Input
-                            placeholder="Enter specialization"
-                            {...field}
-                          />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                  <FormField
-                    control={editForm.control}
-                    name="experience"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Experience</FormLabel>
-                        <FormControl>
-                          <Input placeholder="Enter experience" {...field} />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                </div>
-                <FormField
-                  control={editForm.control}
-                  name="introduction"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Introduction</FormLabel>
-                      <FormControl>
-                        <Input placeholder="Enter introduction" {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <FormField
-                  control={editForm.control}
-                  name="bio"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Bio</FormLabel>
-                      <FormControl>
-                        <Input placeholder="Enter bio" {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-              </div>
-
-              {/* Additional Information Section */}
-              <div className="space-y-4">
-                <h3 className="text-lg font-medium">Additional Information</h3>
-                <FormField
-                  control={editForm.control}
-                  name="otherInfo"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Other Information</FormLabel>
-                      <FormControl>
-                        <Input
-                          placeholder="Enter other information"
-                          {...field}
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <FormField
-                  control={editForm.control}
-                  name="isAvailable"
-                  render={({ field }) => (
-                    <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4">
-                      <div className="space-y-0.5">
-                        <FormLabel className="text-base">
-                          Availability
-                        </FormLabel>
-                      </div>
-                      <FormControl>
-                        <Switch
-                          checked={field.value}
-                          onCheckedChange={field.onChange}
-                        />
-                      </FormControl>
-                    </FormItem>
-                  )}
-                />
-              </div>
-            </div>
-
-            <DialogFooter>
-              <Button
-                variant="outline"
-                onClick={() =>
-                  dispatch({ type: "SET_EDIT_DIALOG", payload: false })
-                }
-              >
-                Cancel
-              </Button>
-              <Button onClick={editForm.handleSubmit(handleEditTherapist)}>
-                Update Therapist
-              </Button>
-            </DialogFooter>
-          </Form>
-        </DialogContent>
-      </Dialog>
+      <EditTherapistDialog
+        isOpen={state.isEditDialogOpen}
+        onClose={() => dispatch({ type: "SET_EDIT_DIALOG", payload: false })}
+        onSuccess={() => fetchTherapists(state.currentPage)}
+        therapist={state.therapistToEdit}
+      />
 
       {/* Schedule Dialog */}
-      <Dialog
-        open={state.isScheduleDialogOpen}
-        onOpenChange={(open) =>
-          dispatch({ type: "SET_SCHEDULE_DIALOG", payload: open })
+      <ScheduleDialog
+        isOpen={state.isScheduleDialogOpen}
+        onClose={() =>
+          dispatch({ type: "SET_SCHEDULE_DIALOG", payload: false })
         }
-      >
-        <DialogContent className="max-w-screen-md">
-          <DialogHeader>
-            <DialogTitle>Schedule Skin Therapist</DialogTitle>
-          </DialogHeader>
-          <div className="space-y-4">
-            <Form {...scheduleForm}>
-              <form className="space-y-4">
-                <FormField
-                  control={scheduleForm.control}
-                  name="date"
-                  render={({ field }) => (
-                    <FormItem className="flex flex-col">
-                      <FormLabel>Select Date</FormLabel>
-                      <Popover>
-                        <PopoverTrigger asChild>
-                          <FormControl>
-                            <Button
-                              variant={"outline"}
-                              className={cn(
-                                "w-[240px] pl-3 text-left font-normal",
-                                !field.value && "text-muted-foreground"
-                              )}
-                            >
-                              {field.value ? (
-                                format(field.value, "PPP")
-                              ) : (
-                                <span>Pick a date</span>
-                              )}
-                              <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
-                            </Button>
-                          </FormControl>
-                        </PopoverTrigger>
-                        <PopoverContent className="w-auto p-0" align="start">
-                          <Calendar
-                            mode="single"
-                            selected={field.value}
-                            onSelect={(date) => {
-                              if (date) {
-                                handleDateSelect(date);
-                              }
-                            }}
-                            initialFocus
-                          />
-                        </PopoverContent>
-                      </Popover>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-              </form>
-            </Form>
-
-            <div className="space-y-2">
-              <h3 className="text-sm font-medium">Time Slots</h3>
-              <div className="flex flex-wrap gap-2">
-                {state.selectedDate ? (
-                  getSchedulesByDate(state.selectedDate).length > 0 ? (
-                    getSchedulesByDate(state.selectedDate).map(
-                      (schedule: any) => (
-                        <div
-                          key={schedule.scheduleId}
-                          className={cn(
-                            "px-3 py-1 rounded-md text-xs font-medium",
-                            schedule.isAvailable
-                              ? "bg-green-100 text-green-700"
-                              : "bg-red-100 text-red-700"
-                          )}
-                        >
-                          {schedule.startTime.substring(0, 5)} -{" "}
-                          {schedule.endTime.substring(0, 5)}
-                        </div>
-                      )
-                    )
-                  ) : (
-                    <div className="text-sm text-muted-foreground">
-                      No schedules found for this date
-                    </div>
-                  )
-                ) : (
-                  <div className="text-sm text-muted-foreground">
-                    Please select a date to view schedules
-                  </div>
-                )}
-              </div>
-              <div className="flex items-center gap-2 mt-2 text-xs text-muted-foreground">
-                <div className="flex items-center gap-1">
-                  <div className="w-3 h-3 rounded-full bg-green-100" />
-                  <span>Available</span>
-                </div>
-                <div className="flex items-center gap-1">
-                  <div className="w-3 h-3 rounded-full bg-red-100" />
-                  <span>Unavailable</span>
-                </div>
-              </div>
-            </div>
-          </div>
-          <DialogFooter>
-            <Button
-              variant="outline"
-              onClick={() =>
-                dispatch({ type: "SET_SCHEDULE_DIALOG", payload: false })
-              }
-            >
-              Close
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+        therapist={state.selectedTherapist}
+      />
     </>
   );
 }

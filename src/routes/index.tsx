@@ -34,7 +34,7 @@ import SkinTest from "@/pages/Dashboard/SkinTest";
 import Consultation from "@/pages/Dashboard/Consultation";
 import BlogDetail from "@/pages/Blogs/blog-detail";
 import NewsPage from "@/pages/Blogs/news";
-
+import OrderWaiting from "@/pages/Dashboard/Order/Waiting";
 // ----------------------------------------------------------------------
 
 export default function AppRouter() {
@@ -112,6 +112,10 @@ export default function AppRouter() {
         {
           path: "/dashboard/skinsenger",
           element: <Skinsenger />,
+        },
+        {
+          path: "/dashboard/order-waiting",
+          element: <OrderWaiting />,
         },
       ],
     },

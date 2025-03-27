@@ -6,7 +6,8 @@ class SkinTherapistSchedulesService {
   async getSkinTherapistSchedules(
     therapistId: number,
     pageNumber: number = 1,
-    pageSize: number = 10
+    pageSize: number = 10,
+    date?: string
   ): Promise<any> {
     try {
       const response = await api.get(`${this.baseUrl}`, {
@@ -14,6 +15,7 @@ class SkinTherapistSchedulesService {
           therapistId,
           pageNumber,
           pageSize,
+          date,
         },
       });
       return response.data;

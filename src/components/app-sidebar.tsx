@@ -80,20 +80,20 @@ const initialNavData = {
       url: "#",
       icon: BookOpen,
       isActive: false,
-       items: [
-         {
+      items: [
+        {
           title: "Quản lý bài kiểm tra",
-           url: "/dashboard/skin-test",
-         },
-         {
-           title: "Quản lý kết quả",
-           url: "/dashboard/skin-test/manage",
-         },
-      //  {
-      //     title: "Thêm mới",
-      //     url: "/dashboard/skin-test/create",
-      //   },
-       ],
+          url: "/dashboard/skin-test",
+        },
+        {
+          title: "Quản lý kết quả",
+          url: "/dashboard/skin-test/manage",
+        },
+        //  {
+        //     title: "Thêm mới",
+        //     url: "/dashboard/skin-test/create",
+        //   },
+      ],
     },
     {
       title: "Tư vấn",
@@ -116,7 +116,7 @@ const initialNavData = {
       //  ],
     },
     {
-      title: "Order",
+      title: "Booking",
       url: "#",
       icon: CalendarArrowDown,
       isActive: false,
@@ -124,6 +124,10 @@ const initialNavData = {
         {
           title: "Checkin",
           url: "/dashboard/order-checkin",
+        },
+        {
+          title: "Chờ duyệt",
+          url: "/dashboard/order-waiting",
         },
         {
           title: "Toàn bộ",
