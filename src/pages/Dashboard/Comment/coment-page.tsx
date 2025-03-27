@@ -20,7 +20,6 @@ import {
   DialogTitle,
   DialogFooter,
 } from "@/components/ui/dialog";
-import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { 
   Select, 
@@ -29,7 +28,7 @@ import {
   SelectTrigger, 
   SelectValue 
 } from "@/components/ui/select";
-import { Search, Trash2, Edit, Eye, AlertCircle } from "lucide-react";
+import { Trash2, Edit, Eye, AlertCircle } from "lucide-react";
 
 interface Comment {
   commentId?: number;
