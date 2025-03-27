@@ -16,6 +16,13 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
 import blogService from "@/services/blog.services";
 
@@ -38,7 +45,6 @@ export default function AddBlog({ open, onClose }: AddBlogProps) {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [thumbnailFile, setThumbnailFile] = useState<File | null>(null);
   const [previewUrl, setPreviewUrl] = useState<string>("");
-  const [markdownPreview, setMarkdownPreview] = useState(false);
   const [mdContent, setMdContent] = useState<string>("");
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -196,7 +202,19 @@ export default function AddBlog({ open, onClose }: AddBlogProps) {
                   <FormItem>
                     <FormLabel>Tags</FormLabel>
                     <FormControl>
-                      <Input placeholder="Nhập tags (phân cách bằng dấu phẩy)" {...field} />
+                      <Select
+                        onValueChange={field.onChange}
+                        defaultValue={field.value}
+                      >
+                        <SelectTrigger>
+                          <SelectValue placeholder="Chọn tags" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="Tips Làm đẹp">Tips Làm đẹp</SelectItem>
+                          <SelectItem value="Tin Tức">Tin Tức</SelectItem>
+                          <SelectItem value="Trải nghiệm dịch vụ">Trải nghiệm dịch vụ</SelectItem>
+                        </SelectContent>
+                      </Select>
                     </FormControl>
                     <FormMessage />
                   </FormItem>

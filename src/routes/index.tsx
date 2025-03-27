@@ -32,6 +32,8 @@ import ServicesList from "@/pages/Services";
 import TreatmentsList from "@/pages/Dashboard/Treatment/treatments";
 import SkinTest from "@/pages/Dashboard/SkinTest";
 import Consultation from "@/pages/Dashboard/Consultation";
+import BlogDetail from "@/pages/Blogs/blog-detail";
+import NewsPage from "@/pages/Blogs/news";
 
 // ----------------------------------------------------------------------
 
@@ -137,11 +139,12 @@ export default function AppRouter() {
         { path: "/treatment/:id", element: <Treatment /> },
         { path: "/treatment/detail/:id", element: <TreatmentDetail /> },
         { path: "/services", element: <ServicesList /> },
-        // { path: "/services/:id", element: <ShowService /> },
         { path: "/content-policy", element: <ContentPolicy /> },
         { path: "/privacy-policy", element: <PrivacyPolicy /> },
         { path: "/booking-history", element: <BookingHistory /> },
         { path: "/profile", element: <MyProfile /> },
+        { path: "/blog/:id", element: <BlogDetail /> },
+        { path: "/news", element: <NewsPage /> },
       ],
     },
   ];

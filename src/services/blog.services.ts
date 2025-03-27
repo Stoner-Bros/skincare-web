@@ -19,7 +19,7 @@ class BlogService {
   }
 
   async getBlogById(id: number): Promise<any> {
-    if (!id) {
+    if (!id || isNaN(id) || id <= 0) {
       console.error("Invalid blog ID:", id);
       throw new Error("ID bài viết không hợp lệ");
     }
@@ -28,18 +28,27 @@ class BlogService {
       console.log("Fetching blog with ID:", id);
       console.log("Request URL:", `${this.baseUrl}/${id}`);
       
+      // Thử thêm trailing slash nếu API yêu cầu
       const response = await api.get(`${this.baseUrl}/${id}`);
       
       // Log response để dễ debug
       console.log("API Response:", response);
       
-      // Kiểm tra và xử lý dữ liệu thumbnailUrl
-      if (response && response.data && response.data.data) {
-        // Lưu ý: Cấu trúc có thể khác tùy thuộc vào API thực tế
-        console.log("Blog data structure:", response.data);
+      // Nếu response là null hoặc undefined
+      if (!response) {
+        throw new Error("Không nhận được phản hồi từ API");
       }
       
-      return response;
+      if (!response.data) {
+        console.error("API returned empty data for blog ID:", id);
+        throw new Error("API trả về dữ liệu trống");
+      }
+      
+      console.log("API response data:", response.data);
+      
+      // Trả về trực tiếp dữ liệu từ response
+      return response.data;
+      
     } catch (error: any) {
       console.error(`Error fetching blog with id ${id}:`, error);
       
@@ -48,8 +57,14 @@ class BlogService {
         console.error("Error response data:", error.response.data);
         console.error("Error response status:", error.response.status);
         console.error("Error response headers:", error.response.headers);
+        
+        if (error.response.status === 404) {
+          throw new Error("Không tìm thấy bài viết");
+        }
+        
       } else if (error.request) {
         console.error("Error request:", error.request);
+        throw new Error("Không nhận được phản hồi từ máy chủ");
       } else {
         console.error("Error message:", error.message);
       }

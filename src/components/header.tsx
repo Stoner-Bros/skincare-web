@@ -93,7 +93,7 @@ export default function Header() {
       onClick: handleSkinTestClick,
     },
     {
-      path: "/add-blog",
+      path: "/news",
       label: "BLOGS",
     },
   ];
