@@ -2,6 +2,7 @@ import {
   BookOpen,
   CalendarArrowDown,
   MessageCircleHeart,
+  MessageCircleQuestion,
   MessagesSquare,
   NotebookText,
   PanelsTopLeft,
@@ -61,22 +62,6 @@ const initialNavData = {
       ],
     },
     {
-      title: "Blog",
-      url: "#",
-      icon: BookOpen,
-      isActive: false,
-      items: [
-        {
-          title: "Đã duyệt",
-          url: "/dashboard/all-blog",
-        },
-        {
-          title: "Toàn bộ",
-          url: "/dashboard/waiting-blog",
-        },
-      ],
-    },
-    {
       title: "Skin Test",
       url: "#",
       icon: BookOpen,
@@ -97,27 +82,7 @@ const initialNavData = {
       ],
     },
     {
-      title: "Tư vấn",
-      url: "/dashboard/consultation",
-      icon: BookOpen,
-      isActive: false,
-      //  items: [
-      //    {
-      //     title: "Quản lý bài kiểm tra",
-      //      url: "/dashboard/skin-test",
-      //    },
-      //    {
-      //      title: "Quản lý kết quả",
-      //      url: "/dashboard/skin-test/manage",
-      //    },
-      // //  {
-      // //     title: "Thêm mới",
-      // //     url: "/dashboard/skin-test/create",
-      // //   },
-      //  ],
-    },
-    {
-      title: "Booking",
+      title: "Đặt lịch",
       url: "#",
       icon: CalendarArrowDown,
       isActive: false,
@@ -137,32 +102,25 @@ const initialNavData = {
       ],
     },
     {
-      title: "Feedback",
-      url: "/dashboard/feedback",
-      icon: MessageCircleHeart,
-      isActive: false,
-      // items: [],
-    },
-    {
-      title: "User",
+      title: "Người dùng",
       url: "#",
       icon: UserRound,
       isActive: false,
       items: [
         {
-          title: "Customer",
+          title: "Khách hàng",
           url: "/dashboard/user-customer",
         },
         {
-          title: "Skin Therapist",
+          title: "Chuyên gia da",
           url: "/dashboard/user-skintherapist",
         },
         {
-          title: "Staff",
+          title: "Nhân viên",
           url: "/dashboard/user-staff",
         },
         {
-          title: "Account",
+          title: "Tài khoản",
           url: "/dashboard/user-accounts",
         },
       ],
@@ -180,6 +138,35 @@ const initialNavData = {
         {
           title: "Skinsenger",
           url: "/dashboard/skinsenger",
+        },
+      ],
+    },
+    {
+      title: "Feedback",
+      url: "/dashboard/feedback",
+      icon: MessageCircleHeart,
+      isActive: false,
+      // items: [],
+    },
+    {
+      title: "Tư vấn",
+      url: "/dashboard/consultation",
+      icon: MessageCircleQuestion,
+      isActive: false,
+    },
+    {
+      title: "Blog",
+      url: "#",
+      icon: BookOpen,
+      isActive: false,
+      items: [
+        {
+          title: "Đã duyệt",
+          url: "/dashboard/all-blog",
+        },
+        {
+          title: "Toàn bộ",
+          url: "/dashboard/waiting-blog",
         },
       ],
     },

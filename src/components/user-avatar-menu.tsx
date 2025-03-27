@@ -9,7 +9,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { History, LogOut, User } from "lucide-react";
+import { LayoutDashboard, LogOut, User } from "lucide-react";
 
 export function UserAvatarMenu() {
   const { user, logout } = useAuth();
@@ -61,8 +61,8 @@ export function UserAvatarMenu() {
           onClick={() => navigate("/dashboard")}
           className="cursor-pointer font-semibold"
         >
-          <User className="mr-2 h-4 w-4" />
-          <span>Dashboard</span>
+          <LayoutDashboard className="mr-2 h-4 w-4" />
+          <span>Bảng điều khiển</span>
         </DropdownMenuItem>
         <DropdownMenuItem
           onClick={() => navigate("/profile")}
@@ -70,13 +70,6 @@ export function UserAvatarMenu() {
         >
           <User className="mr-2 h-4 w-4" />
           <span>Tài khoản của tôi</span>
-        </DropdownMenuItem>
-        <DropdownMenuItem
-          onClick={() => navigate("/booking-history")}
-          className="cursor-pointer font-semibold"
-        >
-          <History className="mr-2 h-4 w-4" />
-          <span>Lịch sử chăm sóc</span>
         </DropdownMenuItem>
         <DropdownMenuItem
           onClick={handleLogout}

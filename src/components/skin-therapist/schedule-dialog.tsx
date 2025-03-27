@@ -33,7 +33,7 @@ import * as z from "zod";
 
 const scheduleFormSchema = z.object({
   date: z.date({
-    required_error: "A date is required.",
+    required_error: "Ngày là bắt buộc.",
   }),
 });
 
@@ -158,8 +158,8 @@ export default function ScheduleDialog({
     } catch (error) {
       console.error("Error fetching time slots:", error);
       toast({
-        title: "Error",
-        description: "Failed to fetch time slots",
+        title: "Lỗi",
+        description: "Không thể tải khung giờ",
         variant: "destructive",
       });
     }
@@ -193,8 +193,8 @@ export default function ScheduleDialog({
     } catch (error) {
       console.error("Error fetching schedules:", error);
       toast({
-        title: "Error",
-        description: "Failed to fetch schedules",
+        title: "Lỗi",
+        description: "Không thể tải lịch trình",
         variant: "destructive",
       });
     } finally {
@@ -266,8 +266,8 @@ export default function ScheduleDialog({
   const handleAssign = async () => {
     if (!selectedDate || !therapist) {
       toast({
-        title: "Error",
-        description: "Please select a date",
+        title: "Lỗi",
+        description: "Vui lòng chọn ngày",
         variant: "destructive",
       });
       return;
@@ -277,8 +277,8 @@ export default function ScheduleDialog({
 
     if (assignableSlots.length === 0) {
       toast({
-        title: "Error",
-        description: "No time slots available for assignment",
+        title: "Lỗi",
+        description: "Không có khung giờ nào khả dụng để đăng ký",
         variant: "destructive",
       });
       return;
@@ -296,8 +296,8 @@ export default function ScheduleDialog({
         });
       if (response.status === 200) {
         toast({
-          title: "Success",
-          description: `${timeSlotIds.length} time slot(s) assigned successfully`,
+          title: "Thành công",
+          description: `${timeSlotIds.length} khung giờ đã được đăng ký thành công`,
         });
         if (selectedDate) {
           fetchTherapistSchedules(selectedDate);
@@ -307,8 +307,8 @@ export default function ScheduleDialog({
     } catch (error) {
       console.error("Error assigning time slot:", error);
       toast({
-        title: "Error",
-        description: "Failed to assign time slot",
+        title: "Lỗi",
+        description: "Không thể đăng ký khung giờ",
         variant: "destructive",
       });
     }
@@ -317,8 +317,8 @@ export default function ScheduleDialog({
   const handleUnassign = async () => {
     if (!selectedDate || !therapist) {
       toast({
-        title: "Error",
-        description: "Please select a date",
+        title: "Lỗi",
+        description: "Vui lòng chọn ngày",
         variant: "destructive",
       });
       return;
@@ -328,8 +328,8 @@ export default function ScheduleDialog({
 
     if (unassignableSlots.length === 0) {
       toast({
-        title: "Error",
-        description: "No time slots available for unassignment",
+        title: "Lỗi",
+        description: "Không có khung giờ nào khả dụng để huỷ đăng ký",
         variant: "destructive",
       });
       return;
@@ -347,8 +347,8 @@ export default function ScheduleDialog({
         });
       if (response.status === 200) {
         toast({
-          title: "Success",
-          description: `${timeSlotIds.length} time slot(s) unassigned successfully`,
+          title: "Thành công",
+          description: `${timeSlotIds.length} khung giờ đã được huỷ đăng ký thành công`,
         });
         if (selectedDate) {
           fetchTherapistSchedules(selectedDate);
@@ -358,8 +358,8 @@ export default function ScheduleDialog({
     } catch (error) {
       console.error("Error unassigning time slot:", error);
       toast({
-        title: "Error",
-        description: "Failed to unassign time slot",
+        title: "Lỗi",
+        description: "Không thể huỷ đăng ký khung giờ",
         variant: "destructive",
       });
     }
@@ -369,7 +369,7 @@ export default function ScheduleDialog({
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="max-w-screen-md">
         <DialogHeader>
-          <DialogTitle>Schedule Skin Therapist</DialogTitle>
+          <DialogTitle>Lịch Trình Chuyên Viên Da</DialogTitle>
         </DialogHeader>
         <div className="space-y-4">
           <Form {...scheduleForm}>
@@ -379,7 +379,7 @@ export default function ScheduleDialog({
                 name="date"
                 render={({ field }) => (
                   <FormItem className="flex flex-col">
-                    <FormLabel>Select Date</FormLabel>
+                    <FormLabel>Chọn Ngày</FormLabel>
                     <Popover>
                       <PopoverTrigger asChild>
                         <FormControl>
@@ -393,7 +393,7 @@ export default function ScheduleDialog({
                             {field.value ? (
                               format(field.value, "PPP")
                             ) : (
-                              <span>Pick a date</span>
+                              <span>Chọn một ngày</span>
                             )}
                             <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
                           </Button>
@@ -420,11 +420,11 @@ export default function ScheduleDialog({
           </Form>
 
           <div className="space-y-2">
-            <h3 className="text-sm font-medium">Time Slots</h3>
+            <h3 className="text-sm font-medium">Khung Giờ</h3>
             <div className="flex flex-wrap gap-2">
               {isLoading ? (
                 <div className="text-sm text-muted-foreground">
-                  Loading schedules...
+                  Đang tải lịch trình...
                 </div>
               ) : selectedDate ? (
                 allTimeSlots?.length > 0 ? (
@@ -451,41 +451,41 @@ export default function ScheduleDialog({
                   ))
                 ) : (
                   <div className="text-sm text-muted-foreground">
-                    No time slots found
+                    Không tìm thấy khung giờ nào
                   </div>
                 )
               ) : (
                 <div className="text-sm text-muted-foreground">
-                  Please select a date to view schedules
+                  Vui lòng chọn ngày để xem lịch trình
                 </div>
               )}
             </div>
             <div className="flex flex-wrap items-center gap-2 mt-2 text-xs text-muted-foreground">
               <div className="flex items-center gap-1">
                 <div className="w-3 h-3 rounded-full bg-green-100" />
-                <span>Registered</span>
+                <span>Đã đăng ký</span>
               </div>
               <div className="flex items-center gap-1">
                 <div className="w-3 h-3 rounded-full bg-green-500" />
-                <span>Selected (Registered)</span>
+                <span>Đã chọn (Đã đăng ký)</span>
               </div>
               <div className="flex items-center gap-1">
                 <div className="w-3 h-3 rounded-full bg-gray-100" />
-                <span>Not Registered</span>
+                <span>Chưa đăng ký</span>
               </div>
               <div className="flex items-center gap-1">
                 <div className="w-3 h-3 rounded-full bg-blue-500" />
-                <span>Selected (Not Registered)</span>
+                <span>Đã chọn (Chưa đăng ký)</span>
               </div>
               <div className="flex items-center gap-1">
                 <div className="w-3 h-3 rounded-full bg-red-100" />
-                <span>Busy</span>
+                <span>Đã bận</span>
               </div>
             </div>
             {selectedTimeSlots.length > 0 && (
               <div className="mt-2 text-sm">
                 <span className="font-medium">{selectedTimeSlots.length}</span>{" "}
-                time slot(s) selected
+                khung giờ đã được chọn
               </div>
             )}
           </div>
@@ -495,7 +495,7 @@ export default function ScheduleDialog({
             onClick={handleAssign}
             disabled={getAssignableTimeSlots().length === 0 || !selectedDate}
           >
-            Assign{" "}
+            Đăng ký{" "}
             {getAssignableTimeSlots().length > 0 &&
               `(${getAssignableTimeSlots().length})`}
           </Button>
@@ -503,12 +503,12 @@ export default function ScheduleDialog({
             onClick={handleUnassign}
             disabled={getUnassignableTimeSlots().length === 0 || !selectedDate}
           >
-            Unassign{" "}
+            Huỷ đăng ký{" "}
             {getUnassignableTimeSlots().length > 0 &&
               `(${getUnassignableTimeSlots().length})`}
           </Button>
           <Button variant="outline" onClick={onClose}>
-            Close
+            Đóng
           </Button>
         </DialogFooter>
       </DialogContent>

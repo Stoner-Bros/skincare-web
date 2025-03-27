@@ -127,8 +127,8 @@ export default function SkinTherapists() {
     } catch (error) {
       console.error("Error fetching skin therapists:", error);
       toast({
-        title: "Error",
-        description: "Failed to fetch skin therapists",
+        title: "Lỗi",
+        description: "Không thể tải danh sách chuyên viên da",
         variant: "destructive",
       });
       dispatch({ type: "SET_LOADING", payload: false });
@@ -161,10 +161,10 @@ export default function SkinTherapists() {
         <div className="flex justify-between items-center border-b pb-5">
           <div>
             <h1 className="text-2xl font-bold tracking-tight">
-              Skin Therapist Management
+              Quản Lý Chuyên Viên Da
             </h1>
             <p className="text-muted-foreground mt-1">
-              Manage skin therapists, their specializations and experience.
+              Quản lý chuyên viên da, chuyên môn và kinh nghiệm.
             </p>
           </div>
           <Button
@@ -172,7 +172,7 @@ export default function SkinTherapists() {
               dispatch({ type: "SET_CREATE_DIALOG", payload: true })
             }
           >
-            Add New Therapist
+            Thêm Chuyên Viên Mới
           </Button>
         </div>
 
@@ -186,18 +186,18 @@ export default function SkinTherapists() {
             <Table>
               <TableHeader>
                 <TableRow className="bg-muted/50">
-                  <TableHead className="w-[300px]">Therapist</TableHead>
-                  <TableHead>Contact</TableHead>
-                  <TableHead>Specialization</TableHead>
-                  <TableHead>Status</TableHead>
-                  <TableHead className="text-right">Actions</TableHead>
+                  <TableHead className="w-[300px]">Chuyên Viên</TableHead>
+                  <TableHead>Liên Hệ</TableHead>
+                  <TableHead>Chuyên Môn</TableHead>
+                  <TableHead>Trạng Thái</TableHead>
+                  <TableHead className="text-right">Thao Tác</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {state.therapists.length === 0 ? (
                   <TableRow>
                     <TableCell colSpan={5} className="text-center h-32">
-                      No skin therapists found
+                      Không tìm thấy chuyên viên da nào
                     </TableCell>
                   </TableRow>
                 ) : (
@@ -214,7 +214,7 @@ export default function SkinTherapists() {
                       <TableCell className="flex items-center gap-3">
                         <Avatar className="h-9 w-9">
                           <AvatarImage
-                            src={therapist.account.accountInfo.avatar}
+                            src={`https://skincare-api.azurewebsites.net/api/upload/${therapist.account.accountInfo.avatar}`}
                           />
                           <AvatarFallback className="bg-primary/10">
                             {therapist.account.accountInfo.fullName.substring(
@@ -256,7 +256,9 @@ export default function SkinTherapists() {
                           }
                           className="capitalize"
                         >
-                          {therapist.account.isDeleted ? "Inactive" : "Active"}
+                          {therapist.account.isDeleted
+                            ? "Không hoạt động"
+                            : "Đang hoạt động"}
                         </Badge>
                       </TableCell>
                       <TableCell className="text-right">
@@ -270,7 +272,7 @@ export default function SkinTherapists() {
                             }}
                             disabled={therapist.account.isDeleted}
                           >
-                            Edit
+                            Sửa
                           </Button>
                           <Button
                             variant="destructive"
@@ -281,7 +283,7 @@ export default function SkinTherapists() {
                             }}
                             disabled={therapist.account.isDeleted}
                           >
-                            Delete
+                            Xóa
                           </Button>
                         </div>
                       </TableCell>

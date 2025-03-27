@@ -64,9 +64,9 @@ const initialState: BookingDialogState = {
   selectedTimeSlots: [],
   skinTherapists: [],
   paymentMethods: [
-    { label: "ATM", value: "atm" },
-    { label: "Credit Card", value: "cc" },
-    { label: "Momo", value: "momo" },
+    { label: "Thẻ ATM", value: "atm" },
+    { label: "Thẻ tín dụng", value: "cc" },
+    { label: "Ví Momo", value: "momo" },
   ],
   bookingLoading: false,
 };
@@ -213,13 +213,13 @@ export default function BookingDialog({
         phone: "",
         fullName: "",
         notes: "",
-        paymentMethod: "cash",
+        paymentMethod: "momo",
       });
 
       // Đảm bảo phương thức thanh toán luôn được chọn
       setTimeout(() => {
         const value = bookingForm.getValues("paymentMethod");
-        if (!value) bookingForm.setValue("paymentMethod", "cash");
+        if (!value) bookingForm.setValue("paymentMethod", "momo");
       }, 0);
     }
   }, [open, bookingForm]);
@@ -534,7 +534,7 @@ export default function BookingDialog({
                       </div>
                     </>
                   ) : (
-                    <div className="text-sm text-muted-foreground bg-muted/50 p-2 rounded-md">
+                    <div className="text-xs text-muted-foreground bg-muted/50 p-2 rounded-md">
                       Vui lòng chọn ngày để xem khung giờ
                     </div>
                   )}
@@ -686,7 +686,7 @@ export default function BookingDialog({
                       <FormLabel>Phương thức thanh toán</FormLabel>
                       <Select
                         onValueChange={field.onChange}
-                        defaultValue={field.value || "cash"}
+                        defaultValue={field.value || "momo"}
                       >
                         <FormControl>
                           <SelectTrigger className="border border-input bg-background hover:bg-accent hover:text-accent-foreground">

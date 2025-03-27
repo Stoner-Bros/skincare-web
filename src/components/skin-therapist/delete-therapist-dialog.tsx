@@ -29,14 +29,14 @@ export default function DeleteTherapistDialog({
       onClose();
       onSuccess();
       toast({
-        title: "Success",
-        description: "Skin therapist deleted successfully",
+        title: "Thành công",
+        description: "Đã xóa chuyên viên da thành công",
       });
     } catch (error) {
       console.error("Error deleting skin therapist:", error);
       toast({
-        title: "Error",
-        description: "Failed to delete skin therapist",
+        title: "Lỗi",
+        description: "Không thể xóa chuyên viên da",
         variant: "destructive",
       });
     }
@@ -46,20 +46,20 @@ export default function DeleteTherapistDialog({
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="sm:max-w-[400px]">
         <DialogHeader>
-          <DialogTitle>Delete Skin Therapist</DialogTitle>
+          <DialogTitle>Xóa Chuyên Viên Da</DialogTitle>
         </DialogHeader>
         <div className="py-6">
           <p className="text-muted-foreground">
-            Are you sure you want to delete this skin therapist? This action
-            cannot be undone.
+            Bạn có chắc chắn muốn xóa chuyên viên da này? Hành động này không
+            thể hoàn tác.
           </p>
         </div>
         <DialogFooter className="gap-2">
           <Button variant="outline" onClick={onClose}>
-            Cancel
+            Hủy
           </Button>
           <Button variant="destructive" onClick={handleDelete}>
-            Delete
+            Xóa
           </Button>
         </DialogFooter>
       </DialogContent>

@@ -15,44 +15,24 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import { Card, CardContent } from "@/components/ui/card";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import SkinTherapistService from "@/services/skin-therapist.services";
 import { toast } from "@/hooks/use-toast";
 
+// Schema chỉ chứa các trường được yêu cầu
 const createFormSchema = z.object({
-  email: z.string().email("Invalid email address"),
-  password: z.string().min(8, "Password must be at least 8 characters"),
-  fullName: z.string().min(2, "Full name must be at least 2 characters"),
-  specialization: z
-    .string()
-    .min(2, "Specialization must be at least 2 characters"),
-  experience: z.string().min(2, "Experience must be at least 2 characters"),
-  introduction: z
-    .string()
-    .min(10, "Introduction must be at least 10 characters")
-    .optional()
-    .or(z.literal("")),
-  bio: z
-    .string()
-    .min(10, "Bio must be at least 10 characters")
-    .optional()
-    .or(z.literal("")),
-  avatar: z.string().optional().or(z.literal("")),
-  phone: z
-    .string()
-    .min(10, "Phone number must be at least 10 characters")
-    .optional()
-    .or(z.literal("")),
-  address: z
-    .string()
-    .min(5, "Address must be at least 5 characters")
-    .optional()
-    .or(z.literal("")),
-  dob: z.string().optional().or(z.literal("")),
-  otherInfo: z.string().optional().or(z.literal("")),
-  isAvailable: z.boolean().default(true),
+  email: z.string().email("Địa chỉ email không hợp lệ"),
+  password: z.string().min(8, "Mật khẩu phải có ít nhất 8 ký tự"),
+  fullName: z.string().min(2, "Họ tên phải có ít nhất 2 ký tự"),
+  specialization: z.string().min(2, "Chuyên môn phải có ít nhất 2 ký tự"),
+  experience: z.string().min(2, "Kinh nghiệm phải có ít nhất 2 ký tự"),
+  introduction: z.string().min(10, "Giới thiệu phải có ít nhất 10 ký tự"),
+  bio: z.string().min(10, "Tiểu sử phải có ít nhất 10 ký tự"),
 });
 
 export type CreateFormValues = z.infer<typeof createFormSchema>;
@@ -78,11 +58,6 @@ export default function CreateTherapistDialog({
       experience: "",
       introduction: "",
       bio: "",
-      phone: "",
-      address: "",
-      dob: "",
-      otherInfo: "",
-      isAvailable: true,
     },
   });
 
@@ -93,14 +68,14 @@ export default function CreateTherapistDialog({
       createForm.reset();
       onSuccess();
       toast({
-        title: "Success",
-        description: "Skin therapist created successfully",
+        title: "Thành công",
+        description: "Tạo chuyên viên da thành công",
       });
     } catch (error) {
       console.error("Error creating skin therapist:", error);
       toast({
-        title: "Error",
-        description: "Failed to create skin therapist",
+        title: "Lỗi",
+        description: "Không thể tạo chuyên viên da",
         variant: "destructive",
       });
     }
@@ -108,161 +83,157 @@ export default function CreateTherapistDialog({
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-[600px]">
+      <DialogContent className="sm:max-w-[700px]">
         <DialogHeader>
-          <DialogTitle>Add New Skin Therapist</DialogTitle>
+          <DialogTitle className="text-xl font-bold">
+            Thêm Chuyên Viên Da Mới
+          </DialogTitle>
         </DialogHeader>
         <Form {...createForm}>
-          <div className="space-y-6 max-h-[70vh] px-1 overflow-y-auto">
-            <div className="grid grid-cols-2 gap-4">
-              <FormField
-                control={createForm.control}
-                name="email"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Email *</FormLabel>
-                    <FormControl>
-                      <Input placeholder="Enter email" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={createForm.control}
-                name="password"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Password *</FormLabel>
-                    <FormControl>
-                      <Input
-                        type="password"
-                        placeholder="Enter password"
-                        {...field}
+          <div className="max-h-[75vh] px-1 overflow-y-auto">
+            <Tabs defaultValue="account" className="w-full">
+              <TabsList className="grid grid-cols-2">
+                <TabsTrigger value="account">Tài khoản</TabsTrigger>
+                <TabsTrigger value="professional">
+                  Thông tin chuyên môn
+                </TabsTrigger>
+              </TabsList>
+
+              {/* Tab Tài khoản */}
+              <TabsContent value="account" className="pt-4">
+                <Card>
+                  <CardContent className="pt-6 space-y-4">
+                    <FormField
+                      control={createForm.control}
+                      name="email"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Email *</FormLabel>
+                          <FormControl>
+                            <Input placeholder="Nhập email" {...field} />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+
+                    <FormField
+                      control={createForm.control}
+                      name="password"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Mật khẩu *</FormLabel>
+                          <FormControl>
+                            <Input
+                              type="password"
+                              placeholder="Nhập mật khẩu"
+                              {...field}
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+
+                    <FormField
+                      control={createForm.control}
+                      name="fullName"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Họ Tên *</FormLabel>
+                          <FormControl>
+                            <Input placeholder="Nhập họ tên" {...field} />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  </CardContent>
+                </Card>
+              </TabsContent>
+
+              {/* Tab Thông tin chuyên môn */}
+              <TabsContent value="professional" className="pt-4">
+                <Card>
+                  <CardContent className="pt-6 space-y-4">
+                    <div className="grid grid-cols-2 gap-4">
+                      <FormField
+                        control={createForm.control}
+                        name="specialization"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Chuyên Môn *</FormLabel>
+                            <FormControl>
+                              <Input placeholder="Nhập chuyên môn" {...field} />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
                       />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-            </div>
-            <div className="grid grid-cols-2 gap-4">
-              <FormField
-                control={createForm.control}
-                name="fullName"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Full Name *</FormLabel>
-                    <FormControl>
-                      <Input placeholder="Enter full name" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={createForm.control}
-                name="specialization"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Specialization *</FormLabel>
-                    <FormControl>
-                      <Input placeholder="Enter specialization" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-            </div>
-            <div className="grid grid-cols-2 gap-4">
-              <FormField
-                control={createForm.control}
-                name="experience"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Experience *</FormLabel>
-                    <FormControl>
-                      <Input placeholder="Enter experience" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={createForm.control}
-                name="introduction"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Introduction</FormLabel>
-                    <FormControl>
-                      <Input placeholder="Enter introduction" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-            </div>
-            <FormField
-              control={createForm.control}
-              name="bio"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Bio</FormLabel>
-                  <FormControl>
-                    <Input placeholder="Enter bio" {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <div className="grid grid-cols-2 gap-4">
-              <FormField
-                control={createForm.control}
-                name="phone"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Phone</FormLabel>
-                    <FormControl>
-                      <Input placeholder="Enter phone number" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={createForm.control}
-                name="address"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Address</FormLabel>
-                    <FormControl>
-                      <Input placeholder="Enter address" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-            </div>
-            <FormField
-              control={createForm.control}
-              name="dob"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Date of Birth</FormLabel>
-                  <FormControl>
-                    <Input type="date" {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
+                      <FormField
+                        control={createForm.control}
+                        name="experience"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Kinh Nghiệm *</FormLabel>
+                            <FormControl>
+                              <Input
+                                placeholder="Nhập kinh nghiệm"
+                                {...field}
+                              />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                    </div>
+
+                    <FormField
+                      control={createForm.control}
+                      name="introduction"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Giới Thiệu *</FormLabel>
+                          <FormControl>
+                            <Textarea
+                              placeholder="Nhập giới thiệu ngắn gọn về chuyên viên"
+                              className="resize-none min-h-24"
+                              {...field}
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+
+                    <FormField
+                      control={createForm.control}
+                      name="bio"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Tiểu Sử *</FormLabel>
+                          <FormControl>
+                            <Textarea
+                              placeholder="Nhập tiểu sử chi tiết của chuyên viên"
+                              className="resize-none min-h-32"
+                              {...field}
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  </CardContent>
+                </Card>
+              </TabsContent>
+            </Tabs>
           </div>
-          <DialogFooter>
+          <DialogFooter className="mt-6">
             <Button variant="outline" onClick={onClose}>
-              Cancel
+              Hủy
             </Button>
             <Button onClick={createForm.handleSubmit(handleCreateTherapist)}>
-              Create Therapist
+              Tạo Chuyên Viên
             </Button>
           </DialogFooter>
         </Form>
