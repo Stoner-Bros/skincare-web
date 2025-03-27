@@ -126,20 +126,10 @@ const initialNavData = {
       ],
     },
     {
-      title: "Hỗ trợ khách hàng",
-      url: "#",
+      title: "Skinsenger",
+      url: "/dashboard/skinsenger",
       icon: MessagesSquare,
       isActive: false,
-      items: [
-        {
-          title: "Quản lý đơn tư vấn",
-          url: "/dashboard/manage-consulting-order",
-        },
-        {
-          title: "Skinsenger",
-          url: "/dashboard/skinsenger",
-        },
-      ],
     },
     {
       title: "Feedback",

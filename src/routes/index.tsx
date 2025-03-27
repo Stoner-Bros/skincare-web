@@ -10,7 +10,6 @@ import Feedbacks from "@/pages/Dashboard/Feedbacks";
 import AllOrder from "@/pages/Dashboard/Bookings/AllBookings";
 import CheckInOrder from "@/pages/Dashboard/Bookings/CheckIn";
 import Overview from "@/pages/Dashboard/Overview";
-import ManageConsultingOrders from "@/pages/Dashboard/SupportCustomer/ManageConsultingOrders";
 import Skinsenger from "@/pages/Dashboard/SupportCustomer/Skinsenger";
 import Accounts from "@/pages/Dashboard/User/Accounts";
 import Customer from "@/pages/Dashboard/User/Customer";
@@ -110,10 +109,6 @@ export default function AppRouter() {
         {
           path: "/dashboard/user-accounts",
           element: <Accounts />,
-        },
-        {
-          path: "/dashboard/manage-consulting-order",
-          element: <ManageConsultingOrders />,
         },
         {
           path: "/dashboard/skinsenger",
