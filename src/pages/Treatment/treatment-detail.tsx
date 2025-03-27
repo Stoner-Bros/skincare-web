@@ -219,27 +219,6 @@ export default function TreatmentDetail() {
             </div>
           </div>
         </div>
-
-        {service && (
-          <div className="bg-white rounded-2xl shadow-lg p-8">
-            <h2 className="text-2xl font-bold mb-6 text-[#2F3B4B]">
-              Dịch vụ liên quan
-            </h2>
-            <div className="bg-pink-50 rounded-xl p-6">
-              <h3 className="text-xl font-semibold text-[#AF1F45] mb-3">
-                {service.serviceName}
-              </h3>
-              <p className="text-gray-600">{service.serviceDescription}</p>
-              <Button
-                variant="outline"
-                className="mt-4 border-[#AF1F45] text-[#AF1F45] hover:bg-[#AF1F45] hover:text-white"
-                onClick={() => navigate(`/services/${service.serviceId}`)}
-              >
-                Xem chi tiết dịch vụ
-              </Button>
-            </div>
-          </div>
-        )}
       </div>
     </div>
   );
