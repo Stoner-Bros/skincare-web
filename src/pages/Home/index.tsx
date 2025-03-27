@@ -1,6 +1,8 @@
 import { Button } from "@/components/ui/button";
+import { useToast } from "@/hooks/use-toast";
+import consultationService from "@/services/consultation.services";
 import serviceService from "@/services/service.services";
-import { useEffect, useState } from "react";
+import { useEffect, useReducer } from "react";
 import { Link } from "react-router-dom";
 import { Autoplay, Navigation, Pagination } from "swiper/modules";
 import { Swiper, SwiperSlide } from "swiper/react";
@@ -9,24 +11,83 @@ import AddBlog from "../Blogs/add-blog";
 import AddService from "../Services/add-service";
 import AddTherapist from "../Therapists/add-therapist";
 import AddTreatment from "../Treatment/add-treatment";
-import consultationService from "@/services/consultation.services";
-import { useToast } from "@/hooks/use-toast";
 
+// Define initial state
+interface HomeState {
+  index: number;
+  isAddServiceOpen: boolean;
+  isAddBlogOpen: boolean;
+  isAddTherapistOpen: boolean;
+  isAddTreatmentOpen: boolean;
+  featuredServices: any[];
+  isLoading: boolean;
+  fullName: string;
+  phone: string;
+  isSubmitting: boolean;
+  submitMessage: string;
+}
+
+const initialState: HomeState = {
+  index: 0,
+  isAddServiceOpen: false,
+  isAddBlogOpen: false,
+  isAddTherapistOpen: false,
+  isAddTreatmentOpen: false,
+  featuredServices: [],
+  isLoading: true,
+  fullName: "",
+  phone: "",
+  isSubmitting: false,
+  submitMessage: "",
+};
+
+// Define action types
+type HomeAction =
+  | { type: "SET_INDEX"; payload: number }
+  | { type: "TOGGLE_ADD_SERVICE"; payload: boolean }
+  | { type: "TOGGLE_ADD_BLOG"; payload: boolean }
+  | { type: "TOGGLE_ADD_THERAPIST"; payload: boolean }
+  | { type: "TOGGLE_ADD_TREATMENT"; payload: boolean }
+  | { type: "SET_FEATURED_SERVICES"; payload: any[] }
+  | { type: "SET_LOADING"; payload: boolean }
+  | { type: "SET_FULL_NAME"; payload: string }
+  | { type: "SET_PHONE"; payload: string }
+  | { type: "SET_SUBMITTING"; payload: boolean }
+  | { type: "SET_SUBMIT_MESSAGE"; payload: string };
+
+// Create reducer function
+function homeReducer(state: HomeState, action: HomeAction): HomeState {
+  switch (action.type) {
+    case "SET_INDEX":
+      return { ...state, index: action.payload };
+    case "TOGGLE_ADD_SERVICE":
+      return { ...state, isAddServiceOpen: action.payload };
+    case "TOGGLE_ADD_BLOG":
+      return { ...state, isAddBlogOpen: action.payload };
+    case "TOGGLE_ADD_THERAPIST":
+      return { ...state, isAddTherapistOpen: action.payload };
+    case "TOGGLE_ADD_TREATMENT":
+      return { ...state, isAddTreatmentOpen: action.payload };
+    case "SET_FEATURED_SERVICES":
+      return { ...state, featuredServices: action.payload };
+    case "SET_LOADING":
+      return { ...state, isLoading: action.payload };
+    case "SET_FULL_NAME":
+      return { ...state, fullName: action.payload };
+    case "SET_PHONE":
+      return { ...state, phone: action.payload };
+    case "SET_SUBMITTING":
+      return { ...state, isSubmitting: action.payload };
+    case "SET_SUBMIT_MESSAGE":
+      return { ...state, submitMessage: action.payload };
+    default:
+      return state;
+  }
+}
 
 export default function Home() {
-  const [index, setIndex] = useState(0);
-  const [isAddServiceOpen, setAddServiceOpen] = useState(false);
-  const [isAddBlogOpen, setAddBlogOpen] = useState(false);
-  const [isAddTherapistOpen, setAddTherapistOpen] = useState(false);
-  const [isAddTreatmentOpen, setAddTreatmentOpen] = useState(false);
-  const [featuredServices, setFeaturedServices] = useState<any[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
-  const [fullName, setFullName] = useState('');
-  const [phone, setPhone] = useState('');
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [submitMessage, setSubmitMessage] = useState('');
+  const [state, dispatch] = useReducer(homeReducer, initialState);
   const { toast } = useToast();
-  
 
   const bacSi = [
     {
@@ -115,40 +176,40 @@ export default function Home() {
   ];
 
   const handleAddServiceClick = () => {
-    setAddServiceOpen(true);
+    dispatch({ type: "TOGGLE_ADD_SERVICE", payload: true });
   };
 
   const handleCloseModal = () => {
-    setAddServiceOpen(false);
+    dispatch({ type: "TOGGLE_ADD_SERVICE", payload: false });
   };
 
   const handleAddBlogClick = () => {
-    setAddBlogOpen(true);
+    dispatch({ type: "TOGGLE_ADD_BLOG", payload: true });
   };
 
   const handleCloseModalBlog = () => {
-    setAddBlogOpen(false);
+    dispatch({ type: "TOGGLE_ADD_BLOG", payload: false });
   };
 
   const handleAddTherapistClick = () => {
-    setAddTherapistOpen(true);
+    dispatch({ type: "TOGGLE_ADD_THERAPIST", payload: true });
   };
 
   const handleCloseModalTherapist = () => {
-    setAddTherapistOpen(false);
+    dispatch({ type: "TOGGLE_ADD_THERAPIST", payload: false });
   };
   const handleAddTreatmentClick = () => {
-    setAddTreatmentOpen(true);
+    dispatch({ type: "TOGGLE_ADD_TREATMENT", payload: true });
   };
 
   const handleCloseModalTreatment = () => {
-    setAddTreatmentOpen(false);
+    dispatch({ type: "TOGGLE_ADD_TREATMENT", payload: false });
   };
   useEffect(() => {
     const fetchFeaturedServices = async () => {
-      setIsLoading(true);
+      dispatch({ type: "SET_LOADING", payload: true });
       try {
-        const serviceIds = [14, 12, 15, 16];
+        const serviceIds = [1, 2, 3, 4];
         const servicesPromises = serviceIds.map(async (id) => {
           try {
             const service = await serviceService.getServiceById(id);
@@ -173,17 +234,16 @@ export default function Home() {
           }
         });
 
-
         const results = await Promise.all(servicesPromises);
         console.log(results);
         const validServices = results.filter(
           (service) => service !== null
         ) as any[];
-        setFeaturedServices(validServices);
+        dispatch({ type: "SET_FEATURED_SERVICES", payload: validServices });
       } catch (error) {
         console.error("Lỗi khi lấy dịch vụ nổi bật:", error);
       } finally {
-        setIsLoading(false);
+        dispatch({ type: "SET_LOADING", payload: false });
       }
     };
 
@@ -236,12 +296,12 @@ export default function Home() {
             DỊCH VỤ NỔI BẬT
           </h2>
           <div className="grid grid-cols-3 gap-8">
-            {isLoading ? (
+            {state.isLoading ? (
               <div className="col-span-3 text-center py-8">
                 Đang tải dịch vụ...
               </div>
-            ) : featuredServices.length > 0 ? (
-              featuredServices.map((service) => (
+            ) : state.featuredServices.length > 0 ? (
+              state.featuredServices.map((service) => (
                 <div
                   key={service.serviceId}
                   className=" border rounded-lg p-4 border-red-500"
@@ -250,9 +310,9 @@ export default function Home() {
                     src={`https://skincare-api.azurewebsites.net/api/upload/${service.serviceThumbnailUrl}`}
                     alt={service.serviceName}
                     className="w-full h-64 object-cover rounded-t-lg"
-                  // onError={(e) => {
-                  //   (e.target as HTMLImageElement).src = "/mun.jpg";
-                  // }}
+                    // onError={(e) => {
+                    //   (e.target as HTMLImageElement).src = "/mun.jpg";
+                    // }}
                   />
                   <h3 className="text-xl font-semibold text-red-600 mt-4">
                     {service.serviceName}
@@ -397,7 +457,7 @@ export default function Home() {
         <div className="w-full grid grid-cols-12 gap-4">
           <div className="col-span-4 flex justify-end">
             <img
-              src={bacSi[index].image}
+              src={bacSi[state.index].image}
               alt="MD-CODE"
               className="aspect-[9/16] h-[600px] object-cover rounded-xl"
             />
@@ -408,10 +468,10 @@ export default function Home() {
             </div>
             <div className="w-80% h-[260px] mx-16 rounded-2xl relative border-2 border-red-500 px-8">
               <div className="absolute left-1/2 -translate-x-1/2 -translate-y-5 bg-white px-8 text-red-500 text-2xl font-semibold">
-                {bacSi[index].name}
+                {bacSi[state.index].name}
               </div>
               <div className="my-8 h-[200px] overflow-y-scroll pr-2">
-                {bacSi[index].description}
+                {bacSi[state.index].description}
               </div>
             </div>
             <div className="mt-8 px-16">
@@ -424,7 +484,10 @@ export default function Home() {
                 navigation
                 className="w-full h-[200px] grid grid-cols-5 gap-4 select-none"
                 onSlideChange={() => {
-                  setIndex((index + 1) % bacSi.length);
+                  dispatch({
+                    type: "SET_INDEX",
+                    payload: (state.index + 1) % bacSi.length,
+                  });
                 }}
                 // className="w-80%"
               >
@@ -718,82 +781,98 @@ export default function Home() {
             <p className="text-gray-600 mb-4 text-center">
               để được tư vấn miễn phí
             </p>
-            {submitMessage && (
-              <div className={`p-3 mb-4 rounded-lg text-center ${submitMessage.includes('thành công') ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}`}>
-                {submitMessage}
+            {state.submitMessage && (
+              <div
+                className={`p-3 mb-4 rounded-lg text-center ${
+                  state.submitMessage.includes("thành công")
+                    ? "bg-green-100 text-green-700"
+                    : "bg-red-100 text-red-700"
+                }`}
+              >
+                {state.submitMessage}
               </div>
             )}
-            <form className="space-y-4" onSubmit={async (e) => {
-              e.preventDefault();
-              if (!fullName || !phone) {
-                toast({
-                  variant: "destructive",
-                  title: "Lỗi",
-                  description: "Vui lòng nhập đầy đủ họ tên và số điện thoại",
-                });
-                return;
-              }
-              
-              setIsSubmitting(true);
-              try {
-                await consultationService.createConsultingForm({
-                  fullName,
-                  phone,
-                  email: 'customer@luxspa.vn',
-                  message: 'Yêu cầu tư vấn từ trang chủ'
-                });
-                // setSubmitMessage('Đăng ký tư vấn thành công! Chúng tôi sẽ liên hệ với bạn sớm.');
-                toast({
-                  title: "Thành công",
-                  description: "Chúng tôi đã nhận được thông tin của bạn. Chúng tôi sẽ liên hệ với bạn sớm.",
-                  variant: "default",
-                });
-                setFullName('');
-                setPhone('');
-              } catch (error) {
-                console.error('Lỗi khi gửi yêu cầu tư vấn:', error);
-                toast({
-                  title: "Lỗi",
-                  description: "Có lỗi xảy ra. Vui lòng thử lại sau.",
-                  variant: "default",
-                });
-              } finally {
-                setIsSubmitting(false);
-              }
-            }}>
+            <form
+              className="space-y-4"
+              onSubmit={async (e) => {
+                e.preventDefault();
+                if (!state.fullName || !state.phone) {
+                  toast({
+                    variant: "destructive",
+                    title: "Lỗi",
+                    description: "Vui lòng nhập đầy đủ họ tên và số điện thoại",
+                  });
+                  return;
+                }
+
+                dispatch({ type: "SET_SUBMITTING", payload: true });
+                try {
+                  await consultationService.createConsultingForm({
+                    fullName: state.fullName,
+                    phone: state.phone,
+                    email: "customer@luxspa.vn",
+                    message: "Yêu cầu tư vấn từ trang chủ",
+                  });
+                  toast({
+                    title: "Thành công",
+                    description:
+                      "Chúng tôi đã nhận được thông tin của bạn. Chúng tôi sẽ liên hệ với bạn sớm.",
+                    variant: "default",
+                  });
+                  dispatch({ type: "SET_FULL_NAME", payload: "" });
+                  dispatch({ type: "SET_PHONE", payload: "" });
+                } catch (error) {
+                  console.error("Lỗi khi gửi yêu cầu tư vấn:", error);
+                  toast({
+                    title: "Lỗi",
+                    description: "Có lỗi xảy ra. Vui lòng thử lại sau.",
+                    variant: "default",
+                  });
+                } finally {
+                  dispatch({ type: "SET_SUBMITTING", payload: false });
+                }
+              }}
+            >
               <input
                 type="text"
                 placeholder="Nhập họ và tên"
-                value={fullName}
-                onChange={(e) => setFullName(e.target.value)}
+                value={state.fullName}
+                onChange={(e) =>
+                  dispatch({ type: "SET_FULL_NAME", payload: e.target.value })
+                }
                 className="w-full p-3 border border-slate-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-500 border-l-4"
               />
               <input
                 type="text"
                 placeholder="Nhập số điện thoại"
-                value={phone}
-                onChange={(e) => setPhone(e.target.value)}
+                value={state.phone}
+                onChange={(e) =>
+                  dispatch({ type: "SET_PHONE", payload: e.target.value })
+                }
                 className="w-full p-3 border border-slate-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-500 border-l-4"
               />
-              <button 
+              <button
                 type="submit"
-                disabled={isSubmitting}
+                disabled={state.isSubmitting}
                 className="w-full bg-red-500 text-white py-3 rounded-lg text-lg font-semibold hover:bg-pink-600 disabled:bg-red-300 disabled:cursor-not-allowed"
               >
-                {isSubmitting ? 'ĐANG GỬI...' : 'NHẬN TƯ VẤN'}
+                {state.isSubmitting ? "ĐANG GỬI..." : "NHẬN TƯ VẤN"}
               </button>
             </form>
           </div>
         </div>
       </section>
 
-      <AddService open={isAddServiceOpen} onClose={handleCloseModal} />
-      <AddBlog open={isAddBlogOpen} onClose={handleCloseModalBlog} />
+      <AddService open={state.isAddServiceOpen} onClose={handleCloseModal} />
+      <AddBlog open={state.isAddBlogOpen} onClose={handleCloseModalBlog} />
       <AddTherapist
-        open={isAddTherapistOpen}
+        open={state.isAddTherapistOpen}
         onClose={handleCloseModalTherapist}
       />
-      <AddTreatment open={isAddTreatmentOpen} onClose={handleCloseModalTreatment} />
+      <AddTreatment
+        open={state.isAddTreatmentOpen}
+        onClose={handleCloseModalTreatment}
+      />
     </div>
   );
 }

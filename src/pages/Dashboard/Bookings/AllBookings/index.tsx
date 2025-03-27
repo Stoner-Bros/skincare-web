@@ -81,7 +81,7 @@ function reducer(state: State, action: Action): State {
 }
 
 export default function AllOrders() {
-  const { bookings, pageInfo, loading, error, fetchBookings } = useBooking();
+  const { bookings, pageInfo, error, fetchBookings } = useBooking();
   const { toast } = useToast();
   const [state, dispatch] = useReducer(reducer, initialState);
 
