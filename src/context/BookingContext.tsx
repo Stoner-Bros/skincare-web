@@ -98,7 +98,7 @@ export const BookingProvider: React.FC<BookingProviderProps> = ({
     totalPages: 0,
   });
 
-  const fetchBookings = useCallback(async (pageNumber = 1, pageSize = 10) => {
+  const fetchBookings = useCallback(async (pageNumber = 1, pageSize = 7) => {
     setLoading(true);
     try {
       const response = await BookingService.getBookings(pageNumber, pageSize);

@@ -97,13 +97,13 @@ export default function CheckInPage() {
 
       dispatch({ type: "UPDATE_BOOKING", payload: updatedBooking });
       toast({
-        title: "Success",
-        description: "Customer checked in successfully",
+        title: "Thành công",
+        description: "Đã check-in khách hàng thành công",
       });
     } catch (error) {
       toast({
-        title: "Error",
-        description: "Failed to check in customer",
+        title: "Lỗi",
+        description: "Không thể check-in khách hàng",
         variant: "destructive",
       });
     } finally {
@@ -128,13 +128,13 @@ export default function CheckInPage() {
 
       dispatch({ type: "UPDATE_BOOKING", payload: updatedBooking });
       toast({
-        title: "Success",
-        description: "Customer checked out successfully",
+        title: "Thành công",
+        description: "Đã check-out khách hàng thành công",
       });
     } catch (error) {
       toast({
-        title: "Error",
-        description: "Failed to check out customer",
+        title: "Lỗi",
+        description: "Không thể check-out khách hàng",
         variant: "destructive",
       });
     } finally {
@@ -143,7 +143,7 @@ export default function CheckInPage() {
   };
 
   const formatDateTime = (dateTimeStr: string | null) => {
-    if (!dateTimeStr) return "Not set";
+    if (!dateTimeStr) return "Chưa thiết lập";
     try {
       return format(new Date(dateTimeStr), "PPP p");
     } catch (error) {
@@ -161,19 +161,19 @@ export default function CheckInPage() {
 
   const getCheckInStatus = (booking: any) => {
     if (booking.checkinAt && booking.checkoutAt) {
-      return "Completed";
+      return "Hoàn thành";
     } else if (booking.checkinAt) {
-      return "Checked In";
+      return "Đã Check-in";
     } else {
-      return "Waiting";
+      return "Đang chờ";
     }
   };
 
   const getStatusBadgeColor = (status: string) => {
     switch (status) {
-      case "Completed":
+      case "Hoàn thành":
         return "bg-green-500";
-      case "Checked In":
+      case "Đã Check-in":
         return "bg-blue-500";
       default:
         return "bg-yellow-500";
@@ -191,31 +191,31 @@ export default function CheckInPage() {
   return (
     <div className="p-6">
       <div className="mb-6">
-        <h1 className="text-2xl font-semibold">Check-In Management</h1>
+        <h1 className="text-2xl font-semibold">Quản Lý Check-in</h1>
         <p className="text-muted-foreground">
-          Manage customer check-ins and check-outs for confirmed bookings
+          Quản lý check-in và check-out khách hàng cho các đặt lịch đã xác nhận
         </p>
       </div>
 
       <div className="bg-white rounded-md shadow">
         {state.confirmedBookings.length === 0 ? (
           <p className="text-center py-8">
-            No confirmed bookings available for check-in
+            Không có đặt lịch nào được xác nhận để check-in
           </p>
         ) : (
           <div className="overflow-x-auto">
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead>Booking ID</TableHead>
-                  <TableHead>Customer</TableHead>
-                  <TableHead>Treatment</TableHead>
-                  <TableHead>Skin Therapist</TableHead>
-                  <TableHead>Time Slot</TableHead>
-                  <TableHead>Check-In Status</TableHead>
-                  <TableHead>Check-In Time</TableHead>
-                  <TableHead>Check-Out Time</TableHead>
-                  <TableHead>Actions</TableHead>
+                  <TableHead>Mã Đặt Lịch</TableHead>
+                  <TableHead>Khách Hàng</TableHead>
+                  <TableHead>Liệu Trình</TableHead>
+                  <TableHead>Chuyên Viên Da</TableHead>
+                  <TableHead>Khung Giờ</TableHead>
+                  <TableHead>Trạng Thái Check-in</TableHead>
+                  <TableHead>Thời Gian Check-in</TableHead>
+                  <TableHead>Thời Gian Check-out</TableHead>
+                  <TableHead>Thao Tác</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -235,7 +235,7 @@ export default function CheckInPage() {
                       <TableCell>
                         {booking.skinTherapist
                           ? booking.skinTherapist.fullName
-                          : "Not assigned"}
+                          : "Chưa phân công"}
                       </TableCell>
                       <TableCell>
                         {booking.timeSlots.map((slot: any) => (
@@ -265,7 +265,7 @@ export default function CheckInPage() {
                             }
                             className="mr-2"
                           >
-                            Check In
+                            Check-in
                           </Button>
                         )}
 
@@ -280,7 +280,7 @@ export default function CheckInPage() {
                             }
                             variant="outline"
                           >
-                            Check Out
+                            Check-out
                           </Button>
                         )}
                       </TableCell>

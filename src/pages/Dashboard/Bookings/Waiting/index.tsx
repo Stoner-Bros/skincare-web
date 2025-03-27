@@ -173,8 +173,8 @@ export default function WaitingBookings() {
       });
     } catch (error) {
       toast({
-        title: "Error",
-        description: "Failed to fetch skin therapists",
+        title: "Lỗi",
+        description: "Không thể tải danh sách chuyên viên da",
         variant: "destructive",
       });
     }
@@ -212,8 +212,8 @@ export default function WaitingBookings() {
   const handleConfirmBooking = async (bookingId: number) => {
     if (!state.selectedTherapists[bookingId]) {
       toast({
-        title: "Error",
-        description: "Please select a skin therapist first",
+        title: "Lỗi",
+        description: "Vui lòng chọn chuyên viên da trước",
         variant: "destructive",
       });
       return;
@@ -229,13 +229,13 @@ export default function WaitingBookings() {
 
       dispatch({ type: "UPDATE_BOOKING", payload: bookingId });
       toast({
-        title: "Success",
-        description: "Booking confirmed successfully",
+        title: "Thành công",
+        description: "Xác nhận đặt lịch thành công",
       });
     } catch (error) {
       toast({
-        title: "Error",
-        description: "Failed to confirm booking",
+        title: "Lỗi",
+        description: "Không thể xác nhận đặt lịch",
         variant: "destructive",
       });
     } finally {
@@ -270,31 +270,31 @@ export default function WaitingBookings() {
   return (
     <div className="p-6">
       <div className="mb-6">
-        <h1 className="text-2xl font-semibold">Waiting Bookings</h1>
+        <h1 className="text-2xl font-semibold">Đặt Lịch Chờ Xác Nhận</h1>
         <p className="text-muted-foreground">
-          Assign skin therapists and confirm bookings
+          Phân công chuyên viên da và xác nhận đặt lịch
         </p>
       </div>
 
       <div className="bg-white rounded-md shadow">
         {state.paidBookings.length === 0 ? (
           <p className="text-center py-8">
-            No paid bookings waiting for confirmation
+            Không có đặt lịch nào đã thanh toán đang chờ xác nhận
           </p>
         ) : (
           <div className="overflow-x-auto">
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead>Booking ID</TableHead>
-                  <TableHead>Customer</TableHead>
-                  <TableHead>Treatment</TableHead>
-                  <TableHead>Service</TableHead>
-                  <TableHead>Booking Date</TableHead>
-                  <TableHead>Time Slot</TableHead>
-                  <TableHead>Price</TableHead>
-                  <TableHead>Assign Therapist</TableHead>
-                  <TableHead>Actions</TableHead>
+                  <TableHead>Mã Đặt Lịch</TableHead>
+                  <TableHead>Khách Hàng</TableHead>
+                  <TableHead>Liệu Trình</TableHead>
+                  <TableHead>Dịch Vụ</TableHead>
+                  <TableHead>Ngày Đặt</TableHead>
+                  <TableHead>Khung Giờ</TableHead>
+                  <TableHead>Giá</TableHead>
+                  <TableHead>Phân Công Chuyên Viên</TableHead>
+                  <TableHead>Thao Tác</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -337,14 +337,15 @@ export default function WaitingBookings() {
                         }
                       >
                         <SelectTrigger className="w-[180px]">
-                          <SelectValue placeholder="Select therapist" />
+                          <SelectValue placeholder="Chọn chuyên viên" />
                         </SelectTrigger>
                         <SelectContent>
                           {!state.therapistsMap[booking.bookingId] ||
                           state.therapistsMap[booking.bookingId].length ===
                             0 ? (
                             <div className="p-2 text-sm text-muted-foreground">
-                              Không có therapist nào khả dụng cho khung giờ này
+                              Không có chuyên viên nào khả dụng cho khung giờ
+                              này
                             </div>
                           ) : (
                             state.therapistsMap[booking.bookingId].map(
@@ -365,7 +366,7 @@ export default function WaitingBookings() {
                       <Button
                         onClick={() => handleConfirmBooking(booking.bookingId)}
                       >
-                        Confirm
+                        Xác Nhận
                       </Button>
                     </TableCell>
                   </TableRow>

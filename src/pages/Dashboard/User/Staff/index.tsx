@@ -45,27 +45,24 @@ import { useForm } from "react-hook-form";
 import * as z from "zod";
 
 const createFormSchema = z.object({
-  email: z.string().email("Invalid email address"),
-  password: z
-    .string()
-    .min(8, "Password must be at least 8 characters")
-    .regex(
-      /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)/,
-      "Password must contain at least one uppercase letter, one lowercase letter, and one number"
-    ),
-  fullName: z.string().min(2, "Full name must be at least 2 characters"),
-  startDate: z.string().min(1, "Start date is required"),
+  email: z.string().email("Địa chỉ email không hợp lệ"),
+  password: z.string().min(8, "Mật khẩu phải có ít nhất 8 ký tự"),
+  fullName: z.string().min(2, "Họ tên phải có ít nhất 2 ký tự"),
+  startDate: z.string().min(1, "Ngày bắt đầu là bắt buộc"),
 });
 
 const updateFormSchema = z.object({
-  fullName: z.string().min(2, "Full name must be at least 2 characters"),
+  fullName: z.string().min(2, "Họ tên phải có ít nhất 2 ký tự"),
   avatar: z.string().optional(),
-  phone: z.string().min(10, "Phone number must be at least 10 characters"),
-  address: z.string().min(5, "Address must be at least 5 characters"),
-  dob: z.string().min(1, "Date of birth is required"),
+  phone: z
+    .string()
+    .min(10, "Số điện thoại phải có ít nhất 10 ký tự")
+    .optional(),
+  address: z.string().min(5, "Địa chỉ phải có ít nhất 5 ký tự").optional(),
+  dob: z.string().optional(),
   otherInfo: z.string().optional(),
-  startDate: z.string().min(1, "Start date is required"),
-  isAvailable: z.boolean(),
+  startDate: z.string().min(1, "Ngày bắt đầu là bắt buộc"),
+  isAvailable: z.boolean().default(true),
 });
 
 type CreateFormValues = z.infer<typeof createFormSchema>;
@@ -111,8 +108,8 @@ export default function Staffs() {
   useEffect(() => {
     if (!isMounted.current) {
       isMounted.current = true;
-      fetchStaffs(currentPage);
     }
+    fetchStaffs(currentPage);
   }, [currentPage]);
 
   const fetchStaffs = async (page: number) => {
@@ -128,8 +125,8 @@ export default function Staffs() {
     } catch (error) {
       console.error("Error fetching staffs:", error);
       toast({
-        title: "Error",
-        description: "Failed to fetch staffs",
+        title: "Lỗi",
+        description: "Không thể tải danh sách nhân viên",
         variant: "destructive",
       });
       setLoading(false);
@@ -143,14 +140,14 @@ export default function Staffs() {
       createForm.reset();
       fetchStaffs(currentPage);
       toast({
-        title: "Success",
-        description: "Staff created successfully",
+        title: "Thành công",
+        description: "Tạo nhân viên thành công",
       });
     } catch (error) {
       console.error("Error creating staff:", error);
       toast({
-        title: "Error",
-        description: "Failed to create staff",
+        title: "Lỗi",
+        description: "Không thể tạo nhân viên",
         variant: "destructive",
       });
     }
@@ -164,14 +161,14 @@ export default function Staffs() {
       setSelectedStaff(null);
       fetchStaffs(currentPage);
       toast({
-        title: "Success",
-        description: "Staff updated successfully",
+        title: "Thành công",
+        description: "Cập nhật nhân viên thành công",
       });
     } catch (error) {
       console.error("Error updating staff:", error);
       toast({
-        title: "Error",
-        description: "Failed to update staff",
+        title: "Lỗi",
+        description: "Không thể cập nhật nhân viên",
         variant: "destructive",
       });
     }
@@ -190,14 +187,14 @@ export default function Staffs() {
       setStaffToDelete(null);
       fetchStaffs(currentPage);
       toast({
-        title: "Success",
-        description: "Staff deleted successfully",
+        title: "Thành công",
+        description: "Xóa nhân viên thành công",
       });
     } catch (error) {
       console.error("Error deleting staff:", error);
       toast({
-        title: "Error",
-        description: "Failed to delete staff",
+        title: "Lỗi",
+        description: "Không thể xóa nhân viên",
         variant: "destructive",
       });
     }
@@ -228,14 +225,14 @@ export default function Staffs() {
       <div className="flex justify-between items-center border-b pb-5">
         <div>
           <h1 className="text-2xl font-bold tracking-tight">
-            Staff Management
+            Quản Lý Nhân Viên
           </h1>
           <p className="text-muted-foreground mt-1">
-            Manage your staff members, their roles and permissions.
+            Quản lý nhân viên, vai trò và quyền hạn của họ.
           </p>
         </div>
         <Button onClick={() => setIsCreateDialogOpen(true)}>
-          Add New Staff
+          Thêm Nhân Viên Mới
         </Button>
       </div>
 
@@ -249,19 +246,19 @@ export default function Staffs() {
           <Table>
             <TableHeader>
               <TableRow className="bg-muted/50">
-                <TableHead className="w-[300px]">Staff</TableHead>
+                <TableHead className="w-[300px]">Nhân Viên</TableHead>
                 <TableHead>Email</TableHead>
-                <TableHead>Phone</TableHead>
-                <TableHead>Start Date</TableHead>
-                <TableHead>Status</TableHead>
-                <TableHead className="text-right">Actions</TableHead>
+                <TableHead>Điện Thoại</TableHead>
+                <TableHead>Ngày Bắt Đầu</TableHead>
+                <TableHead>Trạng Thái</TableHead>
+                <TableHead className="text-right">Thao Tác</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
               {staffs.length === 0 ? (
                 <TableRow>
                   <TableCell colSpan={6} className="text-center h-32">
-                    No staff members found
+                    Không tìm thấy nhân viên nào
                   </TableCell>
                 </TableRow>
               ) : (
@@ -291,18 +288,12 @@ export default function Staffs() {
                     <TableCell>
                       <div className="flex gap-2">
                         <Badge
-                          variant={
-                            staff.account.isDeleted ? "destructive" : "success"
-                          }
+                          variant={staff.isAvailable ? "success" : "secondary"}
                           className="capitalize"
                         >
-                          {staff.account.isDeleted ? "Inactive" : "Active"}
-                        </Badge>
-                        <Badge
-                          variant={staff.isAvailable ? "default" : "secondary"}
-                          className="capitalize"
-                        >
-                          {staff.isAvailable ? "Available" : "Busy"}
+                          {staff.isAvailable
+                            ? "Đang hoạt động"
+                            : "Không hoạt động"}
                         </Badge>
                       </div>
                     </TableCell>
@@ -313,14 +304,14 @@ export default function Staffs() {
                           size="sm"
                           onClick={() => handleUpdateClick(staff)}
                         >
-                          Edit
+                          Sửa
                         </Button>
                         <Button
                           variant="destructive"
                           size="sm"
                           onClick={() => handleDeleteClick(staff.accountId)}
                         >
-                          Delete
+                          Xóa
                         </Button>
                       </div>
                     </TableCell>
@@ -370,7 +361,7 @@ export default function Staffs() {
       <Dialog open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen}>
         <DialogContent className="sm:max-w-[500px]">
           <DialogHeader>
-            <DialogTitle>Add New Staff</DialogTitle>
+            <DialogTitle>Thêm Nhân Viên Mới</DialogTitle>
           </DialogHeader>
           <Form {...createForm}>
             <form
@@ -385,7 +376,7 @@ export default function Staffs() {
                     <FormItem>
                       <FormLabel>Email</FormLabel>
                       <FormControl>
-                        <Input placeholder="Enter email" {...field} />
+                        <Input placeholder="Nhập email" {...field} />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -396,11 +387,11 @@ export default function Staffs() {
                   name="password"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Password</FormLabel>
+                      <FormLabel>Mật khẩu</FormLabel>
                       <FormControl>
                         <Input
                           type="password"
-                          placeholder="Enter password"
+                          placeholder="Nhập mật khẩu"
                           {...field}
                         />
                       </FormControl>
@@ -415,9 +406,9 @@ export default function Staffs() {
                   name="fullName"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Full Name</FormLabel>
+                      <FormLabel>Họ tên</FormLabel>
                       <FormControl>
-                        <Input placeholder="Enter full name" {...field} />
+                        <Input placeholder="Nhập họ tên" {...field} />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -428,7 +419,7 @@ export default function Staffs() {
                   name="startDate"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Start Date</FormLabel>
+                      <FormLabel>Ngày bắt đầu</FormLabel>
                       <FormControl>
                         <Input type="date" {...field} />
                       </FormControl>
@@ -442,9 +433,9 @@ export default function Staffs() {
                   variant="outline"
                   onClick={() => setIsCreateDialogOpen(false)}
                 >
-                  Cancel
+                  Hủy
                 </Button>
-                <Button type="submit">Create Staff</Button>
+                <Button type="submit">Tạo Nhân Viên</Button>
               </DialogFooter>
             </form>
           </Form>
@@ -455,7 +446,7 @@ export default function Staffs() {
       <Dialog open={isUpdateDialogOpen} onOpenChange={setIsUpdateDialogOpen}>
         <DialogContent className="sm:max-w-[600px]">
           <DialogHeader>
-            <DialogTitle>Update Staff Information</DialogTitle>
+            <DialogTitle>Cập Nhật Thông Tin Nhân Viên</DialogTitle>
           </DialogHeader>
           <Form {...updateForm}>
             <form
@@ -468,9 +459,9 @@ export default function Staffs() {
                   name="fullName"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Full Name</FormLabel>
+                      <FormLabel>Họ tên</FormLabel>
                       <FormControl>
-                        <Input placeholder="Enter full name" {...field} />
+                        <Input placeholder="Nhập họ tên" {...field} />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -481,9 +472,9 @@ export default function Staffs() {
                   name="phone"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Phone</FormLabel>
+                      <FormLabel>Điện thoại</FormLabel>
                       <FormControl>
-                        <Input placeholder="Enter phone number" {...field} />
+                        <Input placeholder="Nhập số điện thoại" {...field} />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -496,7 +487,7 @@ export default function Staffs() {
                   name="dob"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Date of Birth</FormLabel>
+                      <FormLabel>Ngày sinh</FormLabel>
                       <FormControl>
                         <Input type="date" {...field} />
                       </FormControl>
@@ -509,7 +500,7 @@ export default function Staffs() {
                   name="startDate"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Start Date</FormLabel>
+                      <FormLabel>Ngày bắt đầu</FormLabel>
                       <FormControl>
                         <Input type="date" {...field} />
                       </FormControl>
@@ -523,9 +514,9 @@ export default function Staffs() {
                 name="address"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Address</FormLabel>
+                    <FormLabel>Địa chỉ</FormLabel>
                     <FormControl>
-                      <Input placeholder="Enter address" {...field} />
+                      <Input placeholder="Nhập địa chỉ" {...field} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -537,9 +528,12 @@ export default function Staffs() {
                   name="avatar"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Avatar URL</FormLabel>
+                      <FormLabel>URL hình đại diện</FormLabel>
                       <FormControl>
-                        <Input placeholder="Enter avatar URL" {...field} />
+                        <Input
+                          placeholder="Nhập URL hình đại diện"
+                          {...field}
+                        />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -550,9 +544,9 @@ export default function Staffs() {
                   name="otherInfo"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Other Info</FormLabel>
+                      <FormLabel>Thông tin khác</FormLabel>
                       <FormControl>
-                        <Input placeholder="Enter other info" {...field} />
+                        <Input placeholder="Nhập thông tin khác" {...field} />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -571,7 +565,7 @@ export default function Staffs() {
                       />
                     </FormControl>
                     <div className="space-y-1 leading-none">
-                      <FormLabel>Available for work</FormLabel>
+                      <FormLabel>Khả dụng để làm việc</FormLabel>
                     </div>
                   </FormItem>
                 )}
@@ -581,9 +575,9 @@ export default function Staffs() {
                   variant="outline"
                   onClick={() => setIsUpdateDialogOpen(false)}
                 >
-                  Cancel
+                  Hủy
                 </Button>
-                <Button type="submit">Update Staff</Button>
+                <Button type="submit">Cập Nhật Nhân Viên</Button>
               </DialogFooter>
             </form>
           </Form>
@@ -594,12 +588,12 @@ export default function Staffs() {
       <Dialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
         <DialogContent className="sm:max-w-[400px]">
           <DialogHeader>
-            <DialogTitle>Delete Staff</DialogTitle>
+            <DialogTitle>Xóa Nhân Viên</DialogTitle>
           </DialogHeader>
           <div className="py-6">
             <p className="text-muted-foreground">
-              Are you sure you want to delete this staff member? This action
-              cannot be undone.
+              Bạn có chắc chắn muốn xóa nhân viên này? Hành động này không thể
+              hoàn tác.
             </p>
           </div>
           <DialogFooter className="gap-2">
@@ -607,10 +601,10 @@ export default function Staffs() {
               variant="outline"
               onClick={() => setIsDeleteDialogOpen(false)}
             >
-              Cancel
+              Hủy
             </Button>
             <Button variant="destructive" onClick={handleConfirmDelete}>
-              Delete
+              Xóa
             </Button>
           </DialogFooter>
         </DialogContent>

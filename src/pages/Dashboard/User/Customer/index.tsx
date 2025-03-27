@@ -36,7 +36,7 @@ export default function Customers() {
   const [loading, setLoading] = useState(true);
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(0);
-  const [pageSize] = useState(10);
+  const [pageSize] = useState(5);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [customerToDelete, setCustomerToDelete] = useState<number | null>(null);
   const isMounted = useRef(false);
@@ -44,8 +44,8 @@ export default function Customers() {
   useEffect(() => {
     if (!isMounted.current) {
       isMounted.current = true;
-      fetchCustomers(currentPage);
     }
+    fetchCustomers(currentPage);
   }, [currentPage]);
 
   const fetchCustomers = async (page: number) => {
@@ -59,8 +59,8 @@ export default function Customers() {
     } catch (error) {
       console.error("Error fetching customers:", error);
       toast({
-        title: "Error",
-        description: "Failed to fetch customers",
+        title: "Lỗi",
+        description: "Không thể tải danh sách khách hàng",
         variant: "destructive",
       });
       setLoading(false);
@@ -80,14 +80,14 @@ export default function Customers() {
       setCustomerToDelete(null);
       fetchCustomers(currentPage);
       toast({
-        title: "Success",
-        description: "Customer deleted successfully",
+        title: "Thành công",
+        description: "Đã xóa khách hàng thành công",
       });
     } catch (error) {
       console.error("Error deleting customer:", error);
       toast({
-        title: "Error",
-        description: "Failed to delete customer",
+        title: "Lỗi",
+        description: "Không thể xóa khách hàng",
         variant: "destructive",
       });
     }
@@ -103,10 +103,10 @@ export default function Customers() {
       <div className="flex justify-between items-center border-b pb-5">
         <div>
           <h1 className="text-2xl font-bold tracking-tight">
-            Customer Management
+            Quản Lý Khách Hàng
           </h1>
           <p className="text-muted-foreground mt-1">
-            Manage customer accounts and their information.
+            Quản lý tài khoản khách hàng và thông tin của họ.
           </p>
         </div>
       </div>
@@ -121,19 +121,19 @@ export default function Customers() {
           <Table>
             <TableHeader>
               <TableRow className="bg-muted/50">
-                <TableHead className="w-[300px]">Customer</TableHead>
+                <TableHead className="w-[300px]">Khách Hàng</TableHead>
                 <TableHead>Email</TableHead>
-                <TableHead>Phone</TableHead>
-                <TableHead>Last Visit</TableHead>
-                <TableHead>Status</TableHead>
-                <TableHead className="text-right">Actions</TableHead>
+                <TableHead>Điện Thoại</TableHead>
+                <TableHead>Lần Ghé Gần Nhất</TableHead>
+                <TableHead>Trạng Thái</TableHead>
+                <TableHead className="text-right">Thao Tác</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
               {customers.length === 0 ? (
                 <TableRow>
                   <TableCell colSpan={6} className="text-center h-32">
-                    No customers found.
+                    Không tìm thấy khách hàng nào.
                   </TableCell>
                 </TableRow>
               ) : (
@@ -171,7 +171,9 @@ export default function Customers() {
                           customer.account.isDeleted ? "destructive" : "success"
                         }
                       >
-                        {customer.account.isDeleted ? "Inactive" : "Active"}
+                        {customer.account.isDeleted
+                          ? "Không hoạt động"
+                          : "Đang hoạt động"}
                       </Badge>
                     </TableCell>
                     <TableCell className="text-right">
@@ -180,7 +182,7 @@ export default function Customers() {
                         size="sm"
                         onClick={() => handleDeleteClick(customer.accountId)}
                       >
-                        Delete
+                        Xóa
                       </Button>
                     </TableCell>
                   </TableRow>
@@ -227,12 +229,12 @@ export default function Customers() {
       <Dialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Delete Customer</DialogTitle>
+            <DialogTitle>Xóa Khách Hàng</DialogTitle>
           </DialogHeader>
           <div className="py-4">
             <p>
-              Are you sure you want to delete this customer? This action cannot
-              be undone.
+              Bạn có chắc chắn muốn xóa khách hàng này? Hành động này không thể
+              hoàn tác.
             </p>
           </div>
           <DialogFooter>
@@ -240,10 +242,10 @@ export default function Customers() {
               variant="outline"
               onClick={() => setIsDeleteDialogOpen(false)}
             >
-              Cancel
+              Hủy
             </Button>
             <Button variant="destructive" onClick={handleConfirmDelete}>
-              Delete
+              Xóa
             </Button>
           </DialogFooter>
         </DialogContent>

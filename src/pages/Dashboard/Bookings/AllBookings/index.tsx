@@ -86,16 +86,19 @@ export default function AllOrders() {
   const [state, dispatch] = useReducer(reducer, initialState);
 
   const loadBookings = useCallback(
-    async (page: number = 1, pageSize: number = 10) => {
+    async (page: number = 1, pageSize: number = 7) => {
       try {
         dispatch({ type: "SET_LOADING", payload: true });
         dispatch({ type: "SET_ERROR", payload: null });
         await fetchBookings(page, pageSize);
       } catch (error) {
-        dispatch({ type: "SET_ERROR", payload: "Failed to fetch bookings" });
+        dispatch({
+          type: "SET_ERROR",
+          payload: "Không thể tải danh sách đặt lịch",
+        });
         toast({
-          title: "Error",
-          description: "Failed to fetch bookings",
+          title: "Lỗi",
+          description: "Không thể tải danh sách đặt lịch",
           variant: "destructive",
         });
       } finally {
@@ -145,34 +148,39 @@ export default function AllOrders() {
 
   const getStatusBadge = (status: string) => {
     let badgeClass = "";
+    let statusText = status;
 
     switch (status) {
       case "Pending":
         badgeClass = "bg-yellow-500";
+        statusText = "Đang chờ";
         break;
       case "Paid":
         badgeClass = "bg-blue-500";
+        statusText = "Đã thanh toán";
         break;
       case "Confirmed":
         badgeClass = "bg-green-500";
+        statusText = "Đã xác nhận";
         break;
       case "Cancelled":
         badgeClass = "bg-red-500";
+        statusText = "Đã hủy";
         break;
       default:
         badgeClass = "bg-gray-500";
     }
 
-    return <Badge className={badgeClass}>{status}</Badge>;
+    return <Badge className={badgeClass}>{statusText}</Badge>;
   };
 
   const getCheckInStatus = (booking: any) => {
     if (booking.checkinAt && booking.checkoutAt) {
-      return "Completed";
+      return "Đã hoàn thành";
     } else if (booking.checkinAt) {
-      return "Checked In";
+      return "Đã check-in";
     } else {
-      return "Not Checked In";
+      return "Chưa check-in";
     }
   };
 
@@ -187,13 +195,15 @@ export default function AllOrders() {
   return (
     <div className="p-6">
       <div className="mb-6">
-        <h1 className="text-2xl font-semibold">All Bookings</h1>
-        <p className="text-muted-foreground">View all bookings in the system</p>
+        <h1 className="text-2xl font-semibold">Tất Cả Đặt Lịch</h1>
+        <p className="text-muted-foreground">
+          Xem tất cả đặt lịch trong hệ thống
+        </p>
       </div>
 
       <div className="bg-white rounded-md shadow">
         {!state.bookings || state.bookings.length === 0 ? (
-          <p className="text-center py-8">No bookings found</p>
+          <p className="text-center py-8">Không tìm thấy đặt lịch nào</p>
         ) : (
           <>
             <div className="overflow-x-auto">
@@ -201,14 +211,14 @@ export default function AllOrders() {
                 <TableHeader>
                   <TableRow>
                     <TableHead>ID</TableHead>
-                    <TableHead>Customer</TableHead>
-                    <TableHead>Treatment</TableHead>
-                    <TableHead>Skin Therapist</TableHead>
-                    <TableHead>Booking Date</TableHead>
-                    <TableHead>Time Slot</TableHead>
-                    <TableHead>Price</TableHead>
-                    <TableHead>Status</TableHead>
-                    <TableHead>Check-In Status</TableHead>
+                    <TableHead>Khách Hàng</TableHead>
+                    <TableHead>Liệu Trình</TableHead>
+                    <TableHead>Chuyên Viên Da</TableHead>
+                    <TableHead>Ngày Đặt</TableHead>
+                    <TableHead>Khung Giờ</TableHead>
+                    <TableHead>Giá</TableHead>
+                    <TableHead>Trạng Thái</TableHead>
+                    <TableHead>Trạng Thái Check-in</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -226,7 +236,7 @@ export default function AllOrders() {
                       <TableCell>
                         {booking.skinTherapist
                           ? booking.skinTherapist.fullName
-                          : "Not assigned"}
+                          : "Chưa phân công"}
                       </TableCell>
                       <TableCell>{formatDateTime(booking.bookingAt)}</TableCell>
                       <TableCell>

@@ -161,12 +161,12 @@ const initialNavData = {
       isActive: false,
       items: [
         {
-          title: "Đã duyệt",
-          url: "/dashboard/all-blog",
+          title: "Đợi duyệt",
+          url: "/dashboard/waiting-blog",
         },
         {
-          title: "Toàn bộ",
-          url: "/dashboard/waiting-blog",
+          title: "Đã duyệt",
+          url: "/dashboard/all-blog",
         },
       ],
     },
