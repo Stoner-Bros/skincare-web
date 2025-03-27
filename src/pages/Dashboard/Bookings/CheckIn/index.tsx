@@ -13,16 +13,64 @@ import { useAuth } from "@/hooks/use-auth";
 import { useToast } from "@/hooks/use-toast";
 import { format } from "date-fns";
 import { Loader2 } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useEffect, useReducer } from "react";
+
+// Define action types
+type Action =
+  | { type: "SET_CONFIRMED_BOOKINGS"; payload: any[] }
+  | { type: "UPDATE_BOOKING"; payload: any }
+  | { type: "SET_LOADING"; payload: boolean };
+
+// Define state type
+interface State {
+  confirmedBookings: any[];
+  loading: boolean;
+}
+
+// Initial state
+const initialState: State = {
+  confirmedBookings: [],
+  loading: false,
+};
+
+// Reducer function
+function reducer(state: State, action: Action): State {
+  switch (action.type) {
+    case "SET_CONFIRMED_BOOKINGS":
+      return {
+        ...state,
+        confirmedBookings: action.payload,
+      };
+    case "UPDATE_BOOKING":
+      return {
+        ...state,
+        confirmedBookings: state.confirmedBookings.map((booking) =>
+          booking.bookingId === action.payload.bookingId
+            ? action.payload
+            : booking
+        ),
+      };
+    case "SET_LOADING":
+      return {
+        ...state,
+        loading: action.payload,
+      };
+    default:
+      return state;
+  }
+}
 
 export default function CheckInPage() {
   const { user } = useAuth();
   const { toast } = useToast();
-  const { bookings, loading, fetchBookings, updateBooking } = useBooking();
-  const [confirmedBookings, setConfirmedBookings] = useState<any[]>([]);
+  const { bookings, fetchBookings, updateBooking } = useBooking();
+  const [state, dispatch] = useReducer(reducer, initialState);
 
   useEffect(() => {
-    fetchBookings();
+    dispatch({ type: "SET_LOADING", payload: true });
+    fetchBookings().finally(() => {
+      dispatch({ type: "SET_LOADING", payload: false });
+    });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
@@ -32,57 +80,65 @@ export default function CheckInPage() {
       const filtered = bookings.filter(
         (booking: any) => booking.status === "Confirmed"
       );
-      setConfirmedBookings(filtered);
+      dispatch({ type: "SET_CONFIRMED_BOOKINGS", payload: filtered });
     }
   }, [bookings]);
 
-  const handleCheckIn = async (bookingId: number) => {
+  const handleCheckIn = async (bookingId: number, skinTherapistId: number) => {
     try {
+      dispatch({ type: "SET_LOADING", payload: true });
       const currentTime = new Date().toISOString();
-      await updateBooking(bookingId, {
+      const updatedBooking = await updateBooking(bookingId, {
         status: "Confirmed",
         staffId: user.accountId,
         checkinAt: currentTime,
+        skinTherapistId: skinTherapistId,
       });
 
+      dispatch({ type: "UPDATE_BOOKING", payload: updatedBooking });
       toast({
         title: "Success",
         description: "Customer checked in successfully",
       });
-
-      // Refresh the list
-      fetchBookings();
     } catch (error) {
       toast({
         title: "Error",
         description: "Failed to check in customer",
         variant: "destructive",
       });
+    } finally {
+      dispatch({ type: "SET_LOADING", payload: false });
     }
   };
 
-  const handleCheckOut = async (bookingId: number, checkinAt: string) => {
+  const handleCheckOut = async (
+    bookingId: number,
+    checkinAt: string,
+    skinTherapistId: number
+  ) => {
     try {
-      await updateBooking(bookingId, {
+      dispatch({ type: "SET_LOADING", payload: true });
+      const updatedBooking = await updateBooking(bookingId, {
         staffId: user.accountId,
         status: "Confirmed",
         checkinAt: checkinAt,
         checkoutAt: new Date().toISOString(),
+        skinTherapistId: skinTherapistId,
       });
 
+      dispatch({ type: "UPDATE_BOOKING", payload: updatedBooking });
       toast({
         title: "Success",
         description: "Customer checked out successfully",
       });
-
-      // Refresh the list
-      fetchBookings();
     } catch (error) {
       toast({
         title: "Error",
         description: "Failed to check out customer",
         variant: "destructive",
       });
+    } finally {
+      dispatch({ type: "SET_LOADING", payload: false });
     }
   };
 
@@ -124,7 +180,7 @@ export default function CheckInPage() {
     }
   };
 
-  if (loading) {
+  if (state.loading) {
     return (
       <div className="flex justify-center items-center h-screen">
         <Loader2 className="h-8 w-8 animate-spin" />
@@ -142,7 +198,7 @@ export default function CheckInPage() {
       </div>
 
       <div className="bg-white rounded-md shadow">
-        {confirmedBookings.length === 0 ? (
+        {state.confirmedBookings.length === 0 ? (
           <p className="text-center py-8">
             No confirmed bookings available for check-in
           </p>
@@ -163,7 +219,7 @@ export default function CheckInPage() {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {confirmedBookings.map((booking) => {
+                {state.confirmedBookings.map((booking) => {
                   const checkInStatus = getCheckInStatus(booking);
                   return (
                     <TableRow key={booking.bookingId}>
@@ -201,7 +257,12 @@ export default function CheckInPage() {
                       <TableCell>
                         {!booking.checkinAt && (
                           <Button
-                            onClick={() => handleCheckIn(booking.bookingId)}
+                            onClick={() =>
+                              handleCheckIn(
+                                booking.bookingId,
+                                booking.skinTherapist.accountId
+                              )
+                            }
                             className="mr-2"
                           >
                             Check In
@@ -213,7 +274,8 @@ export default function CheckInPage() {
                             onClick={() =>
                               handleCheckOut(
                                 booking.bookingId,
-                                booking.checkinAt
+                                booking.checkinAt,
+                                booking.skinTherapist.accountId
                               )
                             }
                             variant="outline"

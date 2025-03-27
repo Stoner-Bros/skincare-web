@@ -20,7 +20,7 @@ import { useToast } from "@/hooks/use-toast";
 import SkinTherapistService from "@/services/skin-therapist.services";
 import { format } from "date-fns";
 import { Loader2 } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useEffect, useReducer } from "react";
 
 interface TimeSlot {
   timeSlotId: number;
@@ -81,17 +81,82 @@ interface Therapist {
   account: Account;
 }
 
+// Define action types
+type Action =
+  | { type: "SET_PAID_BOOKINGS"; payload: Booking[] }
+  | {
+      type: "UPDATE_THERAPISTS_MAP";
+      payload: { bookingId: number; therapists: Therapist[] };
+    }
+  | {
+      type: "SET_SELECTED_THERAPIST";
+      payload: { bookingId: number; therapistId: number };
+    }
+  | { type: "SET_LOADING"; payload: boolean }
+  | { type: "UPDATE_BOOKING"; payload: number };
+
+// Define state type
+interface State {
+  paidBookings: Booking[];
+  therapistsMap: { [key: number]: Therapist[] };
+  selectedTherapists: { [key: number]: number };
+  loading: boolean;
+}
+
+// Initial state
+const initialState: State = {
+  paidBookings: [],
+  therapistsMap: {},
+  selectedTherapists: {},
+  loading: false,
+};
+
+// Reducer function
+function reducer(state: State, action: Action): State {
+  switch (action.type) {
+    case "SET_PAID_BOOKINGS":
+      return {
+        ...state,
+        paidBookings: action.payload,
+      };
+    case "UPDATE_THERAPISTS_MAP":
+      return {
+        ...state,
+        therapistsMap: {
+          ...state.therapistsMap,
+          [action.payload.bookingId]: action.payload.therapists,
+        },
+      };
+    case "SET_SELECTED_THERAPIST":
+      return {
+        ...state,
+        selectedTherapists: {
+          ...state.selectedTherapists,
+          [action.payload.bookingId]: action.payload.therapistId,
+        },
+      };
+    case "SET_LOADING":
+      return {
+        ...state,
+        loading: action.payload,
+      };
+    case "UPDATE_BOOKING":
+      return {
+        ...state,
+        paidBookings: state.paidBookings.filter(
+          (booking) => booking.bookingId !== action.payload
+        ),
+      };
+    default:
+      return state;
+  }
+}
+
 export default function WaitingBookings() {
   const { user } = useAuth();
   const { toast } = useToast();
-  const { bookings, loading, fetchBookings, updateBooking } = useBooking();
-  const [paidBookings, setPaidBookings] = useState<Booking[]>([]);
-  const [therapistsMap, setTherapistsMap] = useState<{
-    [key: number]: Therapist[];
-  }>({});
-  const [selectedTherapists, setSelectedTherapists] = useState<{
-    [key: number]: number;
-  }>({});
+  const { bookings, fetchBookings, updateBooking } = useBooking();
+  const [state, dispatch] = useReducer(reducer, initialState);
 
   const fetchTherapists = async (booking: Booking) => {
     try {
@@ -99,10 +164,13 @@ export default function WaitingBookings() {
         booking.slotDate,
         booking.timeSlots.map((slot) => slot.timeSlotId).join(",")
       );
-      setTherapistsMap((prev) => ({
-        ...prev,
-        [booking.bookingId]: response.data.items,
-      }));
+      dispatch({
+        type: "UPDATE_THERAPISTS_MAP",
+        payload: {
+          bookingId: booking.bookingId,
+          therapists: response.data.items,
+        },
+      });
     } catch (error) {
       toast({
         title: "Error",
@@ -113,7 +181,10 @@ export default function WaitingBookings() {
   };
 
   useEffect(() => {
-    fetchBookings();
+    dispatch({ type: "SET_LOADING", payload: true });
+    fetchBookings().finally(() => {
+      dispatch({ type: "SET_LOADING", payload: false });
+    });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
@@ -123,7 +194,7 @@ export default function WaitingBookings() {
       const filtered = bookings.filter(
         (booking) => booking.status === "Paid"
       ) as Booking[];
-      setPaidBookings(filtered);
+      dispatch({ type: "SET_PAID_BOOKINGS", payload: filtered });
       // Fetch therapists for all paid bookings
       filtered.forEach((booking) => {
         fetchTherapists(booking);
@@ -132,14 +203,14 @@ export default function WaitingBookings() {
   }, [bookings]);
 
   const handleSelectTherapist = (bookingId: number, therapistId: number) => {
-    setSelectedTherapists({
-      ...selectedTherapists,
-      [bookingId]: therapistId,
+    dispatch({
+      type: "SET_SELECTED_THERAPIST",
+      payload: { bookingId, therapistId },
     });
   };
 
   const handleConfirmBooking = async (bookingId: number) => {
-    if (!selectedTherapists[bookingId]) {
+    if (!state.selectedTherapists[bookingId]) {
       toast({
         title: "Error",
         description: "Please select a skin therapist first",
@@ -149,25 +220,26 @@ export default function WaitingBookings() {
     }
 
     try {
+      dispatch({ type: "SET_LOADING", payload: true });
       await updateBooking(bookingId, {
-        skinTherapistId: selectedTherapists[bookingId],
+        skinTherapistId: state.selectedTherapists[bookingId],
         staffId: user.accountId,
         status: "Confirmed",
       });
 
+      dispatch({ type: "UPDATE_BOOKING", payload: bookingId });
       toast({
         title: "Success",
         description: "Booking confirmed successfully",
       });
-
-      // Refresh the list
-      fetchBookings();
     } catch (error) {
       toast({
         title: "Error",
         description: "Failed to confirm booking",
         variant: "destructive",
       });
+    } finally {
+      dispatch({ type: "SET_LOADING", payload: false });
     }
   };
 
@@ -187,7 +259,7 @@ export default function WaitingBookings() {
     }
   };
 
-  if (loading || Object.keys(therapistsMap).length === 0) {
+  if (state.loading || Object.keys(state.therapistsMap).length === 0) {
     return (
       <div className="flex justify-center items-center h-screen">
         <Loader2 className="h-8 w-8 animate-spin" />
@@ -205,7 +277,7 @@ export default function WaitingBookings() {
       </div>
 
       <div className="bg-white rounded-md shadow">
-        {paidBookings.length === 0 ? (
+        {state.paidBookings.length === 0 ? (
           <p className="text-center py-8">
             No paid bookings waiting for confirmation
           </p>
@@ -226,7 +298,7 @@ export default function WaitingBookings() {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {paidBookings.map((booking) => (
+                {state.paidBookings.map((booking) => (
                   <TableRow key={booking.bookingId}>
                     <TableCell>{booking.bookingId}</TableCell>
                     <TableCell>
@@ -254,6 +326,9 @@ export default function WaitingBookings() {
                     </TableCell>
                     <TableCell>
                       <Select
+                        value={state.selectedTherapists[
+                          booking.bookingId
+                        ]?.toString()}
                         onValueChange={(value) =>
                           handleSelectTherapist(
                             booking.bookingId,
@@ -261,17 +336,18 @@ export default function WaitingBookings() {
                           )
                         }
                       >
-                        <SelectTrigger className="w-full">
+                        <SelectTrigger className="w-[180px]">
                           <SelectValue placeholder="Select therapist" />
                         </SelectTrigger>
                         <SelectContent>
-                          {!therapistsMap[booking.bookingId] ||
-                          therapistsMap[booking.bookingId].length === 0 ? (
+                          {!state.therapistsMap[booking.bookingId] ||
+                          state.therapistsMap[booking.bookingId].length ===
+                            0 ? (
                             <div className="p-2 text-sm text-muted-foreground">
                               Không có therapist nào khả dụng cho khung giờ này
                             </div>
                           ) : (
-                            therapistsMap[booking.bookingId].map(
+                            state.therapistsMap[booking.bookingId].map(
                               (therapist) => (
                                 <SelectItem
                                   key={therapist.accountId}
@@ -288,7 +364,6 @@ export default function WaitingBookings() {
                     <TableCell>
                       <Button
                         onClick={() => handleConfirmBooking(booking.bookingId)}
-                        disabled={!selectedTherapists[booking.bookingId]}
                       >
                         Confirm
                       </Button>

@@ -7,8 +7,8 @@ import PrivacyPolicy from "@/pages/AboutUs/PrivacyPolicy";
 import WaitingBlog from "@/pages/Dashboard/Blog/WaitingBlog";
 import AllBlog from "@/pages/Dashboard/Blog/AllBlog";
 import Feedbacks from "@/pages/Dashboard/Feedbacks";
-import AllOrder from "@/pages/Dashboard/Order/AllOrder";
-import CheckInOrder from "@/pages/Dashboard/Order/CheckIn";
+import AllOrder from "@/pages/Dashboard/Bookings/AllBookings";
+import CheckInOrder from "@/pages/Dashboard/Bookings/CheckIn";
 import Overview from "@/pages/Dashboard/Overview";
 import ManageConsultingOrders from "@/pages/Dashboard/SupportCustomer/ManageConsultingOrders";
 import Skinsenger from "@/pages/Dashboard/SupportCustomer/Skinsenger";
@@ -34,7 +34,7 @@ import SkinTest from "@/pages/Dashboard/SkinTest";
 import Consultation from "@/pages/Dashboard/Consultation";
 import BlogDetail from "@/pages/Blogs/blog-detail";
 import NewsPage from "@/pages/Blogs/news";
-import OrderWaiting from "@/pages/Dashboard/Order/Waiting";
+import OrderWaiting from "@/pages/Dashboard/Bookings/Waiting";
 // ----------------------------------------------------------------------
 
 export default function AppRouter() {

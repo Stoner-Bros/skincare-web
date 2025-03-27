@@ -19,39 +19,112 @@ import { useBooking } from "@/context/BookingContext";
 import { useToast } from "@/hooks/use-toast";
 import { format } from "date-fns";
 import { Loader2 } from "lucide-react";
-import { useCallback, useEffect } from "react";
+import { useCallback, useEffect, useReducer } from "react";
+
+// Define action types
+type Action =
+  | { type: "SET_BOOKINGS"; payload: any[] }
+  | { type: "SET_PAGE_INFO"; payload: any }
+  | { type: "SET_LOADING"; payload: boolean }
+  | { type: "SET_ERROR"; payload: string | null };
+
+// Define state type
+interface State {
+  bookings: any[];
+  pageInfo: {
+    pageNumber: number;
+    pageSize: number;
+    totalPages: number;
+  };
+  loading: boolean;
+  error: string | null;
+}
+
+// Initial state
+const initialState: State = {
+  bookings: [],
+  pageInfo: {
+    pageNumber: 1,
+    pageSize: 10,
+    totalPages: 1,
+  },
+  loading: false,
+  error: null,
+};
+
+// Reducer function
+function reducer(state: State, action: Action): State {
+  switch (action.type) {
+    case "SET_BOOKINGS":
+      return {
+        ...state,
+        bookings: action.payload,
+      };
+    case "SET_PAGE_INFO":
+      return {
+        ...state,
+        pageInfo: action.payload,
+      };
+    case "SET_LOADING":
+      return {
+        ...state,
+        loading: action.payload,
+      };
+    case "SET_ERROR":
+      return {
+        ...state,
+        error: action.payload,
+      };
+    default:
+      return state;
+  }
+}
 
 export default function AllOrders() {
-  const { bookings, loading, pageInfo, fetchBookings } = useBooking();
+  const { bookings, pageInfo, loading, error, fetchBookings } = useBooking();
   const { toast } = useToast();
+  const [state, dispatch] = useReducer(reducer, initialState);
 
-  const loadBookings = useCallback(() => {
-    try {
-      fetchBookings(1, 10);
-    } catch (error) {
-      toast({
-        title: "Error",
-        description: "Failed to fetch bookings",
-        variant: "destructive",
-      });
-    }
-  }, [fetchBookings, toast]);
+  const loadBookings = useCallback(
+    async (page: number = 1, pageSize: number = 10) => {
+      try {
+        dispatch({ type: "SET_LOADING", payload: true });
+        dispatch({ type: "SET_ERROR", payload: null });
+        await fetchBookings(page, pageSize);
+      } catch (error) {
+        dispatch({ type: "SET_ERROR", payload: "Failed to fetch bookings" });
+        toast({
+          title: "Error",
+          description: "Failed to fetch bookings",
+          variant: "destructive",
+        });
+      } finally {
+        dispatch({ type: "SET_LOADING", payload: false });
+      }
+    },
+    [fetchBookings, toast]
+  );
 
   useEffect(() => {
     loadBookings();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  const handlePageChange = (page: number) => {
-    try {
-      fetchBookings(page, pageInfo.pageSize);
-    } catch (error) {
-      toast({
-        title: "Error",
-        description: "Failed to change page",
-        variant: "destructive",
-      });
+  // Update state when context data changes
+  useEffect(() => {
+    if (bookings) {
+      dispatch({ type: "SET_BOOKINGS", payload: bookings });
     }
+    if (pageInfo) {
+      dispatch({ type: "SET_PAGE_INFO", payload: pageInfo });
+    }
+    if (error) {
+      dispatch({ type: "SET_ERROR", payload: error });
+    }
+  }, [bookings, pageInfo, error]);
+
+  const handlePageChange = (page: number) => {
+    loadBookings(page, state.pageInfo.pageSize);
   };
 
   const formatDateTime = (dateTimeStr: string) => {
@@ -103,7 +176,7 @@ export default function AllOrders() {
     }
   };
 
-  if (loading) {
+  if (state.loading) {
     return (
       <div className="flex justify-center items-center h-screen">
         <Loader2 className="h-8 w-8 animate-spin" />
@@ -119,7 +192,7 @@ export default function AllOrders() {
       </div>
 
       <div className="bg-white rounded-md shadow">
-        {!bookings || bookings.length === 0 ? (
+        {!state.bookings || state.bookings.length === 0 ? (
           <p className="text-center py-8">No bookings found</p>
         ) : (
           <>
@@ -139,7 +212,7 @@ export default function AllOrders() {
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {bookings.map((booking) => (
+                  {state.bookings.map((booking) => (
                     <TableRow key={booking.bookingId}>
                       <TableCell>{booking.bookingId}</TableCell>
                       <TableCell>
@@ -175,15 +248,15 @@ export default function AllOrders() {
               </Table>
             </div>
 
-            {pageInfo && pageInfo.totalPages > 1 && (
+            {state.pageInfo && state.pageInfo.totalPages > 1 && (
               <div className="py-4 flex justify-center border-t">
                 <Pagination>
                   <PaginationContent>
                     <PaginationItem>
-                      {pageInfo.pageNumber > 1 ? (
+                      {state.pageInfo.pageNumber > 1 ? (
                         <PaginationPrevious
                           onClick={() =>
-                            handlePageChange(pageInfo.pageNumber - 1)
+                            handlePageChange(state.pageInfo.pageNumber - 1)
                           }
                         />
                       ) : (
@@ -191,11 +264,11 @@ export default function AllOrders() {
                       )}
                     </PaginationItem>
 
-                    {[...Array(pageInfo.totalPages)].map((_, index) => (
+                    {[...Array(state.pageInfo.totalPages)].map((_, index) => (
                       <PaginationItem key={index}>
                         <PaginationLink
                           onClick={() => handlePageChange(index + 1)}
-                          isActive={pageInfo.pageNumber === index + 1}
+                          isActive={state.pageInfo.pageNumber === index + 1}
                         >
                           {index + 1}
                         </PaginationLink>
@@ -203,10 +276,10 @@ export default function AllOrders() {
                     ))}
 
                     <PaginationItem>
-                      {pageInfo.pageNumber < pageInfo.totalPages ? (
+                      {state.pageInfo.pageNumber < state.pageInfo.totalPages ? (
                         <PaginationNext
                           onClick={() =>
-                            handlePageChange(pageInfo.pageNumber + 1)
+                            handlePageChange(state.pageInfo.pageNumber + 1)
                           }
                         />
                       ) : (
