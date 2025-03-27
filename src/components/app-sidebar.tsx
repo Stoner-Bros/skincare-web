@@ -144,6 +144,13 @@ const initialNavData = {
       // items: [],
     },
     {
+      title: "Comment",
+      url: "/dashboard/comment",
+      icon: MessageCircleHeart,
+      isActive: false,
+      // items: [],
+    },
+    {
       title: "User",
       url: "#",
       icon: UserRound,

@@ -35,6 +35,7 @@ import Consultation from "@/pages/Dashboard/Consultation";
 import BlogDetail from "@/pages/Blogs/blog-detail";
 import NewsPage from "@/pages/Blogs/news";
 import OrderWaiting from "@/pages/Dashboard/Bookings/Waiting";
+import CommentPage from "@/pages/Dashboard/Comment/coment-page";
 // ----------------------------------------------------------------------
 
 export default function AppRouter() {
@@ -88,6 +89,10 @@ export default function AppRouter() {
         {
           path: "/dashboard/feedback",
           element: <Feedbacks />,
+        },
+        {
+          path: "/dashboard/comment",
+          element: <CommentPage />,
         },
         {
           path: "/dashboard/user-customer",
