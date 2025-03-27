@@ -20,6 +20,7 @@ import {
   SidebarRail,
 } from "@/components/ui/sidebar";
 import serviceService from "@/services/service.services";
+import { useNavigate } from "react-router-dom";
 
 // Khởi tạo trạng thái ban đầu
 const initialNavData = {
@@ -187,6 +188,7 @@ const initialNavData = {
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   const [navData, setNavData] = useState(initialNavData);
+  const navigate = useNavigate();
 
   // Lấy danh sách dịch vụ từ API và cập nhật menu
   useEffect(() => {
@@ -236,7 +238,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   return (
     <Sidebar collapsible="icon" {...props}>
       <SidebarHeader>
-        <img src="/logo.gif" alt="logo" />
+        <img src="/logo.gif" alt="logo" onClick={() => navigate("/")} />
       </SidebarHeader>
       <SidebarContent>
         <NavMain items={navData.navMain} />
