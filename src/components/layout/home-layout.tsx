@@ -24,8 +24,8 @@ export default function HomeLayout({
       <div className="fixed bottom-4 left-4 z-50">
         {!showLiveChat ? (
           <Button
-            className="bg-red-500 hover:bg-red-600 text-white py-2 px-4 rounded-full 
-            flex items-center gap-2 group transition-all duration-300 
+            className="bg-red-500 hover:bg-red-600 text-white py-2 px-4 rounded-full
+            flex items-center gap-2 group transition-all duration-300
             shadow-lg hover:shadow-xl"
             onClick={() => setShowLiveChat(true)}
           >
@@ -34,7 +34,7 @@ export default function HomeLayout({
           </Button>
         ) : (
           <div className="mb-2">
-            <LiveChat onClose={() => setShowLiveChat(false)} />
+            <LiveChat onClose={() => setShowLiveChat(false)} customerId={7}/>
           </div>
         )}
       </div>
