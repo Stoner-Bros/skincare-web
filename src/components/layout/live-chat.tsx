@@ -3,26 +3,43 @@ import { Button } from "../ui/button";
 import { X, Send, Minimize2, Maximize2 } from "lucide-react";
 import * as signalR from "@microsoft/signalr";
 import axios from "axios";
+import { useAuth } from "@/hooks/use-auth";
 
 axios.defaults.baseURL = "https://skincare-api.azurewebsites.net/api";
 
 interface LiveChatProps {
   onClose: () => void;
-  customerId: number; // Assuming customerId is passed as a prop
 }
 
-const LiveChat: React.FC<LiveChatProps> = ({ onClose, customerId }) => {
+const LiveChat: React.FC<LiveChatProps> = ({ onClose }) => {
+  const { user } = useAuth();
   const [messages, setMessages] = useState<Array<{ text: string; isUser: boolean }>>([]);
   const [newMessage, setNewMessage] = useState("");
   const [isMinimized, setIsMinimized] = useState(false);
   const [threadId, setThreadId] = useState<number | null>(null);
   const [connection, setConnection] = useState<signalR.HubConnection | null>(null);
+  
+  // Lấy customerId từ accountInfo
+  const customerId = user?.accountInfo?.accountId;
+
+  useEffect(() => {
+    // Log để kiểm tra customerId
+    console.log("User object:", user);
+    console.log("CustomerID từ accountInfo:", customerId);
+  }, [user, customerId]);
 
   useEffect(() => {
     const initializeChat = async () => {
+      if (!customerId) {
+        console.log("Không có customerId, không khởi tạo chat");
+        return;
+      }
+      
       try {
         // Create or fetch thread for the customer
-        const response = await axios.get(`/chat/threads/customer?customerId=${7}`);
+        console.log("Đang khởi tạo chat với CustomerID:", customerId);
+        const response = await axios.get(`/chat/threads/customer?customerId=${customerId}`);
+        console.log("Thread response:", response.data);
         setThreadId(response.data.data.threadId);
 
         // Fetch existing messages
@@ -65,10 +82,7 @@ const LiveChat: React.FC<LiveChatProps> = ({ onClose, customerId }) => {
   }, [customerId]);
 
   const handleSendMessage = async () => {
-    if (newMessage.trim() === "" || !threadId || !connection) return;
-
-    // Add user message to the UI
-    // setMessages([...messages, { text: newMessage, isUser: true }]);
+    if (newMessage.trim() === "" || !threadId || !connection || !customerId) return;
 
     try {
       // Send message via SignalR
