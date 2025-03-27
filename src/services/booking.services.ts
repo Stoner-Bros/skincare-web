@@ -62,12 +62,14 @@ class BookingService {
   }
 
   async getBookingHistory(
+    customerId: number,
     pageNumber: number = 1,
     pageSize: number = 10
   ): Promise<any> {
     try {
       const response = await api.get(`${this.baseUrl}/history`, {
         params: {
+          customerId,
           pageNumber,
           pageSize,
         },

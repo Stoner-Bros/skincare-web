@@ -28,28 +28,13 @@ interface RecommendedBlog {
 
 const placeholderImage = "https://placehold.co/300x500/gray/white?text=Beauty+Tips";
 
-const fakeRecommendedBlogs: RecommendedBlog[] = [
-  {
-    blogId: "2",
-    title: "5 bước chăm sóc da buổi tối không thể bỏ qua",
-    imageUrl: "https://placehold.co/600x400/purple/white?text=SkinCare",
-    createdAt: new Date().toISOString(),
-  },
-  {
-    blogId: "3",
-    title: "Bí quyết giảm nếp nhăn tự nhiên tại nhà",
-    imageUrl: "https://placehold.co/600x400/skyblue/white?text=Anti+Aging",
-    createdAt: new Date().toISOString(),
-  },
-];
-
 export default function BlogDetail() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const [blog, setBlog] = useState<Blog | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [recommended, setRecommended] = useState<RecommendedBlog[]>(fakeRecommendedBlogs);
+  const [recommended, setRecommended] = useState<RecommendedBlog[]>([]);
 
   useEffect(() => {
     const fetchBlogData = async () => {
@@ -103,52 +88,40 @@ export default function BlogDetail() {
 
     const fetchRecommendedBlogs = async () => {
       try {
-        // Thử lấy bài viết đề xuất từ API
-        const data = await blogService.getBlogs(1, 5);
-        console.log("Bài viết đề xuất:", data);
+        // Lấy danh sách ID từ 1-10 (trừ ID hiện tại)
+        const blogIds = Array.from({ length: 10 }, (_, i) => i + 1)
+          .filter(blogId => blogId !== Number(id));
         
-        if (data) {
-          // Lấy dữ liệu trực tiếp
-          const recommendedData = Array.isArray(data) 
-            ? data 
-            : data.items || data.data || [];
-          
-          console.log("Dữ liệu bài viết đề xuất:", recommendedData);
-          
-          if (!Array.isArray(recommendedData) || recommendedData.length === 0) {
-            console.log("Không có bài viết đề xuất từ API, sử dụng dữ liệu mẫu");
-            return; // Giữ nguyên dữ liệu mẫu
-          }
-          
-          // Chỉ lấy tối đa 2 bài viết khác với bài hiện tại
-          const filteredRecommended = recommendedData
-            .filter((blog: any) => {
-              const blogIdentifier = blog.blogId?.toString() || blog.id?.toString();
-              return blogIdentifier && blogIdentifier !== id;
-            })
-            .slice(0, 2);
-          
-          if (filteredRecommended.length > 0) {
-            // Chuyển đổi thành định dạng RecommendedBlog
-            const formattedRecommended: RecommendedBlog[] = filteredRecommended.map((blog: any) => ({
-              blogId: blog.blogId?.toString() || blog.id?.toString() || "0",
-              title: blog.title || "Bài viết đề xuất",
-              imageUrl: blog.thumbnailUrl 
-                ? `https://skincare-api.azurewebsites.net/api/upload/${blog.thumbnailUrl}` 
-                : placeholderImage,
-              createdAt: blog.createdAt || new Date().toISOString()
-            }));
-            
-            console.log("Bài viết đề xuất sau khi định dạng:", formattedRecommended);
-            
-            if (formattedRecommended.length > 0) {
-              setRecommended(formattedRecommended);
+        // Danh sách bài viết đề xuất
+        const recommendedBlogs: RecommendedBlog[] = [];
+        
+        // Gọi API để lấy chi tiết từng bài viết
+        for (const blogId of blogIds) {
+          try {
+            const blogData = await blogService.getBlogById(blogId);
+            if (blogData) {
+              recommendedBlogs.push({
+                blogId: blogData.blogId?.toString() || blogData.id?.toString() || "0",
+                title: blogData.title || "Bài viết đề xuất",
+                imageUrl: blogData.thumbnailUrl 
+                  ? `https://skincare-api.azurewebsites.net/api/upload/${blogData.thumbnailUrl}` 
+                  : (blogData.imageUrl || placeholderImage),
+                createdAt: blogData.createdAt || new Date().toISOString()
+              });
             }
+          } catch (error) {
+            console.error(`Lỗi khi lấy bài viết đề xuất ID ${blogId}:`, error);
+            // Bỏ qua bài viết lỗi và tiếp tục
           }
+        }
+        
+        console.log("Bài viết đề xuất sau khi lấy từ API:", recommendedBlogs);
+        
+        if (recommendedBlogs.length > 0) {
+          setRecommended(recommendedBlogs);
         }
       } catch (error) {
         console.error("Lỗi khi lấy bài viết đề xuất:", error);
-        // Giữ nguyên dữ liệu mẫu nếu API không thành công
       }
     };
 
@@ -247,17 +220,29 @@ export default function BlogDetail() {
           </div>
           <div className="w-full md:w-1/4 p-4">
             <h2 className="text-xl font-bold mb-4">Bài viết đề xuất</h2>
-            {recommended.map((item) => (
-              <div key={item.blogId} className="mb-4">
-                <Link to={`/blog/${item.blogId}`} className="flex gap-2">
-                  <img src={item.imageUrl} alt={item.title} className="w-16 h-16 object-cover rounded" />
-                  <div>
-                    <h3 className="text-sm font-semibold">{item.title}</h3>
-                    <p className="text-xs text-gray-500">{new Date(item.createdAt).toLocaleDateString()}</p>
-                  </div>
-                </Link>
-              </div>
-            ))}
+            {recommended.length > 0 ? (
+              recommended.map((item) => (
+                <div key={item.blogId} className="mb-4">
+                  <Link to={`/blog/${item.blogId}`} className="flex gap-2">
+                    <img 
+                      src={item.imageUrl} 
+                      alt={item.title} 
+                      className="w-16 h-16 object-cover rounded"
+                      onError={(e) => {
+                        const target = e.target as HTMLImageElement;
+                        target.src = placeholderImage;
+                      }}
+                    />
+                    <div>
+                      <h3 className="text-lg font-semibold">{item.title}</h3>
+                      <p className="text-xs text-gray-500">{new Date(item.createdAt).toLocaleDateString()}</p>
+                    </div>
+                  </Link>
+                </div>
+              ))
+            ) : (
+              <p className="text-sm text-gray-500">Không có bài viết đề xuất</p>
+            )}
           </div>
         </div>
       </div>

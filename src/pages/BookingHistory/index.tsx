@@ -1,4 +1,6 @@
-import React, { useState } from 'react';
+import { useEffect, useState } from "react";
+import bookingService from "@/services/booking.services";
+import { useAuth } from "@/hooks/use-auth";
 import {
   Card,
   CardContent,
@@ -16,170 +18,231 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 
-// Định nghĩa kiểu dữ liệu cho booking
-interface Booking {
-  id: string;
-  date: string;
-  serviceName: string;
-  status: "Checked Out" | "Confirmed" | "Pending";
-  therapistName?: string;
-  duration?: string;
-  startTime?: string;
-  endTime?: string;
-  price?: string;
-  // paymentStatus?: string;
+interface TimeSlot {
+  timeSlotId: number;
+  startTime: string;
+  endTime: string;
+}
+
+interface Treatment {
+  treatmentId: number;
+  treatmentName: string;
+  belongToService: {
+    serviceId: number;
+    serviceName: string;
+  };
+}
+
+interface Account {
+  accountId: number;
+  fullName: string;
+}
+
+interface BookingHistory {
+  bookingId: number;
+  bookingAt: string;
+  status: string;
+  checkinAt: string | null;
+  checkoutAt: string | null;
+  totalPrice: number;
+  notes: string;
+  treatment: Treatment;
+  skinTherapist: Account;
+  staff: Account | null;
+  customer: Account;
+  guest: Account | null;
+  timeSlots: TimeSlot[];
+  slotDate: string;
 }
 
 const BookingHistory: React.FC = () => {
+  const { user, loading: authLoading } = useAuth();
+  const [bookings, setBookings] = useState<BookingHistory[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [selectedBooking, setSelectedBooking] = useState<BookingHistory | null>(null);
   
-  const bookings: Booking[] = [
-    {
-      id: "1",
-      date: "12-03-2025",
-      serviceName: "Acne Control Treatment",
-      status: "Checked Out",
-      therapistName: "khoiThe",
-      duration: "30 Mins",
-      startTime: "08:30:00",
-      endTime: "09:00:00",
-      price: "1320000 VND",
-      // paymentStatus: "Pending",
-    },
-    {
-      id: "2",
-      date: "12-03-2025",
-      serviceName: "Chemical Peel Treatment",
-      status: "Checked Out",
-      therapistName: "ThaoNguyen",
-      duration: "45 Mins",
-      startTime: "10:00:00",
-      endTime: "10:45:00",
-      price: "1500000 VND",
-      // paymentStatus: "Paid",
-    },
-    {
-      id: "3", 
-      date: "22-03-2025",
-      serviceName: "Advanced Hydration Therapy",
-      status: "Confirmed",
-      therapistName: "MinhHa",
-      duration: "60 Mins",
-      startTime: "14:00:00",
-      endTime: "15:00:00",
-      price: "2100000 VND",
-      // paymentStatus: "Pending",
-    },
-    {
-      id: "4", 
-      date: "22-03-2025",
-      serviceName: "Advanced Hydration Therapy",
-      status: "Confirmed",
-      therapistName: "MinhHa",
-      duration: "60 Mins",
-      startTime: "14:00:00",
-      endTime: "15:00:00",
-      price: "2100000 VND",
-      // paymentStatus: "Pending",
-    },
-    {
-      id: "5", 
-      date: "22-03-2025",
-      serviceName: "Advanced Hydration Therapy",
-      status: "Confirmed",
-      therapistName: "MinhHa",
-      duration: "60 Mins",
-      startTime: "14:00:00",
-      endTime: "15:00:00",
-      price: "2100000 VND",
-      // paymentStatus: "Pending",
-    },
-    {
-      id: "6", 
-      date: "22-03-2025",
-      serviceName: "Advanced Hydration Therapy",
-      status: "Confirmed",
-      therapistName: "MinhHa",
-      duration: "60 Mins",
-      startTime: "14:00:00",
-      endTime: "15:00:00",
-      price: "2100000 VND",
-      // paymentStatus: "Pending",
-    },
-  ];
+  // Thêm state cho pagination
+  const [currentPage, setCurrentPage] = useState<number>(1);
+  const [totalPages, setTotalPages] = useState<number>(1);
+  const itemsPerPage = 6; // Số lượng booking mỗi trang
 
-  // State cho booking đang được xem chi tiết
-  const [selectedBooking, setSelectedBooking] = useState<Booking | null>(bookings[0]);
+  useEffect(() => {
+    const fetchBookingHistory = async () => {
+      try {
+        if (authLoading) {
+          return;
+        }
+        
+        setLoading(true);
+        if (!user?.accountId) {
+          setError("Vui lòng đăng nhập để xem lịch sử đặt lịch");
+          setLoading(false);
+          return;
+        }
 
-  // Function để render badge dựa vào trạng thái
+        // Gọi API lấy tất cả booking history
+        const response = await bookingService.getBookingHistory(user.accountId);
+        
+        if (response && response.data && response.data.items) {
+          const allBookings = response.data.items || [];
+          
+          // Tính tổng số trang
+          setTotalPages(Math.max(1, Math.ceil(allBookings.length / itemsPerPage)));
+          
+          // Phân trang theo BookingID
+          const start = (currentPage - 1) * itemsPerPage;
+          const end = start + itemsPerPage;
+          
+          // Lấy các booking cho trang hiện tại
+          const paginatedBookings = allBookings.slice(start, end);
+          setBookings(paginatedBookings);
+          
+          if (paginatedBookings.length > 0) {
+            setSelectedBooking(paginatedBookings[0]);
+          } else {
+            setError("Bạn chưa có lịch sử đặt lịch nào");
+          }
+        } else {
+          setError("Không có dữ liệu lịch sử đặt lịch");
+        }
+      } catch (err) {
+        console.error("Lỗi khi lấy lịch sử đặt lịch:", err);
+        setError("Đã xảy ra lỗi khi tải lịch sử đặt lịch");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchBookingHistory();
+  }, [user?.accountId, authLoading, currentPage]); // Thêm currentPage vào dependencies
+
   const renderStatusBadge = (status: string) => {
-    switch (status) {
-      case "Checked Out":
-        return <Badge variant="checked">Checked Out</Badge>;
-      case "Confirmed":
-        return <Badge variant="confirmed">Confirmed</Badge>;
-      case "Pending":
-        return <Badge variant="warning">Pending</Badge>;
+    switch (status.toLowerCase()) {
+      case "paid":
+        return <Badge variant="success">Đã thanh toán</Badge>;
+      case "pending":
+        return <Badge variant="warning">Chờ thanh toán</Badge>;
+      case "cancelled":
+        return <Badge variant="destructive">Đã hủy</Badge>;
       default:
         return <Badge>{status}</Badge>;
     }
   };
 
-  // Function để render payment status badge
-  // const renderPaymentStatusBadge = (status: string) => {
-  //   switch (status) {
-  //     case "Pending":
-  //       return <Badge variant="warning">Pending</Badge>;
-  //     case "Paid":
-  //       return <Badge variant="success">Paid</Badge>;
-  //     default:
-  //       return <Badge>{status}</Badge>;
-  //   }
-  // };
-
-  // Xử lý khi nhấn vào View Detail
-  const handleViewDetail = (booking: Booking) => {
+  const handleViewDetail = (booking: BookingHistory) => {
     setSelectedBooking(booking);
   };
 
+  // Thêm hàm chuyển trang
+  const handlePageChange = (page: number) => {
+    if (page >= 1 && page <= totalPages) {
+      setCurrentPage(page);
+    }
+  };
+
+  if (loading) {
+    return (
+      <div className="container mx-auto py-10 bg-pink-50">
+        <div className="animate-pulse">
+          <div className="h-8 bg-pink-200 rounded w-1/4 mb-4"></div>
+          <div className="space-y-4">
+            {[1, 2, 3].map((n) => (
+              <div key={n} className="h-32 bg-pink-100 rounded"></div>
+            ))}
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="container mx-auto py-10 bg-pink-50">
+        <div className="bg-red-50 border border-red-200 rounded-lg p-4">
+          <p className="text-red-600">{error}</p>
+        </div>
+      </div>
+    );
+  }
+
   return (
-    <div className="container mx-auto py-10 bg-pink-">
+    <div className="container mx-auto py-6 bg-pink-50">
       <div className="grid grid-cols-1 md:grid-cols-12 gap-6">
         <div className="md:col-span-7">
-          <Card className="bg-pink-50">
-            <CardHeader className="pb-2">
-              <CardTitle className="text-xl font-bold text-center">Booking History</CardTitle>
+          <Card className="bg-white shadow-md">
+            <CardHeader className="pb-2 bg-pink-100 rounded-t-lg">
+              <CardTitle className="text-xl font-bold text-center text-pink-800">Lịch sử đặt lịch</CardTitle>
             </CardHeader>
-            <CardContent>
+            <CardContent className="p-4">
               <Table>
-                <TableHeader>
+                <TableHeader className="bg-pink-50">
                   <TableRow>
-                    <TableHead className="text-left font-bold">Booking Date</TableHead>
-                    <TableHead className="text-left font-bold">Service Name</TableHead>
-                    <TableHead className="text-left font-bold">Status</TableHead>
-                    <TableHead className="text-left font-bold">Action</TableHead>
+                    <TableHead className="text-left font-bold text-pink-800">Ngày đặt</TableHead>
+                    <TableHead className="text-left font-bold text-pink-800">Dịch vụ</TableHead>
+                    <TableHead className="text-left font-bold text-pink-800">Trạng thái</TableHead>
+                    <TableHead className="text-left font-bold text-pink-800">Thao tác</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
                   {bookings.map((booking) => (
-                    <TableRow key={booking.id}>
-                      <TableCell>{booking.date}</TableCell>
-                      <TableCell>{booking.serviceName}</TableCell>
+                    <TableRow key={booking.bookingId} className="hover:bg-pink-50 transition-colors">
+                      <TableCell>
+                        {new Date(booking.slotDate).toLocaleDateString("vi-VN")}
+                      </TableCell>
+                      <TableCell>{booking.treatment.treatmentName}</TableCell>
                       <TableCell>{renderStatusBadge(booking.status)}</TableCell>
                       <TableCell>
                         <Button 
                           variant="default" 
-                          className="bg-lime-500 hover:bg-lime-600"
+                          className="bg-pink-600 hover:bg-pink-700 text-white"
                           onClick={() => handleViewDetail(booking)}
                         >
-                          View Detail
+                          Xem chi tiết
                         </Button>
                       </TableCell>
                     </TableRow>
                   ))}
                 </TableBody>
               </Table>
-              <div className="flex justify-end mt-4">
-                <Button variant="outline" className="rounded-full w-8 h-8 p-0 bg-white">1</Button>
+              
+              {/* Thêm UI phân trang */}
+              <div className="flex justify-center mt-4 space-x-2">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => handlePageChange(currentPage - 1)}
+                  disabled={currentPage === 1}
+                  className="border-pink-300 text-pink-800 hover:bg-pink-100"
+                >
+                  Trước
+                </Button>
+                
+                {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
+                  <Button
+                    key={page}
+                    variant={currentPage === page ? "default" : "outline"}
+                    size="sm"
+                    onClick={() => handlePageChange(page)}
+                    className={
+                      currentPage === page
+                        ? "bg-pink-600 hover:bg-pink-700"
+                        : "border-pink-300 text-pink-800 hover:bg-pink-100"
+                    }
+                  >
+                    {page}
+                  </Button>
+                ))}
+                
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => handlePageChange(currentPage + 1)}
+                  disabled={currentPage === totalPages}
+                  className="border-pink-300 text-pink-800 hover:bg-pink-100"
+                >
+                  Tiếp
+                </Button>
               </div>
             </CardContent>
           </Card>
@@ -188,56 +251,64 @@ const BookingHistory: React.FC = () => {
         {/* Booking Detail Card */}
         <div className="md:col-span-5">
           {selectedBooking && (
-            <Card className="bg-white h-full">
-              <CardHeader className="pb-2">
-                <CardTitle className="text-xl font-bold">Booking Detail</CardTitle>
+            <Card className="bg-white shadow-md h-full">
+              <CardHeader className="pb-2 bg-pink-100 rounded-t-lg">
+                <CardTitle className="text-xl font-bold text-center text-pink-800">Chi tiết đặt lịch</CardTitle>
               </CardHeader>
-              <CardContent>
+              <CardContent className="p-4">
                 <table className="w-full border-collapse">
                   <tbody>
-                    <tr className="border-b border-gray-200">
-                      <td className="py-3 font-medium text-gray-700">Booking Date</td>
-                      <td className="py-3 text-right">2025-03-12</td>
+                    <tr className="border-b border-pink-100">
+                      <td className="py-3 font-medium text-pink-800">Ngày đặt</td>
+                      <td className="py-3 text-right">
+                        {new Date(selectedBooking.slotDate).toLocaleDateString("vi-VN")}
+                      </td>
                     </tr>
-                    <tr className="border-b border-gray-200">
-                      <td className="py-3 font-medium text-gray-700">Status</td>
+                    <tr className="border-b border-pink-100">
+                      <td className="py-3 font-medium text-pink-800">Trạng thái</td>
                       <td className="py-3 text-right">{renderStatusBadge(selectedBooking.status)}</td>
                     </tr>
-                    <tr className="border-b border-gray-200">
-                      <td className="py-3 font-medium text-gray-700">Service Name</td>
-                      <td className="py-3 text-right">{selectedBooking.serviceName}</td>
+                    <tr className="border-b border-pink-100">
+                      <td className="py-3 font-medium text-pink-800">Dịch vụ</td>
+                      <td className="py-3 text-right">{selectedBooking.treatment.treatmentName}</td>
                     </tr>
-                    <tr className="border-b border-gray-200">
-                      <td className="py-3 font-medium text-gray-700">Therapist Name</td>
-                      <td className="py-3 text-right">{selectedBooking.therapistName || "N/A"}</td>
+                    <tr className="border-b border-pink-100">
+                      <td className="py-3 font-medium text-pink-800">Chuyên viên</td>
+                      <td className="py-3 text-right">{selectedBooking.skinTherapist?.fullName}</td>
                     </tr>
-                    <tr className="border-b border-gray-200">
-                      <td className="py-3 font-medium text-gray-700">Duration</td>
-                      <td className="py-3 text-right">{selectedBooking.duration || "N/A"}</td>
+                    <tr className="border-b border-pink-100">
+                      <td className="py-3 font-medium text-pink-800">Thời gian</td>
+                      <td className="py-3 text-right">
+                        {selectedBooking.timeSlots[0]?.startTime} - {selectedBooking.timeSlots[0]?.endTime}
+                      </td>
                     </tr>
-                    <tr className="border-b border-gray-200">
-                      <td className="py-3 font-medium text-gray-700">Start Time</td>
-                      <td className="py-3 text-right">{selectedBooking.startTime || "N/A"}</td>
+                    <tr className="border-b border-pink-100">
+                      <td className="py-3 font-medium text-pink-800">Giá tiền</td>
+                      <td className="py-3 text-right">
+                        {selectedBooking.totalPrice.toLocaleString("vi-VN")} VNĐ
+                      </td>
                     </tr>
-                    <tr className="border-b border-gray-200">
-                      <td className="py-3 font-medium text-gray-700">End Time</td>
-                      <td className="py-3 text-right">{selectedBooking.endTime || "N/A"}</td>
-                    </tr>
-                    <tr className="border-b border-gray-200">
-                      <td className="py-3 font-medium text-gray-700">Service Price</td>
-                      <td className="py-3 text-right">{selectedBooking.price || "N/A"}</td>
-                    </tr>
-                    <tr className="border-b border-gray-200">
-                      <td className="py-3 font-medium text-gray-700">Payment Status</td>
-                      {/* <td className="py-3 text-right">
-                        {selectedBooking.paymentStatus ? renderPaymentStatusBadge(selectedBooking.paymentStatus) : "N/A"}
-                      </td> */}
-                    </tr>
+                    {selectedBooking.checkinAt && (
+                      <tr className="border-b border-pink-100">
+                        <td className="py-3 font-medium text-pink-800">Check-in</td>
+                        <td className="py-3 text-right">
+                          {new Date(selectedBooking.checkinAt).toLocaleString("vi-VN")}
+                        </td>
+                      </tr>
+                    )}
+                    {selectedBooking.checkoutAt && (
+                      <tr className="border-b border-pink-100">
+                        <td className="py-3 font-medium text-pink-800">Check-out</td>
+                        <td className="py-3 text-right">
+                          {new Date(selectedBooking.checkoutAt).toLocaleString("vi-VN")}
+                        </td>
+                      </tr>
+                    )}
                   </tbody>
                 </table>
-                  <Button className="w-full mt-6 bg-green-500 hover:bg-green-600 text-white font-medium py-3 rounded">
-                    Write Blog
-                  </Button>
+                <Button className="w-full mt-6 bg-pink-600 hover:bg-pink-700 text-white font-medium py-3 rounded">
+                  Viết đánh giá
+                </Button>
               </CardContent>
             </Card>
           )}

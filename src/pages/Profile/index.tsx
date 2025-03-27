@@ -78,9 +78,6 @@ export default function MyProfile() {
           Thông Tin Cá Nhân
         </h2>
 
-        <div className="flex justify-center mb-5">
-          <div className="bg-gray-200 text-black w-20 h-20 flex items-center justify-center rounded-full text-2xl"></div>
-        </div>
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
