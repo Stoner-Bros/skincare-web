@@ -1,7 +1,8 @@
 import MDEditor from "@uiw/react-md-editor";
-import { useEffect, useState } from "react";
+import { useEffect, useState, FormEvent } from "react";
 import { useParams, Link, useNavigate } from "react-router-dom";
 import blogService from "@/services/blog.services";
+import commentService from "@/services/comment.services";
 // import { useParams } from "react-router-dom";
 
 interface Blog {
@@ -26,6 +27,24 @@ interface RecommendedBlog {
   createdAt: string;
 }
 
+interface Comment {
+  commentId?: number;
+  authorName?: string;
+  blogId?: number;
+  content: string;
+  createdAt?: string;
+  updatedAt?: string;
+  isDeleted?: boolean;
+}
+
+interface CommentPagination {
+  items: Comment[];
+  pageNumber: number;
+  pageSize: number;
+  totalRecords: number;
+  totalPages: number;
+}
+
 const placeholderImage = "https://placehold.co/300x500/gray/white?text=Beauty+Tips";
 
 export default function BlogDetail() {
@@ -35,6 +54,82 @@ export default function BlogDetail() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [recommended, setRecommended] = useState<RecommendedBlog[]>([]);
+  
+  // Comment state
+  const [comments, setComments] = useState<Comment[]>([]);
+  const [totalComments, setTotalComments] = useState<number>(0);
+  const [commentPage, setCommentPage] = useState<number>(1);
+  const [commentPageSize] = useState<number>(5);
+  const [totalPages, setTotalPages] = useState<number>(1);
+  const [newComment, setNewComment] = useState<string>("");
+  const [commentLoading, setCommentLoading] = useState<boolean>(false);
+  const [commentError, setCommentError] = useState<string | null>(null);
+  const [submitting, setSubmitting] = useState<boolean>(false);
+
+  // Fetch comments
+  const fetchComments = async (blogId: number, page: number = 1) => {
+    if (!blogId) return;
+    
+    try {
+      setCommentLoading(true);
+      setCommentError(null);
+      
+      const data: CommentPagination = await commentService.getCommentsByBlogId(
+        blogId,
+        page,
+        commentPageSize
+      );
+      
+      setComments(data.items || []);
+      setTotalComments(data.totalRecords || 0);
+      setTotalPages(data.totalPages || 1);
+      setCommentPage(data.pageNumber || 1);
+    } catch (err) {
+      console.error("Lỗi khi tải bình luận:", err);
+    } finally {
+      setCommentLoading(false);
+    }
+  };
+
+  // Submit new comment
+  const handleCommentSubmit = async (e: FormEvent) => {
+    e.preventDefault();
+    
+    if (!newComment.trim()) {
+      return;
+    }
+    
+    if (!id) {
+      setCommentError("ID bài viết không hợp lệ");
+      return;
+    }
+    
+    try {
+      setSubmitting(true);
+      setCommentError(null);
+      
+      const blogId = parseInt(id);
+      await commentService.createComment(blogId, newComment);
+      
+      // Reset form and refresh comments
+      setNewComment("");
+      fetchComments(blogId, 1); // Quay lại trang đầu tiên sau khi comment
+    } catch (err) {
+      console.error("Lỗi khi gửi bình luận:", err);
+      setCommentError("Không thể gửi bình luận. Vui lòng thử lại sau.");
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  // Handle pagination
+  const handlePageChange = (page: number) => {
+    if (id) {
+      const blogId = parseInt(id);
+      setCommentPage(page);
+      fetchComments(blogId, page);
+    }
+  };
 
   useEffect(() => {
     const fetchBlogData = async () => {
@@ -78,6 +173,9 @@ export default function BlogDetail() {
         
         console.log("Blog sau khi định dạng:", formattedBlog);
         setBlog(formattedBlog);
+        
+        // Tải bình luận sau khi có blog data
+        fetchComments(blogId);
       } catch (err) {
         console.error('Error fetching blog:', err);
         setError(err instanceof Error ? err.message : 'Đã xảy ra lỗi khi tải bài viết');
@@ -127,7 +225,19 @@ export default function BlogDetail() {
 
     fetchBlogData();
     fetchRecommendedBlogs();
-  }, [id]);
+  }, [id, commentPageSize]);
+
+  // Format date helper
+  const formatDate = (dateString: string) => {
+    const date = new Date(dateString);
+    return new Intl.DateTimeFormat('vi-VN', {
+      day: '2-digit',
+      month: '2-digit', 
+      year: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit'
+    }).format(date);
+  };
 
   if (loading) {
     return (
@@ -215,6 +325,116 @@ export default function BlogDetail() {
                     #{tag}
                   </span>
                 ))}
+              </div>
+              
+              {/* Comment Section */}
+              <div className="mt-10 border-t pt-6">
+                <h3 className="text-2xl font-bold text-red-600 mb-6">Bình luận ({totalComments})</h3>
+                
+                {/* Comment Form */}
+                <div className="bg-gray-50 p-4 rounded-lg shadow-sm mb-6">
+                  <h4 className="text-lg font-semibold mb-3">Để lại bình luận</h4>
+                  <form onSubmit={handleCommentSubmit}>
+                    <textarea
+                      className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500 min-h-[120px]"
+                      placeholder="Viết bình luận của bạn..."
+                      value={newComment}
+                      onChange={(e) => setNewComment(e.target.value)}
+                      required
+                    ></textarea>
+                    {commentError && (
+                      <p className="text-red-500 text-sm mt-1">{commentError}</p>
+                    )}
+                    <div className="flex justify-end mt-3">
+                      <button
+                        type="submit"
+                        disabled={submitting || !newComment.trim()}
+                        className={`px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 transition-colors ${
+                          submitting || !newComment.trim() ? 'opacity-50 cursor-not-allowed' : ''
+                        }`}
+                      >
+                        {submitting ? 'Đang gửi...' : 'Gửi bình luận'}
+                      </button>
+                    </div>
+                  </form>
+                </div>
+                
+                {/* Comments List */}
+                <div className="space-y-4">
+                  {commentLoading ? (
+                    <div className="text-center p-4">
+                      <p className="text-gray-500">Đang tải bình luận...</p>
+                    </div>
+                  ) : comments.length > 0 ? (
+                    comments.map((comment) => (
+                      <div key={comment.commentId} className="bg-white p-4 rounded-lg shadow-sm border border-gray-100">
+                        <div className="flex justify-between items-start">
+                          <div className="flex items-center">
+                            <div className="h-10 w-10 rounded-full bg-red-100 flex items-center justify-center text-red-600 font-bold mr-3">
+                              {comment.authorName ? comment.authorName.charAt(0).toUpperCase() : 'U'}
+                            </div>
+                            <div>
+                              <h5 className="font-semibold">{comment.authorName || 'Người dùng ẩn danh'}</h5>
+                              <p className="text-xs text-gray-500">{comment.createdAt ? formatDate(comment.createdAt) : 'Không có thời gian'}</p>
+                            </div>
+                          </div>
+                        </div>
+                        <div className="mt-3 pl-13">
+                          <p className="text-gray-700 whitespace-pre-line">{comment.content}</p>
+                        </div>
+                      </div>
+                    ))
+                  ) : (
+                    <div className="text-center py-10 bg-gray-50 rounded-lg">
+                      <p className="text-gray-500">Chưa có bình luận nào. Hãy trở thành người đầu tiên bình luận!</p>
+                    </div>
+                  )}
+                </div>
+                
+                {/* Pagination */}
+                {totalPages > 1 && (
+                  <div className="flex justify-center mt-6">
+                    <nav className="flex items-center space-x-1">
+                      <button
+                        onClick={() => handlePageChange(commentPage - 1)}
+                        disabled={commentPage === 1}
+                        className={`px-3 py-1 rounded-md ${
+                          commentPage === 1
+                            ? 'text-gray-400 cursor-not-allowed'
+                            : 'text-gray-700 hover:bg-gray-100'
+                        }`}
+                      >
+                        &lt;
+                      </button>
+                      
+                      {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
+                        <button
+                          key={page}
+                          onClick={() => handlePageChange(page)}
+                          className={`px-3 py-1 rounded-md ${
+                            page === commentPage
+                              ? 'bg-red-600 text-white'
+                              : 'text-gray-700 hover:bg-gray-100'
+                          }`}
+                        >
+                          {page}
+                        </button>
+                      ))}
+                      
+                      <button
+                        onClick={() => handlePageChange(commentPage + 1)}
+                        disabled={commentPage === totalPages}
+                        className={`px-3 py-1 rounded-md ${
+                          commentPage === totalPages
+                            ? 'text-gray-400 cursor-not-allowed'
+                            : 'text-gray-700 hover:bg-gray-100'
+                        }`}
+                      >
+                        &gt;
+                      </button>
+                    </nav>
+                  </div>
+                )}
               </div>
             </div>
           </div>

@@ -170,6 +170,13 @@ const initialNavData = {
         },
       ],
     },
+    {
+      title: "Comment",
+      url: "/dashboard/comment",
+      icon: MessageCircleHeart,
+      isActive: false,
+      // items: [],
+    },
   ],
 };
 
