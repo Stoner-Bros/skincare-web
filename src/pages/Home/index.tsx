@@ -726,7 +726,11 @@ export default function Home() {
             <form className="space-y-4" onSubmit={async (e) => {
               e.preventDefault();
               if (!fullName || !phone) {
-                setSubmitMessage('Vui lòng nhập đầy đủ họ tên và số điện thoại');
+                toast({
+                  variant: "destructive",
+                  title: "Lỗi",
+                  description: "Vui lòng nhập đầy đủ họ tên và số điện thoại",
+                });
                 return;
               }
               

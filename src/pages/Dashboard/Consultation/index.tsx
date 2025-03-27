@@ -1,7 +1,22 @@
-import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
 import {
   Pagination,
@@ -9,9 +24,16 @@ import {
   PaginationItem,
   PaginationLink,
   PaginationNext,
-  PaginationPrevious
+  PaginationPrevious,
 } from "@/components/ui/pagination";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 import { toast } from "@/hooks/use-toast";
 import consultationService from "@/services/consultation.services";
 import { useEffect, useState } from "react";
@@ -19,11 +41,13 @@ import { useEffect, useState } from "react";
 interface Customer {
   accountId?: string;
   fullName?: string;
+  phone?: string;
 }
 
 interface Guest {
   guestId?: string;
   fullName?: string;
+  phone?: string;
 }
 
 interface ConsultingForm {
@@ -47,37 +71,41 @@ export default function Consultation() {
   const [isViewDialogOpen, setIsViewDialogOpen] = useState(false);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
-  const [statusFilter, setStatusFilter] = useState<string>("");
+  const [statusFilter] = useState<string>("");
   const [formStatus, setFormStatus] = useState("");
-  
+  const [phoneFilter] = useState<string>("");
 
   useEffect(() => {
     fetchConsultingForms();
-  }, [currentPage, pageSize, statusFilter]);
+  }, [currentPage, pageSize, statusFilter, phoneFilter]);
 
   const fetchConsultingForms = async () => {
     try {
       setLoading(true);
-      const response = await consultationService.getConsultingForms(currentPage, pageSize);
+      const response = await consultationService.getConsultingForms(
+        currentPage,
+        pageSize,
+        phoneFilter
+      );
       const sortedForms = response.data.items || [];
-      
+
       // Sắp xếp theo trạng thái và ID mới nhất lên đầu
       sortedForms.sort((a: ConsultingForm, b: ConsultingForm) => {
         // Ưu tiên trạng thái pending lên đầu tiên
-        if (a.status === 'pending' && b.status !== 'pending') return -1; 
-        if (a.status !== 'pending' && b.status === 'pending') return 1;
-        
+        if (a.status === "pending" && b.status !== "pending") return -1;
+        if (a.status !== "pending" && b.status === "pending") return 1;
+
         // Nếu cùng trạng thái, sắp xếp theo ID giảm dần (mới nhất lên đầu)
         if (a.status === b.status) {
           return b.consultingFormId - a.consultingFormId;
         }
-        
+
         // Sắp xếp các trạng thái khác
-        if (a.status === 'completed' && b.status !== 'completed') return 1;
-        if (a.status !== 'completed' && b.status === 'completed') return -1;
-        if (a.status === 'cancelled' && b.status !== 'cancelled') return 1;
-        if (a.status !== 'cancelled' && b.status === 'cancelled') return -1;
-        
+        if (a.status === "completed" && b.status !== "completed") return 1;
+        if (a.status !== "completed" && b.status === "completed") return -1;
+        if (a.status === "cancelled" && b.status !== "cancelled") return 1;
+        if (a.status !== "cancelled" && b.status === "cancelled") return -1;
+
         return 0;
       });
 
@@ -113,6 +141,15 @@ export default function Consultation() {
     return "Không có ID";
   };
 
+  const getPhone = (form: ConsultingForm) => {
+    if (form.customer && form.customer.phone) {
+      return form.customer.phone;
+    } else if (form.guest && form.guest.phone) {
+      return form.guest.phone;
+    }
+    return "Không có SDT";
+  };
+
   const handleViewForm = (form: ConsultingForm) => {
     setSelectedForm(form);
     setIsViewDialogOpen(true);
@@ -134,9 +171,12 @@ export default function Consultation() {
 
     try {
       setLoading(true);
-      await consultationService.updateConsultingForm(selectedForm.consultingFormId, { 
-        status: formStatus 
-      });
+      await consultationService.updateConsultingForm(
+        selectedForm.consultingFormId,
+        {
+          status: formStatus,
+        }
+      );
       toast({
         title: "Thành công",
         description: "Cập nhật trạng thái thành công",
@@ -161,7 +201,9 @@ export default function Consultation() {
 
     try {
       setLoading(true);
-      await consultationService.deleteConsultingForm(selectedForm.consultingFormId);
+      await consultationService.deleteConsultingForm(
+        selectedForm.consultingFormId
+      );
       toast({
         title: "Thành công",
         description: "Xóa form tư vấn thành công",
@@ -183,22 +225,22 @@ export default function Consultation() {
 
   const formatDate = (dateString: string) => {
     const date = new Date(dateString);
-    return new Intl.DateTimeFormat('vi-VN', {
-      day: '2-digit',
-      month: '2-digit',
-      year: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit'
+    return new Intl.DateTimeFormat("vi-VN", {
+      day: "2-digit",
+      month: "2-digit",
+      year: "numeric",
+      hour: "2-digit",
+      minute: "2-digit",
     }).format(date);
   };
 
   const renderStatusBadge = (status: string) => {
     switch (status.toLowerCase()) {
-      case 'pending':
+      case "pending":
         return <Badge className="bg-yellow-500">Đang chờ</Badge>;
-      case 'completed':
+      case "completed":
         return <Badge className="bg-green-500">Hoàn thành</Badge>;
-      case 'cancelled':
+      case "cancelled":
         return <Badge className="bg-red-500">Đã hủy</Badge>;
       default:
         return <Badge>{status}</Badge>;
@@ -209,19 +251,19 @@ export default function Consultation() {
   const generatePaginationItems = () => {
     const items = [];
     const maxPagesToShow = 5;
-    
+
     // Đảm bảo hiển thị đúng số lượng trang
     let startPage = Math.max(1, currentPage - Math.floor(maxPagesToShow / 2));
     let endPage = Math.min(totalPages, startPage + maxPagesToShow - 1);
-    
+
     if (endPage - startPage + 1 < maxPagesToShow) {
       startPage = Math.max(1, endPage - maxPagesToShow + 1);
     }
-    
+
     for (let i = startPage; i <= endPage; i++) {
       items.push(
         <PaginationItem key={i}>
-          <PaginationLink 
+          <PaginationLink
             isActive={currentPage === i}
             onClick={() => setCurrentPage(i)}
           >
@@ -230,7 +272,7 @@ export default function Consultation() {
         </PaginationItem>
       );
     }
-    
+
     return items;
   };
 
@@ -249,6 +291,7 @@ export default function Consultation() {
               <TableHead>ID</TableHead>
               <TableHead>Khách hàng</TableHead>
               <TableHead>Họ tên</TableHead>
+              <TableHead>Số điện thoại</TableHead>
               <TableHead>Trạng thái</TableHead>
               <TableHead>Ngày tạo</TableHead>
               <TableHead>Ngày cập nhật</TableHead>
@@ -258,27 +301,40 @@ export default function Consultation() {
           <TableBody>
             {consultingForms.length === 0 ? (
               <TableRow>
-                <TableCell colSpan={7} className="text-center py-4">
+                <TableCell colSpan={8} className="text-center py-4">
                   Không có dữ liệu
                 </TableCell>
               </TableRow>
             ) : (
               consultingForms.map((form) => (
                 <TableRow key={form.id}>
-                  <TableCell>{form.consultingFormId}</TableCell>  
+                  <TableCell>{form.consultingFormId}</TableCell>
                   <TableCell>{getUserId(form)}</TableCell>
                   <TableCell>{getFullName(form)}</TableCell>
+                  <TableCell>{getPhone(form)}</TableCell>
                   <TableCell>{renderStatusBadge(form.status)}</TableCell>
                   <TableCell>{formatDate(form.createdAt)}</TableCell>
                   <TableCell>{formatDate(form.updatedAt)}</TableCell>
                   <TableCell className="flex gap-2">
-                    <Button variant="outline" size="sm" onClick={() => handleViewForm(form)}>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => handleViewForm(form)}
+                    >
                       Xem
                     </Button>
-                    <Button variant="outline" size="sm" onClick={() => handleEditForm(form)}>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => handleEditForm(form)}
+                    >
                       Sửa
                     </Button>
-                    <Button variant="destructive" size="sm" onClick={() => handleDeleteForm(form)}>
+                    <Button
+                      variant="destructive"
+                      size="sm"
+                      onClick={() => handleDeleteForm(form)}
+                    >
                       Xóa
                     </Button>
                   </TableCell>
@@ -294,15 +350,19 @@ export default function Consultation() {
           <PaginationContent>
             {currentPage > 1 && (
               <PaginationItem>
-                <PaginationPrevious onClick={() => setCurrentPage(currentPage - 1)} />
+                <PaginationPrevious
+                  onClick={() => setCurrentPage(currentPage - 1)}
+                />
               </PaginationItem>
             )}
-            
+
             {generatePaginationItems()}
-            
+
             {currentPage < totalPages && (
               <PaginationItem>
-                <PaginationNext onClick={() => setCurrentPage(currentPage + 1)} />
+                <PaginationNext
+                  onClick={() => setCurrentPage(currentPage + 1)}
+                />
               </PaginationItem>
             )}
           </PaginationContent>
@@ -320,7 +380,9 @@ export default function Consultation() {
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <Label>ID Form</Label>
-                  <div className="font-medium">{selectedForm.consultingFormId}</div>
+                  <div className="font-medium">
+                    {selectedForm.consultingFormId}
+                  </div>
                 </div>
                 <div>
                   <Label>Trạng thái</Label>
@@ -335,12 +397,20 @@ export default function Consultation() {
                   <div className="font-medium">{getFullName(selectedForm)}</div>
                 </div>
                 <div>
+                  <Label>Số điện thoại</Label>
+                  <div className="font-medium">{getPhone(selectedForm)}</div>
+                </div>
+                <div>
                   <Label>Ngày tạo</Label>
-                  <div className="font-medium">{formatDate(selectedForm.createdAt)}</div>
+                  <div className="font-medium">
+                    {formatDate(selectedForm.createdAt)}
+                  </div>
                 </div>
                 <div>
                   <Label>Ngày cập nhật</Label>
-                  <div className="font-medium">{formatDate(selectedForm.updatedAt)}</div>
+                  <div className="font-medium">
+                    {formatDate(selectedForm.updatedAt)}
+                  </div>
                 </div>
               </div>
               <div>
@@ -378,24 +448,38 @@ export default function Consultation() {
             </div>
           )}
           <DialogFooter>
-            <Button variant="outline" onClick={() => setIsEditDialogOpen(false)}>Hủy</Button>
-            <Button onClick={handleStatusChange} disabled={loading}>Lưu thay đổi</Button>
+            <Button
+              variant="outline"
+              onClick={() => setIsEditDialogOpen(false)}
+            >
+              Hủy
+            </Button>
+            <Button onClick={handleStatusChange} disabled={loading}>
+              Lưu thay đổi
+            </Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
 
       {/* Dialog xác nhận xóa */}
-      <AlertDialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
+      <AlertDialog
+        open={isDeleteDialogOpen}
+        onOpenChange={setIsDeleteDialogOpen}
+      >
         <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle>Xác nhận xóa</AlertDialogTitle>
             <AlertDialogDescription>
-              Bạn có chắc chắn muốn xóa form tư vấn này? Hành động này không thể hoàn tác.
+              Bạn có chắc chắn muốn xóa form tư vấn này? Hành động này không thể
+              hoàn tác.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel>Hủy</AlertDialogCancel>
-            <AlertDialogAction onClick={handleDeleteConfirm} className="bg-red-500 text-white">
+            <AlertDialogAction
+              onClick={handleDeleteConfirm}
+              className="bg-red-500 text-white"
+            >
               Xóa
             </AlertDialogAction>
           </AlertDialogFooter>

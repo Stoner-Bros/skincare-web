@@ -114,7 +114,7 @@ class SkinTestAnswerService {
     try {
       console.log(`Lấy lịch sử làm bài kiểm tra cho customer ${customerId}`);
       const response = await api.get(
-        `${this.baseUrl}/by-customer/${customerId}`
+        `${this.baseUrl}/customer/${customerId}`
       );
       console.log("Lịch sử làm bài kiểm tra:", response.data);
       return response.data;
@@ -127,15 +127,33 @@ class SkinTestAnswerService {
     }
   }
 
-  // Lấy tất cả lịch sử làm bài kiểm tra
-  async getSkinTestAnswerHistory(): Promise<SkinTestAnswer[]> {
+  // Lấy skin test answer cụ thể theo customerId
+  async getSkinTestAnswerByCustomerId(
+    customerId: number
+  ): Promise<SkinTestAnswer> {
     try {
-      console.log("Lấy tất cả lịch sử làm bài kiểm tra");
-      const response = await api.get(`${this.baseUrl}/history`);
-      console.log("Dữ liệu lịch sử:", response.data);
+      console.log(`Lấy skin test answer cho customer ${customerId}`);
+      const response = await api.get(
+        `${this.baseUrl}/customer/${customerId}`
+      );
+      console.log("Dữ liệu skin test answer:", response.data);
+      
+      // Kiểm tra và khởi tạo mảng answers nếu nó không tồn tại hoặc không phải là mảng
+      if (!response.data.answers || !Array.isArray(response.data.answers)) {
+        console.warn("Dữ liệu answers không hợp lệ, khởi tạo mảng rỗng");
+        response.data.answers = [];
+      }
+      
       return response.data;
-    } catch (error) {
-      console.error("Error fetching skin test answer history:", error);
+    } catch (error: any) {
+      console.error(`Error fetching skin test answer for customer ${customerId}:`, error);
+      // Ghi log chi tiết lỗi nếu có
+      if (error.response) {
+        console.error("Chi tiết lỗi từ API:", {
+          status: error.response.status,
+          data: error.response.data,
+        });
+      }
       throw error;
     }
   }
