@@ -62,3 +62,23 @@ export const getAccessToken = (): string | null => {
 export const getRefreshToken = (): string | null => {
   return Cookies.get(REFRESH_TOKEN_KEY) || null;
 };
+
+// Kiểm tra token có hợp lệ không dựa trên JWT
+export const isTokenValid = (token: string): boolean => {
+  if (!token) return false;
+
+  try {
+    // Phân tích JWT (không cần thư viện)
+    const payload = JSON.parse(atob(token.split(".")[1]));
+    // Kiểm tra hạn của token
+    return payload.exp * 1000 > Date.now();
+  } catch (error) {
+    return false;
+  }
+};
+
+// Kiểm tra access token có hợp lệ không
+export const isAccessTokenValid = (): boolean => {
+  const token = getAccessToken();
+  return token ? isTokenValid(token) : false;
+};

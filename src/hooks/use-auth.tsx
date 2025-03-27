@@ -1,4 +1,4 @@
-import { isAuthenticated } from "@/lib/token";
+import { isAuthenticated, isAccessTokenValid } from "@/lib/token";
 import authServices from "@/services/auth.services";
 import React, {
   createContext,
@@ -34,7 +34,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   // Kiểm tra trạng thái đăng nhập khi component mount
   useEffect(() => {
     const checkAuth = async () => {
-      if (isAuthenticated()) {
+      if (isAuthenticated() && isAccessTokenValid()) {
         try {
           const userData = await authServices.getCurrentUser();
           setUser(userData);
