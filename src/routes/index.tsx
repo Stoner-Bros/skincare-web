@@ -31,6 +31,7 @@ import BookingHistory from "@/pages/BookingHistory";
 import ServicesList from "@/pages/Services";
 import TreatmentsList from "@/pages/Dashboard/Treatment/treatments";
 import SkinTest from "@/pages/Dashboard/SkinTest";
+import Consultation from "@/pages/Dashboard/Consultation";
 
 // ----------------------------------------------------------------------
 
@@ -69,6 +70,10 @@ export default function AppRouter() {
         {
           path: "/dashboard/skin-test/manage",
           element: <ManageResult />,
+        },
+        {
+          path: "/dashboard/consultation",
+          element: <Consultation />,
         },
         {
           path: "/dashboard/order-checkin",

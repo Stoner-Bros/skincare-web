@@ -96,6 +96,26 @@ const initialNavData = {
        ],
     },
     {
+      title: "Tư vấn",
+      url: "/dashboard/consultation",
+      icon: BookOpen,
+      isActive: false,
+      //  items: [
+      //    {
+      //     title: "Quản lý bài kiểm tra",
+      //      url: "/dashboard/skin-test",
+      //    },
+      //    {
+      //      title: "Quản lý kết quả",
+      //      url: "/dashboard/skin-test/manage",
+      //    },
+      // //  {
+      // //     title: "Thêm mới",
+      // //     url: "/dashboard/skin-test/create",
+      // //   },
+      //  ],
+    },
+    {
       title: "Order",
       url: "#",
       icon: CalendarArrowDown,

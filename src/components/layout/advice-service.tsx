@@ -1,4 +1,70 @@
+import React, { useState } from 'react';
+import consultationService from '@/services/consultation.services';
+import { toast } from "@/hooks/use-toast";
+
 export default function AdviceService({ onClose }: { onClose: () => void }) {
+  const [formData, setFormData] = useState({
+    fullName: '',
+    phone: '',
+  });
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [message, setMessage] = useState('');
+
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target;
+    setFormData(prev => ({
+      ...prev,
+      [name]: value
+    }));
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    if (!formData.fullName.trim() || !formData.phone.trim()) {
+      setMessage('Vui lòng điền đầy đủ thông tin');
+      return;
+    }
+    
+    try {
+      setIsSubmitting(true);
+      
+      await consultationService.createConsultingForm({
+        fullName: formData.fullName,
+        phone: formData.phone,
+        email: `khachhang_${Date.now()}@example.com`, // Tự động tạo email
+        message: `Yêu cầu tư vấn từ khách hàng ${formData.fullName}`, // Tự động tạo message
+      });
+      
+      toast({
+        title: "Thành công",
+        description: "Chúng tôi đã nhận được thông tin của bạn. Chúng tôi sẽ liên hệ với bạn sớm.",
+        variant: "default",
+      });
+      
+      // Reset form sau khi gửi thành công
+      setFormData({
+        fullName: '',
+        phone: '',
+      });
+      
+      // Đóng popup sau 3 giây
+      setTimeout(() => {
+        onClose();
+      }, 3000);
+      
+    } catch (error) {
+      console.error("Lỗi khi gửi form:", error);
+      toast({
+        title: "Lỗi",
+        description: "Có lỗi xảy ra khi gửi thông tin. Vui lòng thử lại sau.",
+        variant: "default",
+      });
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
   return (
     <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
       <div className="bg-white p-6 rounded-md shadow-lg w-96 relative border border-pink-300">
@@ -29,13 +95,22 @@ export default function AdviceService({ onClose }: { onClose: () => void }) {
           </h2>
         </div>
 
-        <form className="space-y-4">
+        {message && (
+          <div className={`p-2 rounded mb-4 text-center ${message.includes('thành công') ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}`}>
+            {message}
+          </div>
+        )}
+
+        <form className="space-y-4" onSubmit={handleSubmit}>
           <div>
             <label className="block text-red-400">
               Họ và tên: <span className="text-pink-300">❤</span>
             </label>
             <input
               type="text"
+              name="fullName"
+              value={formData.fullName}
+              onChange={handleChange}
               placeholder="Họ và tên"
               required
               className="w-full p-2 border rounded border-red-500"
@@ -47,25 +122,22 @@ export default function AdviceService({ onClose }: { onClose: () => void }) {
             </label>
             <input
               type="tel"
+              name="phone"
+              value={formData.phone}
+              onChange={handleChange}
               placeholder="Số Điện Thoại"
               required
               className="w-full p-2 border rounded border-red-500"
             />
           </div>
-          {/* <div>
-                        <label className="block text-pink-500">Ghi chú:</label>
-                        <textarea
-                            placeholder="Nội Dung"
-                            className="w-full p-2 border rounded h-20"
-                        />
-                    </div> */}
 
           <div className="flex justify-center pt-2">
             <button
               type="submit"
-              className="bg-white text-red-500 border border-red-500 font-medium py-2 px-10 rounded-3xl hover:bg-pink-50"
+              disabled={isSubmitting}
+              className={`bg-white text-red-500 border border-red-500 font-medium py-2 px-10 rounded-3xl hover:bg-pink-50 ${isSubmitting ? 'opacity-50 cursor-not-allowed' : ''}`}
             >
-              Xác nhận
+              {isSubmitting ? 'Đang gửi...' : 'Xác nhận'}
             </button>
           </div>
         </form>

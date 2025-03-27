@@ -1,15 +1,17 @@
 import { Button } from "@/components/ui/button";
-import { useState, useEffect } from "react";
+import serviceService from "@/services/service.services";
+import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { Autoplay, Navigation, Pagination } from "swiper/modules";
 import { Swiper, SwiperSlide } from "swiper/react";
 import "swiper/swiper-bundle.css";
-import AddService from "../Services/add-service";
-import serviceService from "@/services/service.services";
-import { Service } from "@/types/service.types";
 import AddBlog from "../Blogs/add-blog";
+import AddService from "../Services/add-service";
 import AddTherapist from "../Therapists/add-therapist";
 import AddTreatment from "../Treatment/add-treatment";
+import consultationService from "@/services/consultation.services";
+import { useToast } from "@/hooks/use-toast";
+
 
 export default function Home() {
   const [index, setIndex] = useState(0);
@@ -17,8 +19,15 @@ export default function Home() {
   const [isAddBlogOpen, setAddBlogOpen] = useState(false);
   const [isAddTherapistOpen, setAddTherapistOpen] = useState(false);
   const [isAddTreatmentOpen, setAddTreatmentOpen] = useState(false);
-  const [featuredServices, setFeaturedServices] = useState<Service[]>([]);
+  const [featuredServices, setFeaturedServices] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [fullName, setFullName] = useState('');
+  const [phone, setPhone] = useState('');
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [submitMessage, setSubmitMessage] = useState('');
+  const { toast } = useToast();
+  
+
   const bacSi = [
     {
       name: "Nguyễn Kim Khoa",
@@ -169,7 +178,7 @@ export default function Home() {
         console.log(results);
         const validServices = results.filter(
           (service) => service !== null
-        ) as Service[];
+        ) as any[];
         setFeaturedServices(validServices);
       } catch (error) {
         console.error("Lỗi khi lấy dịch vụ nổi bật:", error);
@@ -414,7 +423,7 @@ export default function Home() {
                 // autoplay={{ delay: 3000 }}
                 navigation
                 className="w-full h-[200px] grid grid-cols-5 gap-4 select-none"
-                onSlideChange={(e) => {
+                onSlideChange={() => {
                   setIndex((index + 1) % bacSi.length);
                 }}
                 // className="w-80%"
@@ -709,19 +718,65 @@ export default function Home() {
             <p className="text-gray-600 mb-4 text-center">
               để được tư vấn miễn phí
             </p>
-            <form className="space-y-4">
+            {submitMessage && (
+              <div className={`p-3 mb-4 rounded-lg text-center ${submitMessage.includes('thành công') ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}`}>
+                {submitMessage}
+              </div>
+            )}
+            <form className="space-y-4" onSubmit={async (e) => {
+              e.preventDefault();
+              if (!fullName || !phone) {
+                setSubmitMessage('Vui lòng nhập đầy đủ họ tên và số điện thoại');
+                return;
+              }
+              
+              setIsSubmitting(true);
+              try {
+                await consultationService.createConsultingForm({
+                  fullName,
+                  phone,
+                  email: 'customer@luxspa.vn',
+                  message: 'Yêu cầu tư vấn từ trang chủ'
+                });
+                // setSubmitMessage('Đăng ký tư vấn thành công! Chúng tôi sẽ liên hệ với bạn sớm.');
+                toast({
+                  title: "Thành công",
+                  description: "Chúng tôi đã nhận được thông tin của bạn. Chúng tôi sẽ liên hệ với bạn sớm.",
+                  variant: "default",
+                });
+                setFullName('');
+                setPhone('');
+              } catch (error) {
+                console.error('Lỗi khi gửi yêu cầu tư vấn:', error);
+                toast({
+                  title: "Lỗi",
+                  description: "Có lỗi xảy ra. Vui lòng thử lại sau.",
+                  variant: "default",
+                });
+              } finally {
+                setIsSubmitting(false);
+              }
+            }}>
               <input
                 type="text"
                 placeholder="Nhập họ và tên"
+                value={fullName}
+                onChange={(e) => setFullName(e.target.value)}
                 className="w-full p-3 border border-slate-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-500 border-l-4"
               />
               <input
                 type="text"
                 placeholder="Nhập số điện thoại"
+                value={phone}
+                onChange={(e) => setPhone(e.target.value)}
                 className="w-full p-3 border border-slate-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-500 border-l-4"
               />
-              <button className="w-full bg-red-500 text-white py-3 rounded-lg text-lg font-semibold hover:bg-pink-600">
-                NHẬN TƯ VẤN
+              <button 
+                type="submit"
+                disabled={isSubmitting}
+                className="w-full bg-red-500 text-white py-3 rounded-lg text-lg font-semibold hover:bg-pink-600 disabled:bg-red-300 disabled:cursor-not-allowed"
+              >
+                {isSubmitting ? 'ĐANG GỬI...' : 'NHẬN TƯ VẤN'}
               </button>
             </form>
           </div>
