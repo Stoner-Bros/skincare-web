@@ -22,17 +22,29 @@ import {
 import { useToast } from "@/hooks/use-toast";
 import { Eye } from "lucide-react";
 import ViewResultDetail from "./view-result-detail";
+import {
+  Pagination,
+  PaginationContent,
+  PaginationEllipsis,
+  PaginationItem,
+  PaginationLink,
+  PaginationNext,
+  PaginationPrevious,
+} from "@/components/ui/pagination";
 
 export default function ManageResult() {
   const [loading, setLoading] = useState<boolean>(true);
   const [results, setResults] = useState<SkinTestAnswer[]>([]);
   const [selectedAnswerId, setSelectedAnswerId] = useState<number | null>(null);
   const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
+  const [currentPage, setCurrentPage] = useState<number>(1);
+  const [totalPages, setTotalPages] = useState<number>(1);
+  const [pageSize] = useState<number>(8);
   const { toast } = useToast();
 
   useEffect(() => {
     fetchResults();
-  }, []);
+  }, [currentPage, pageSize]);
 
   const fetchResults = async () => {
     try {
@@ -40,10 +52,15 @@ export default function ManageResult() {
       const response = await skinTestAnswerService.getSkinTestAnswers();
 
       if (response && Array.isArray(response)) {
+        // Sắp xếp theo answerId mới nhất lên đầu
         const sortedResults = [...response].sort(
           (a, b) => b.answerId - a.answerId
         );
+        
         setResults(sortedResults);
+        
+        // Tính toán tổng số trang
+        setTotalPages(Math.ceil(sortedResults.length / pageSize) || 1);
       } else {
         toast({
           variant: "destructive",
@@ -61,6 +78,42 @@ export default function ManageResult() {
     } finally {
       setLoading(false);
     }
+  };
+
+  // Lấy dữ liệu cho trang hiện tại
+  const getPaginatedResults = () => {
+    const startIndex = (currentPage - 1) * pageSize;
+    const endIndex = startIndex + pageSize;
+    return results.slice(startIndex, endIndex);
+  };
+
+  // Tạo mảng trang để hiển thị
+  const generatePaginationItems = () => {
+    const items = [];
+    const maxPagesToShow = 5;
+
+    // Đảm bảo hiển thị đúng số lượng trang
+    let startPage = Math.max(1, currentPage - Math.floor(maxPagesToShow / 2));
+    let endPage = Math.min(totalPages, startPage + maxPagesToShow - 1);
+
+    if (endPage - startPage + 1 < maxPagesToShow) {
+      startPage = Math.max(1, endPage - maxPagesToShow + 1);
+    }
+
+    for (let i = startPage; i <= endPage; i++) {
+      items.push(
+        <PaginationItem key={i}>
+          <PaginationLink
+            isActive={currentPage === i}
+            onClick={() => setCurrentPage(i)}
+          >
+            {i}
+          </PaginationLink>
+        </PaginationItem>
+      );
+    }
+
+    return items;
   };
 
   useEffect(() => {}, [results]);
@@ -97,7 +150,7 @@ export default function ManageResult() {
           <h1 className="text-xl font-semibold">
             Quản lý kết quả bài kiểm tra da
           </h1>
-          {/* <Button onClick={fetchResults}>Làm mới</Button> */}
+          <Button variant="outline" onClick={fetchResults}>Làm mới</Button>
         </div>
 
         <div className="space-y-2">
@@ -115,7 +168,7 @@ export default function ManageResult() {
         <h1 className="text-xl font-semibold">
           Quản lý kết quả bài kiểm tra da
         </h1>
-        {/* <Button onClick={fetchResults}>Làm mới</Button> */}
+        <Button variant="outline" onClick={fetchResults}>Làm mới</Button>
       </div>
 
       <div className="rounded-md border">
@@ -132,7 +185,7 @@ export default function ManageResult() {
           </TableHeader>
           <TableBody>
             {!loading && results && results.length > 0 ? (
-              results.map((result) => (
+              getPaginatedResults().map((result) => (
                 <TableRow key={result.answerId}>
                   <TableCell>{result.answerId}</TableCell>
                   <TableCell>{result.skinTest?.testName || "N/A"}</TableCell>
@@ -174,6 +227,30 @@ export default function ManageResult() {
           </TableBody>
         </Table>
       </div>
+
+      {totalPages > 1 && (
+        <Pagination className="mt-4">
+          <PaginationContent>
+            {currentPage > 1 && (
+              <PaginationItem>
+                <PaginationPrevious
+                  onClick={() => setCurrentPage(currentPage - 1)}
+                />
+              </PaginationItem>
+            )}
+
+            {generatePaginationItems()}
+
+            {currentPage < totalPages && (
+              <PaginationItem>
+                <PaginationNext
+                  onClick={() => setCurrentPage(currentPage + 1)}
+                />
+              </PaginationItem>
+            )}
+          </PaginationContent>
+        </Pagination>
+      )}
 
       <ViewResultDetail
         answerId={selectedAnswerId}

@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { useLocation } from "react-router-dom";
 import bookingService from "@/services/booking.services";
+import feedbackService from "@/services/feedback.services";
 import { useAuth } from "@/hooks/use-auth";
 import {
   Card,
@@ -18,6 +19,18 @@ import {
 } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+} from "@/components/ui/dialog";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import { Star, StarIcon } from "lucide-react";
+import { toast } from "@/hooks/use-toast";
 
 interface TimeSlot {
   timeSlotId: number;
@@ -63,6 +76,11 @@ const BookingHistory: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
   const [selectedBooking, setSelectedBooking] = useState<BookingHistory | null>(null);
   const [email, setEmail] = useState<string | null>(null);
+  const [showFeedbackDialog, setShowFeedbackDialog] = useState(false);
+  const [rating, setRating] = useState<number>(0);
+  const [comment, setComment] = useState<string>("");
+  const [submitting, setSubmitting] = useState(false);
+  const [ratedBookings, setRatedBookings] = useState<number[]>([]);
   
   // Lấy query params từ URL
   const location = useLocation();
@@ -159,6 +177,48 @@ const BookingHistory: React.FC = () => {
     fetchBookingHistory();
   }, [user?.accountId, authLoading, email, currentPage, itemsPerPage]);
 
+  // Tải danh sách bookingId đã đánh giá từ localStorage khi trang được tải
+  useEffect(() => {
+    const savedRatedBookings = localStorage.getItem('ratedBookings');
+    if (savedRatedBookings) {
+      setRatedBookings(JSON.parse(savedRatedBookings));
+    }
+  }, []);
+
+  // Lưu danh sách bookingId đã đánh giá vào localStorage khi thay đổi
+  useEffect(() => {
+    if (ratedBookings.length > 0) {
+      localStorage.setItem('ratedBookings', JSON.stringify(ratedBookings));
+    }
+  }, [ratedBookings]);
+
+  // Kiểm tra các booking đã có đánh giá chưa
+  useEffect(() => {
+    const checkRatedBookings = async () => {
+      try {
+        // Kiểm tra các booking hiện có
+        for (const booking of bookings) {
+          try {
+            // Gọi API để kiểm tra xem booking này đã có feedback chưa
+            const response = await feedbackService.getFeedbackByBookingId(booking.bookingId);
+            if (response && !ratedBookings.includes(booking.bookingId)) {
+              setRatedBookings(prev => [...prev, booking.bookingId]);
+            }
+          } catch (error) {
+            // Lỗi khi lấy feedback có thể là do booking chưa có feedback
+            console.log(`Booking ${booking.bookingId} chưa có feedback`);
+          }
+        }
+      } catch (error) {
+        console.error("Lỗi khi kiểm tra các booking đã đánh giá:", error);
+      }
+    };
+
+    if (bookings.length > 0) {
+      checkRatedBookings();
+    }
+  }, [bookings]);
+
   const renderStatusBadge = (status: string) => {
     switch (status.toLowerCase()) {
       case "paid":
@@ -181,6 +241,60 @@ const BookingHistory: React.FC = () => {
     if (page >= 1 && page <= totalPages) {
       setCurrentPage(page);
     }
+  };
+
+  const handleOpenFeedback = () => {
+    if (selectedBooking) {
+      setRating(0);
+      setComment("");
+      setShowFeedbackDialog(true);
+    }
+  };
+
+  const handleSubmitFeedback = async () => {
+    if (!selectedBooking) return;
+    if (rating === 0) {
+      toast({
+        title: "Lỗi",
+        description: "Vui lòng chọn số sao đánh giá",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    try {
+      setSubmitting(true);
+      const feedbackData = {
+        rating,
+        comment
+      };
+
+      await feedbackService.createFeedback(selectedBooking.bookingId, feedbackData);
+      
+      // Thêm bookingId vào danh sách đã đánh giá
+      setRatedBookings(prev => [...prev, selectedBooking.bookingId]);
+      
+      toast({
+        title: "Thành công",
+        description: "Gửi đánh giá thành công",
+        variant: "default",
+      });
+      setShowFeedbackDialog(false);
+    } catch (error) {
+      console.error("Lỗi khi gửi đánh giá:", error);
+      toast({
+        title: "Lỗi",
+        description: "Có lỗi xảy ra khi gửi đánh giá",
+        variant: "destructive",
+      });
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  // Kiểm tra xem booking đã được đánh giá chưa
+  const isBookingRated = (bookingId: number) => {
+    return ratedBookings.includes(bookingId);
   };
 
   if (loading) {
@@ -372,14 +486,91 @@ const BookingHistory: React.FC = () => {
                     )}
                   </tbody>
                 </table>
-                <Button className="w-full mt-6 bg-pink-600 hover:bg-pink-700 text-white font-medium py-3 rounded">
-                  Viết đánh giá
+                <Button 
+                  className={`w-full mt-6 ${
+                    isBookingRated(selectedBooking.bookingId)
+                      ? "bg-gray-400 cursor-not-allowed"
+                      : "bg-pink-600 hover:bg-pink-700"
+                  } text-white font-medium py-3 rounded`}
+                  onClick={handleOpenFeedback}
+                  disabled={isBookingRated(selectedBooking.bookingId)}
+                >
+                  {isBookingRated(selectedBooking.bookingId) ? "Đã đánh giá" : "Viết đánh giá"}
                 </Button>
               </CardContent>
             </Card>
           )}
         </div>
       </div>
+      
+      {/* Dialog đánh giá */}
+      <Dialog open={showFeedbackDialog} onOpenChange={setShowFeedbackDialog}>
+        <DialogContent className="sm:max-w-[425px] bg-white">
+          <DialogHeader>
+            <DialogTitle className="text-center text-pink-800 text-xl">Đánh giá dịch vụ</DialogTitle>
+            <DialogDescription className="text-center">
+              {selectedBooking?.treatment?.treatmentName}
+            </DialogDescription>
+          </DialogHeader>
+          
+          <div className="grid gap-4 py-4">
+            <div className="flex flex-col gap-2">
+              <Label htmlFor="rating" className="font-medium text-pink-800">
+                Đánh giá
+              </Label>
+              <div className="flex justify-center gap-1">
+                {[1, 2, 3, 4, 5].map((star) => (
+                  <button
+                    key={star}
+                    type="button"
+                    onClick={() => setRating(star)}
+                    className="text-2xl focus:outline-none"
+                  >
+                    {star <= rating ? (
+                      <StarIcon className="w-8 h-8 fill-yellow-400 text-yellow-400" />
+                    ) : (
+                      <Star className="w-8 h-8 text-gray-300" />
+                    )}
+                  </button>
+                ))}
+              </div>
+            </div>
+            
+            <div className="flex flex-col gap-2">
+              <Label htmlFor="comment" className="font-medium text-pink-800">
+                Bình luận
+              </Label>
+              <Textarea 
+                id="comment"
+                value={comment}
+                onChange={(e) => setComment(e.target.value)}
+                placeholder="Nhập bình luận của bạn về dịch vụ..."
+                className="resize-none border-pink-200 focus:border-pink-500"
+                rows={4}
+              />
+            </div>
+          </div>
+          
+          <DialogFooter>
+            <Button 
+              type="button" 
+              variant="outline" 
+              onClick={() => setShowFeedbackDialog(false)}
+              className="border-pink-300 text-pink-800"
+            >
+              Hủy
+            </Button>
+            <Button 
+              type="button" 
+              className="bg-pink-600 hover:bg-pink-700 text-white"
+              onClick={handleSubmitFeedback}
+              disabled={submitting}
+            >
+              {submitting ? "Đang gửi..." : "Gửi đánh giá"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
