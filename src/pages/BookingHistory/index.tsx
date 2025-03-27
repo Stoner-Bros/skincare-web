@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { useLocation } from "react-router-dom";
 import bookingService from "@/services/booking.services";
 import feedbackService from "@/services/feedback.services";
+import feedbackReplyService from "@/services/feedback-reply.services";
 import { useAuth } from "@/hooks/use-auth";
 import {
   Card,
@@ -81,6 +82,9 @@ const BookingHistory: React.FC = () => {
   const [comment, setComment] = useState<string>("");
   const [submitting, setSubmitting] = useState(false);
   const [ratedBookings, setRatedBookings] = useState<number[]>([]);
+  const [showReplyDialog, setShowReplyDialog] = useState(false);
+  const [feedbackReplies, setFeedbackReplies] = useState<any[]>([]);
+  const [loadingReplies, setLoadingReplies] = useState(false);
   
   // Lấy query params từ URL
   const location = useLocation();
@@ -292,6 +296,68 @@ const BookingHistory: React.FC = () => {
     }
   };
 
+  // Hàm để lấy feedback ID dựa trên booking ID
+  const getFeedbackIdByBookingId = async (bookingId: number) => {
+    try {
+      const response = await feedbackService.getFeedbackByBookingId(bookingId);
+      return response.feedbackId;
+    } catch (error) {
+      console.error(`Lỗi khi lấy feedbackId cho booking ${bookingId}:`, error);
+      return null;
+    }
+  };
+
+  // Hàm xử lý khi người dùng nhấn nút "Xem phản hồi"
+  const handleViewReplies = async () => {
+    if (!selectedBooking) return;
+    
+    try {
+      setLoadingReplies(true);
+      
+      // Bước 1: Lấy feedback ID từ booking ID
+      const feedbackId = await getFeedbackIdByBookingId(selectedBooking.bookingId);
+      
+      if (!feedbackId) {
+        toast({
+          title: "Thông báo",
+          description: "Không tìm thấy đánh giá cho lịch đặt này",
+          variant: "destructive",
+        });
+        return;
+      }
+      
+      // Bước 2: Lấy danh sách phản hồi theo feedback ID
+      const response = await feedbackReplyService.getFeedbackRepliesByFeedbackId(feedbackId);
+      console.log("Response nhận được:", response);
+      
+      // Kiểm tra cấu trúc response và trích xuất dữ liệu đúng cách
+      let replies = [];
+      
+      if (response && response.data) {
+        // Trường hợp response có cấu trúc { data: [...] }
+        replies = Array.isArray(response.data) ? response.data : [response.data];
+      } else if (Array.isArray(response)) {
+        // Trường hợp response trực tiếp là mảng
+        replies = response;
+      } else if (response) {
+        // Trường hợp response là một object đơn lẻ
+        replies = [response];
+      }
+      
+      setFeedbackReplies(replies);
+      setShowReplyDialog(true);
+    } catch (error) {
+      console.error("Lỗi khi lấy phản hồi:", error);
+      toast({
+        title: "Lỗi",
+        description: "Không thể lấy phản hồi. Vui lòng thử lại sau.",
+        variant: "destructive",
+      });
+    } finally {
+      setLoadingReplies(false);
+    }
+  };
+
   // Kiểm tra xem booking đã được đánh giá chưa
   const isBookingRated = (bookingId: number) => {
     return ratedBookings.includes(bookingId);
@@ -486,17 +552,31 @@ const BookingHistory: React.FC = () => {
                     )}
                   </tbody>
                 </table>
-                <Button 
-                  className={`w-full mt-6 ${
-                    isBookingRated(selectedBooking.bookingId)
-                      ? "bg-gray-400 cursor-not-allowed"
-                      : "bg-pink-600 hover:bg-pink-700"
-                  } text-white font-medium py-3 rounded`}
-                  onClick={handleOpenFeedback}
-                  disabled={isBookingRated(selectedBooking.bookingId)}
-                >
-                  {isBookingRated(selectedBooking.bookingId) ? "Đã đánh giá" : "Viết đánh giá"}
-                </Button>
+                <div className="flex flex-col gap-2 mt-6">
+                  <Button 
+                    className={`w-full ${
+                      isBookingRated(selectedBooking.bookingId)
+                        ? "bg-pink-600 hover:bg-pink-700"
+                        : "bg-gray-400 cursor-not-allowed"
+                    } text-white font-medium py-3 rounded`}
+                    onClick={handleViewReplies}
+                    disabled={!isBookingRated(selectedBooking.bookingId)}
+                  >
+                    Xem phản hồi từ nhân viên
+                  </Button>
+                  
+                  <Button 
+                    className={`w-full ${
+                      isBookingRated(selectedBooking.bookingId)
+                        ? "bg-gray-400 cursor-not-allowed"
+                        : "bg-pink-600 hover:bg-pink-700"
+                    } text-white font-medium py-3 rounded`}
+                    onClick={handleOpenFeedback}
+                    disabled={isBookingRated(selectedBooking.bookingId)}
+                  >
+                    {isBookingRated(selectedBooking.bookingId) ? "Đã đánh giá" : "Viết đánh giá"}
+                  </Button>
+                </div>
               </CardContent>
             </Card>
           )}
@@ -567,6 +647,65 @@ const BookingHistory: React.FC = () => {
               disabled={submitting}
             >
               {submitting ? "Đang gửi..." : "Gửi đánh giá"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+      
+      {/* Dialog xem phản hồi */}
+      <Dialog open={showReplyDialog} onOpenChange={setShowReplyDialog}>
+        <DialogContent className="sm:max-w-[500px] bg-white">
+          <DialogHeader>
+            <DialogTitle className="text-center text-pink-800 text-xl">Phản hồi từ nhân viên</DialogTitle>
+            <DialogDescription className="text-center">
+              {selectedBooking?.treatment?.treatmentName}
+            </DialogDescription>
+          </DialogHeader>
+          
+          <div className="py-4">
+            {loadingReplies ? (
+              <div className="flex justify-center py-8">
+                <div className="w-8 h-8 border-4 border-pink-500 border-t-transparent rounded-full animate-spin"></div>
+              </div>
+            ) : feedbackReplies.length > 0 ? (
+              <div className="space-y-4">
+                {feedbackReplies.map((reply, index) => (
+                  <div key={index} className="bg-pink-50 p-4 rounded-lg">
+                    <div className="flex justify-between items-center mb-2">
+                      <div className="font-medium text-pink-800">
+                        <span className="text-pink-600">Nhân viên:</span> {reply.staffName || "Admin"}
+                      </div>
+                      <div className="text-xs text-gray-500">
+                        {new Date(reply.createdAt).toLocaleDateString("vi-VN", {
+                          day: "2-digit",
+                          month: "2-digit",
+                          year: "numeric",
+                          hour: "2-digit",
+                          minute: "2-digit"
+                        })}
+                      </div>
+                    </div>
+                    <div className="mt-2">
+                      <span className="font-medium text-pink-600 block mb-1">Phản hồi:</span>
+                      <p className="text-gray-700 pl-3 border-l-2 border-pink-300">{reply.reply}</p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <div className="text-center py-8 text-gray-500">
+                Chưa có phản hồi nào từ nhân viên.
+              </div>
+            )}
+          </div>
+          
+          <DialogFooter>
+            <Button 
+              type="button" 
+              onClick={() => setShowReplyDialog(false)}
+              className="bg-pink-600 hover:bg-pink-700 text-white"
+            >
+              Đóng
             </Button>
           </DialogFooter>
         </DialogContent>

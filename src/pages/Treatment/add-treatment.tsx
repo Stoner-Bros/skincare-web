@@ -1,9 +1,8 @@
-import React, { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
-import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import * as z from "zod";
 import { Loader2 } from "lucide-react";
+import React, { useEffect, useState } from "react";
+import { useForm } from "react-hook-form";
+import * as z from "zod";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -15,10 +14,6 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
-import { useToast } from "@/hooks/use-toast";
-import treatmentService from "@/services/treatment.services";
-import serviceService from "@/services/service.services";
 import {
   Select,
   SelectContent,
@@ -26,6 +21,10 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { Textarea } from "@/components/ui/textarea";
+import { useToast } from "@/hooks/use-toast";
+import serviceService from "@/services/service.services";
+import treatmentService from "@/services/treatment.services";
 // import uploadService from "@/services/upload.services";
 
 const formSchema = z.object({
@@ -47,7 +46,6 @@ type AddTreatmentProps = {
 
 export default function AddTreatment({ open, onClose, serviceId }: AddTreatmentProps) {
   const { toast } = useToast();
-  const navigate = useNavigate();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [thumbnailFile, setThumbnailFile] = useState<File | null>(null);
   const [previewUrl, setPreviewUrl] = useState<string>("");
@@ -350,7 +348,7 @@ export default function AddTreatment({ open, onClose, serviceId }: AddTreatmentP
                   className="cursor-pointer"
                 />
                 
-                {/* {previewUrl && (
+                {previewUrl && (
                   <div className="mt-2">
                     <p className="text-sm mb-2">Xem trước:</p>
                     <img
@@ -359,7 +357,7 @@ export default function AddTreatment({ open, onClose, serviceId }: AddTreatmentP
                       className="max-w-xs rounded-md border border-gray-200"
                     />
                   </div>
-                )} */}
+                )}
               </div>
 
               <div className="flex justify-end space-x-3 mt-6">

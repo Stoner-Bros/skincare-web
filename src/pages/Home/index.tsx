@@ -175,6 +175,30 @@ export default function Home() {
     },
   ];
 
+  // Thêm mảng dữ liệu mới cho công nghệ độc quyền
+  const technologies = [
+    {
+      name: "Nâng cơ Collagen",
+      description: "Sử dụng chỉ Collagen sinh học tạo lưới nâng đỡ da, làm căng vùng da chảy xệ, trẻ hóa tự nhiên không cần phẫu thuật",
+      image: "/nangco.webp"
+    },
+    {
+      name: "Căn chỉnh khuôn mặt",
+      description: "Công nghệ CODE định vị và đưa collagen vào nhóm cơ lão hóa, giúp căng da, nâng cơ, giảm nếp nhăn và định hình khuôn mặt.",
+      image: "/canchinh.webp"
+    },
+    {
+      name: "MD-CODE",
+      description: "Công nghệ MD-CODE sử dụng sóng vô tuyến để làm căng da, xóa nhăn và mang lại làn da trẻ trung hơn. Không xâm lấn, không thời gian nghỉ dưỡng và mang lại kết quả lâu dài cho mọi loại da",
+      image: "/mdcode.webp"
+    },
+    {
+      name: "Nâng Cơ Sinh Học",
+      description: "Công nghệ căng da không phẫu thuật 5.0 đột phá: ứng dụng chỉ sinh học tự thân, xóa nhăn và trẻ hóa da hiệu quả",
+      image: "/sinhhoc.webp"
+    },
+  ];
+
   const handleAddServiceClick = () => {
     dispatch({ type: "TOGGLE_ADD_SERVICE", payload: true });
   };
@@ -368,48 +392,25 @@ export default function Home() {
           navigation
           className="w-3/5 mx-auto select-none"
         >
-          <div className="grid grid-cols-2 gap-4">
-            <SwiperSlide>
+          {technologies.map((tech, index) => (
+            <SwiperSlide key={index}>
               <div className="bg-white rounded-2xl shadow-lg flex items-center border border-pink-300">
                 <img
-                  src="/tesst.webp"
-                  alt="MD-CODE"
+                  src={tech.image}
+                  alt={tech.name}
                   className="aspect-[11/9] h-[200px] object-cover rounded-xl"
                 />
                 <div className="h-[200px] px-4 py-2 flex flex-col grow">
                   <h3 className="text-pink-500 font-semibold text-lg mb-2">
-                    MD-CODE
+                    {tech.name}
                   </h3>
                   <p className="text-gray-600 text-sm tracking-widest">
-                    Công nghệ MD-DYNAMIC CODE tái cấu trúc da minh họa động và
-                    đầy đủ cấp độ tốt nhất có thể cho bạn để làm việc nhanh
-                    nhất. Công nghệ MD-DYNAMIC CODE cái cấu trúc da minh họa
-                    động và đầy đủ cấp độ tốt nhất
+                    {tech.description}
                   </p>
                 </div>
               </div>
             </SwiperSlide>
-            <SwiperSlide>
-              <div className="bg-white rounded-2xl shadow-lg flex items-center border border-pink-300">
-                <img
-                  src="/tesst.webp"
-                  alt="MD-CODE"
-                  className="aspect-[11/9] h-[200px] object-cover rounded-xl"
-                />
-                <div className="h-[200px] px-4 py-2 flex flex-col grow">
-                  <h3 className="text-pink-500 font-semibold text-lg mb-2">
-                    MD-CODE
-                  </h3>
-                  <p className="text-gray-600 text-sm tracking-widest">
-                    Công nghệ MD-DYNAMIC CODE tái cấu trúc da minh họa động và
-                    đầy đủ cấp độ tốt nhất có thể cho bạn để làm việc nhanh
-                    nhất. Công nghệ MD-DYNAMIC CODE cái cấu trúc da minh họa
-                    động và đầy đủ cấp độ tốt nhất
-                  </p>
-                </div>
-              </div>
-            </SwiperSlide>
-          </div>
+          ))}
         </Swiper>
       </section>
 
