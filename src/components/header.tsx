@@ -5,6 +5,8 @@ import { Button } from "./ui/button";
 import AuthDialog from "@/pages/Auth";
 import { useAuth } from "@/hooks/use-auth";
 import { UserAvatarMenu } from "./user-avatar-menu";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
 
 export default function Header() {
   const [showAuthDialog, setShowAuthDialog] = useState(false);
@@ -16,6 +18,10 @@ export default function Header() {
 
   const location = useLocation();
   const navigate = useNavigate();
+
+  // Thêm state cho Dialog nhập email
+  const [showEmailDialog, setShowEmailDialog] = useState(false);
+  const [bookingEmail, setBookingEmail] = useState("");
 
   // Check for auth parameter in URL on component mount and route changes
   useEffect(() => {
@@ -74,6 +80,36 @@ export default function Header() {
     }
   };
 
+  // Xử lý khi click vào nút Tra Cứu
+  const handleBookingHistoryClick = (e: React.MouseEvent) => {
+    e.preventDefault();
+    
+    // Kiểm tra trạng thái đăng nhập
+    if (isLoggedIn) {
+      // Nếu đã đăng nhập, chuyển đến trang lịch sử đặt lịch
+      navigate("/booking-history");
+    } else {
+      // Nếu chưa đăng nhập, hiển thị dialog nhập email
+      setShowEmailDialog(true);
+    }
+  };
+  
+  // Xử lý khi submit form nhập email
+  const handleEmailSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    if (bookingEmail.trim()) {
+      // Đóng dialog
+      setShowEmailDialog(false);
+      
+      // Chuyển đến trang lịch sử đặt lịch với email được truyền qua query params
+      navigate(`/booking-history?email=${encodeURIComponent(bookingEmail)}`);
+      
+      // Reset email
+      setBookingEmail("");
+    }
+  };
+
   const navigationLinks = [
     {
       path: "/about-us",
@@ -95,6 +131,11 @@ export default function Header() {
     {
       path: "/news",
       label: "BLOGS",
+    },
+    {
+      path: "#",
+      label: "TRA CỨU",
+      onClick: handleBookingHistoryClick,
     },
   ];
 
@@ -199,6 +240,41 @@ export default function Header() {
         onOpenChange={setShowAuthDialog}
         defaultTab={authDialogTab}
       />
+      
+      {/* Dialog nhập email */}
+      <Dialog open={showEmailDialog} onOpenChange={setShowEmailDialog}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle className="text-center text-lg font-bold text-pink-800">
+              Tra cứu lịch sử đặt lịch
+            </DialogTitle>
+          </DialogHeader>
+          <form onSubmit={handleEmailSubmit} className="space-y-4">
+            <div className="flex flex-col space-y-2">
+              <label htmlFor="booking-email" className="text-sm font-medium text-pink-700">
+                Vui lòng nhập email bạn đã dùng để đặt lịch
+              </label>
+              <Input
+                id="booking-email"
+                type="email"
+                value={bookingEmail}
+                onChange={(e) => setBookingEmail(e.target.value)}
+                placeholder="Nhập email của bạn"
+                required
+                className="border-pink-200 focus:border-pink-500"
+              />
+            </div>
+            <div className="flex justify-center">
+              <Button
+                type="submit"
+                className="bg-pink-600 hover:bg-pink-700 text-white px-6 py-2 rounded-full"
+              >
+                Tra cứu
+              </Button>
+            </div>
+          </form>
+        </DialogContent>
+      </Dialog>
     </>
   );
 }
