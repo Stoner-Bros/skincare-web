@@ -83,6 +83,21 @@ class SkinTherapistSchedulesService {
       throw error;
     }
   }
+
+  async cancelSkinTherapistSchedule(
+    skinTherapistScheduleData: any
+  ): Promise<any> {
+    try {
+      const response = await api.post(
+        `${this.baseUrl}/cancel-schedule`,
+        skinTherapistScheduleData
+      );
+      return response.data;
+    } catch (error) {
+      console.error(`Error canceling skin therapist schedule: `, error);
+      throw error;
+    }
+  }
 }
 
 export default new SkinTherapistSchedulesService();

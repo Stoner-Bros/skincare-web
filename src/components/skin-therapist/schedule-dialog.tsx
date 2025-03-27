@@ -22,11 +22,12 @@ import {
 } from "@/components/ui/popover";
 import { toast } from "@/hooks/use-toast";
 import { cn } from "@/lib/utils";
-import skinTherapistSchedulesServices from "@/services/skin-therapist-schedules.services";
+import SkinTherapistSchedulesServices from "@/services/skin-therapist-schedules.services";
+import TimeSlotServices from "@/services/time-slot.services";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { format } from "date-fns";
 import { CalendarIcon } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useEffect, useReducer } from "react";
 import { useForm } from "react-hook-form";
 import * as z from "zod";
 
@@ -44,33 +45,126 @@ interface ScheduleDialogProps {
   therapist: any | null;
 }
 
+type State = {
+  allTimeSlots: any[];
+  therapistSchedules: any[];
+  selectedDate: Date | null;
+  isLoading: boolean;
+  selectedTimeSlots: any[];
+};
+
+type Action =
+  | { type: "SET_ALL_TIME_SLOTS"; payload: any[] }
+  | { type: "SET_THERAPIST_SCHEDULES"; payload: any[] }
+  | { type: "SET_SELECTED_DATE"; payload: Date | null }
+  | { type: "SET_LOADING"; payload: boolean }
+  | { type: "TOGGLE_TIME_SLOT_SELECTION"; payload: any }
+  | { type: "RESET_SELECTED_TIME_SLOTS" }
+  | { type: "RESET_STATE" };
+
+const initialState: State = {
+  allTimeSlots: [],
+  therapistSchedules: [],
+  selectedDate: null,
+  isLoading: false,
+  selectedTimeSlots: [],
+};
+
+function reducer(state: State, action: Action): State {
+  switch (action.type) {
+    case "SET_ALL_TIME_SLOTS":
+      return { ...state, allTimeSlots: action.payload };
+    case "SET_THERAPIST_SCHEDULES":
+      return { ...state, therapistSchedules: action.payload };
+    case "SET_SELECTED_DATE":
+      return { ...state, selectedDate: action.payload };
+    case "SET_LOADING":
+      return { ...state, isLoading: action.payload };
+    case "TOGGLE_TIME_SLOT_SELECTION":
+      const timeSlot = action.payload;
+      // Check if the time slot is busy
+      const isBusy = state.therapistSchedules.some(
+        (schedule) =>
+          schedule.startTime === timeSlot.startTime &&
+          schedule.endTime === timeSlot.endTime &&
+          !schedule.isAvailable
+      );
+
+      // Don't allow selecting busy slots
+      if (isBusy) return state;
+
+      const isAlreadySelected = state.selectedTimeSlots.some(
+        (selected) => selected.timeSlotId === timeSlot.timeSlotId
+      );
+
+      if (isAlreadySelected) {
+        return {
+          ...state,
+          selectedTimeSlots: state.selectedTimeSlots.filter(
+            (selected) => selected.timeSlotId !== timeSlot.timeSlotId
+          ),
+        };
+      } else {
+        return {
+          ...state,
+          selectedTimeSlots: [...state.selectedTimeSlots, timeSlot],
+        };
+      }
+    case "RESET_SELECTED_TIME_SLOTS":
+      return { ...state, selectedTimeSlots: [] };
+    case "RESET_STATE":
+      return initialState;
+    default:
+      return state;
+  }
+}
+
 export default function ScheduleDialog({
   isOpen,
   onClose,
   therapist,
 }: ScheduleDialogProps) {
-  const [scheduleData, setScheduleData] = useState<any[]>([]);
-  const [selectedDate, setSelectedDate] = useState<Date | null>(new Date());
-  const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [state, dispatch] = useReducer(reducer, initialState);
+  const {
+    allTimeSlots,
+    therapistSchedules,
+    selectedDate,
+    isLoading,
+    selectedTimeSlots,
+  } = state;
 
   const scheduleForm = useForm<ScheduleFormValues>({
     resolver: zodResolver(scheduleFormSchema),
-    defaultValues: {
-      date: new Date(),
-    },
+    defaultValues: {},
   });
 
   useEffect(() => {
-    if (therapist && isOpen) {
-      const today = new Date();
-      setSelectedDate(today);
-      scheduleForm.setValue("date", today);
-
-      fetchSchedules(today);
+    if (isOpen) {
+      dispatch({ type: "SET_SELECTED_DATE", payload: null });
+      scheduleForm.reset();
+      fetchAllTimeSlots();
     }
-  }, [therapist, isOpen]);
+  }, [isOpen]);
 
-  // Hàm format date theo định dạng YYYY-MM-DD
+  useEffect(() => {
+    // Reset selected time slots when date changes
+    dispatch({ type: "RESET_SELECTED_TIME_SLOTS" });
+  }, [selectedDate]);
+
+  const fetchAllTimeSlots = async () => {
+    try {
+      const response = await TimeSlotServices.getTimeSlots();
+      dispatch({ type: "SET_ALL_TIME_SLOTS", payload: response.data });
+    } catch (error) {
+      console.error("Error fetching time slots:", error);
+      toast({
+        title: "Error",
+        description: "Failed to fetch time slots",
+        variant: "destructive",
+      });
+    }
+  };
+
   const formatDateForApi = (date: Date): string => {
     const year = date.getFullYear();
     const month = String(date.getMonth() + 1).padStart(2, "0");
@@ -78,23 +172,24 @@ export default function ScheduleDialog({
     return `${year}-${month}-${day}`;
   };
 
-  const fetchSchedules = async (date: Date) => {
+  const fetchTherapistSchedules = async (date: Date) => {
     if (!therapist) return;
 
-    setIsLoading(true);
+    dispatch({ type: "SET_LOADING", payload: true });
     try {
       const formattedDate = formatDateForApi(date);
       const response: any =
-        await skinTherapistSchedulesServices.getSkinTherapistSchedules(
+        await SkinTherapistSchedulesServices.getSkinTherapistSchedules(
           therapist.accountId,
-          1, // pageNumber
-          10, // pageSize
-          formattedDate // date
+          1,
+          10,
+          formattedDate
         );
 
-      // Kiểm tra và cập nhật trạng thái dựa trên thời gian hiện tại
-      const updatedItems = processScheduleData(response.data.items);
-      setScheduleData(updatedItems);
+      dispatch({
+        type: "SET_THERAPIST_SCHEDULES",
+        payload: response.data.items,
+      });
     } catch (error) {
       console.error("Error fetching schedules:", error);
       toast({
@@ -103,80 +198,171 @@ export default function ScheduleDialog({
         variant: "destructive",
       });
     } finally {
-      setIsLoading(false);
+      dispatch({ type: "SET_LOADING", payload: false });
     }
-  };
-
-  const processScheduleData = (schedules: any[]) => {
-    // Lấy thời gian hiện tại theo múi giờ local của trình duyệt
-    const now = new Date();
-
-    return schedules.map((schedule) => {
-      // Nếu lịch đã unavailable thì giữ nguyên
-      if (!schedule.isAvailable) {
-        return schedule;
-      }
-
-      try {
-        // Parse workDate và tạo ngày từ schedule
-        const [scheduleYear, scheduleMonth, scheduleDay] = schedule.workDate
-          .split("-")
-          .map(Number);
-        const [endHours, endMinutes] = schedule.endTime.split(":").map(Number);
-
-        // Lấy năm, tháng, ngày hiện tại
-        const todayYear = now.getFullYear();
-        const todayMonth = now.getMonth() + 1; // getMonth() trả về 0-11
-        const todayDay = now.getDate();
-
-        // So sánh ngày
-        if (scheduleYear < todayYear) {
-          // Lịch thuộc năm đã qua
-          return { ...schedule, isAvailable: false };
-        } else if (scheduleYear === todayYear) {
-          if (scheduleMonth < todayMonth) {
-            // Lịch thuộc tháng đã qua trong năm hiện tại
-            return { ...schedule, isAvailable: false };
-          } else if (scheduleMonth === todayMonth) {
-            if (scheduleDay < todayDay) {
-              // Lịch thuộc ngày đã qua trong tháng hiện tại
-              return { ...schedule, isAvailable: false };
-            } else if (scheduleDay === todayDay) {
-              // Cùng ngày, kiểm tra giờ
-              const currentHour = now.getHours();
-              const currentMinute = now.getMinutes();
-
-              if (
-                currentHour > endHours ||
-                (currentHour === endHours && currentMinute >= endMinutes)
-              ) {
-                // Đã qua giờ kết thúc
-                return { ...schedule, isAvailable: false };
-              }
-            }
-          }
-        }
-
-        // Nếu không rơi vào các trường hợp trên, lịch vẫn available
-      } catch (error) {
-        console.error("Error processing schedule:", error, schedule);
-      }
-
-      return schedule;
-    });
   };
 
   const handleDateSelect = (date: Date | null) => {
-    setSelectedDate(date);
+    dispatch({ type: "SET_SELECTED_DATE", payload: date });
     if (date) {
       scheduleForm.setValue("date", date);
-      fetchSchedules(date);
+      if (therapist) {
+        fetchTherapistSchedules(date);
+      }
     }
   };
 
-  // Function to get schedules
-  const getSchedulesByDate = () => {
-    return scheduleData;
+  const isTimeSlotAvailable = (timeSlot: any) => {
+    return therapistSchedules.some(
+      (schedule) =>
+        schedule.startTime === timeSlot.startTime &&
+        schedule.endTime === timeSlot.endTime &&
+        schedule.isAvailable
+    );
+  };
+
+  const isTimeSlotBusy = (timeSlot: any) => {
+    return therapistSchedules.some(
+      (schedule) =>
+        schedule.startTime === timeSlot.startTime &&
+        schedule.endTime === timeSlot.endTime &&
+        !schedule.isAvailable
+    );
+  };
+
+  const isTimeSlotSelected = (timeSlot: any) => {
+    return selectedTimeSlots.some(
+      (selected) => selected.timeSlotId === timeSlot.timeSlotId
+    );
+  };
+
+  const toggleTimeSlotSelection = (timeSlot: any) => {
+    dispatch({ type: "TOGGLE_TIME_SLOT_SELECTION", payload: timeSlot });
+  };
+
+  const getAssignableTimeSlots = () => {
+    return selectedTimeSlots.filter((slot) => {
+      // Slot có thể đăng ký nếu chưa được đăng ký (không có trong therapistSchedules)
+      return !therapistSchedules.some(
+        (schedule) =>
+          schedule.startTime === slot.startTime &&
+          schedule.endTime === slot.endTime
+      );
+    });
+  };
+
+  const getUnassignableTimeSlots = () => {
+    return selectedTimeSlots.filter((slot) => {
+      // Slot có thể hủy đăng ký nếu đã được đăng ký (có trong therapistSchedules và isAvailable)
+      return therapistSchedules.some(
+        (schedule) =>
+          schedule.startTime === slot.startTime &&
+          schedule.endTime === slot.endTime &&
+          schedule.isAvailable
+      );
+    });
+  };
+
+  const handleAssign = async () => {
+    if (!selectedDate || !therapist) {
+      toast({
+        title: "Error",
+        description: "Please select a date",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    const assignableSlots = getAssignableTimeSlots();
+
+    if (assignableSlots.length === 0) {
+      toast({
+        title: "Error",
+        description: "No time slots available for assignment",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    const workDates = [formatDateForApi(selectedDate)];
+    const timeSlotIds = assignableSlots.map((slot) => slot.timeSlotId);
+
+    try {
+      const response =
+        await SkinTherapistSchedulesServices.createSkinTherapistSchedule({
+          skinTherapistId: therapist.accountId,
+          workDates: workDates,
+          timeSlotIds: timeSlotIds,
+        });
+      if (response.status === 200) {
+        toast({
+          title: "Success",
+          description: `${timeSlotIds.length} time slot(s) assigned successfully`,
+        });
+        if (selectedDate) {
+          fetchTherapistSchedules(selectedDate);
+        }
+        dispatch({ type: "RESET_SELECTED_TIME_SLOTS" });
+      }
+    } catch (error) {
+      console.error("Error assigning time slot:", error);
+      toast({
+        title: "Error",
+        description: "Failed to assign time slot",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const handleUnassign = async () => {
+    if (!selectedDate || !therapist) {
+      toast({
+        title: "Error",
+        description: "Please select a date",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    const unassignableSlots = getUnassignableTimeSlots();
+
+    if (unassignableSlots.length === 0) {
+      toast({
+        title: "Error",
+        description: "No time slots available for unassignment",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    const workDates = [formatDateForApi(selectedDate)];
+    const timeSlotIds = unassignableSlots.map((slot) => slot.timeSlotId);
+
+    try {
+      const response =
+        await SkinTherapistSchedulesServices.cancelSkinTherapistSchedule({
+          skinTherapistId: therapist.accountId,
+          workDates: workDates,
+          timeSlotIds: timeSlotIds,
+        });
+      if (response.status === 200) {
+        toast({
+          title: "Success",
+          description: `${timeSlotIds.length} time slot(s) unassigned successfully`,
+        });
+        if (selectedDate) {
+          fetchTherapistSchedules(selectedDate);
+        }
+        dispatch({ type: "RESET_SELECTED_TIME_SLOTS" });
+      }
+    } catch (error) {
+      console.error("Error unassigning time slot:", error);
+      toast({
+        title: "Error",
+        description: "Failed to unassign time slot",
+        variant: "destructive",
+      });
+    }
   };
 
   return (
@@ -241,24 +427,31 @@ export default function ScheduleDialog({
                   Loading schedules...
                 </div>
               ) : selectedDate ? (
-                getSchedulesByDate().length > 0 ? (
-                  getSchedulesByDate().map((schedule: any) => (
+                allTimeSlots?.length > 0 ? (
+                  allTimeSlots?.map((timeSlot: any) => (
                     <div
-                      key={schedule.scheduleId}
+                      key={timeSlot?.timeSlotId}
+                      onClick={() => toggleTimeSlotSelection(timeSlot)}
                       className={cn(
-                        "px-3 py-1 rounded-md text-xs font-medium",
-                        schedule.isAvailable
-                          ? "bg-green-100 text-green-700"
-                          : "bg-red-100 text-red-700"
+                        "px-3 py-1 rounded-md text-xs font-medium cursor-pointer transition-colors",
+                        isTimeSlotBusy(timeSlot)
+                          ? "bg-red-100 text-red-700 cursor-not-allowed"
+                          : isTimeSlotAvailable(timeSlot)
+                          ? isTimeSlotSelected(timeSlot)
+                            ? "bg-green-500 text-white"
+                            : "bg-green-100 text-green-700 hover:bg-green-200"
+                          : isTimeSlotSelected(timeSlot)
+                          ? "bg-blue-500 text-white"
+                          : "bg-gray-100 text-gray-700 hover:bg-gray-200"
                       )}
                     >
-                      {schedule.startTime.substring(0, 5)} -{" "}
-                      {schedule.endTime.substring(0, 5)}
+                      {timeSlot?.startTime?.substring(0, 5)} -{" "}
+                      {timeSlot?.endTime?.substring(0, 5)}
                     </div>
                   ))
                 ) : (
                   <div className="text-sm text-muted-foreground">
-                    No schedules found for this date
+                    No time slots found
                   </div>
                 )
               ) : (
@@ -267,19 +460,53 @@ export default function ScheduleDialog({
                 </div>
               )}
             </div>
-            <div className="flex items-center gap-2 mt-2 text-xs text-muted-foreground">
+            <div className="flex flex-wrap items-center gap-2 mt-2 text-xs text-muted-foreground">
               <div className="flex items-center gap-1">
                 <div className="w-3 h-3 rounded-full bg-green-100" />
-                <span>Available</span>
+                <span>Registered</span>
+              </div>
+              <div className="flex items-center gap-1">
+                <div className="w-3 h-3 rounded-full bg-green-500" />
+                <span>Selected (Registered)</span>
+              </div>
+              <div className="flex items-center gap-1">
+                <div className="w-3 h-3 rounded-full bg-gray-100" />
+                <span>Not Registered</span>
+              </div>
+              <div className="flex items-center gap-1">
+                <div className="w-3 h-3 rounded-full bg-blue-500" />
+                <span>Selected (Not Registered)</span>
               </div>
               <div className="flex items-center gap-1">
                 <div className="w-3 h-3 rounded-full bg-red-100" />
-                <span>Unavailable</span>
+                <span>Busy</span>
               </div>
             </div>
+            {selectedTimeSlots.length > 0 && (
+              <div className="mt-2 text-sm">
+                <span className="font-medium">{selectedTimeSlots.length}</span>{" "}
+                time slot(s) selected
+              </div>
+            )}
           </div>
         </div>
         <DialogFooter>
+          <Button
+            onClick={handleAssign}
+            disabled={getAssignableTimeSlots().length === 0 || !selectedDate}
+          >
+            Assign{" "}
+            {getAssignableTimeSlots().length > 0 &&
+              `(${getAssignableTimeSlots().length})`}
+          </Button>
+          <Button
+            onClick={handleUnassign}
+            disabled={getUnassignableTimeSlots().length === 0 || !selectedDate}
+          >
+            Unassign{" "}
+            {getUnassignableTimeSlots().length > 0 &&
+              `(${getUnassignableTimeSlots().length})`}
+          </Button>
           <Button variant="outline" onClick={onClose}>
             Close
           </Button>
