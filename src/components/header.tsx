@@ -5,8 +5,14 @@ import { Button } from "./ui/button";
 import AuthDialog from "@/pages/Auth";
 import { useAuth } from "@/hooks/use-auth";
 import { UserAvatarMenu } from "./user-avatar-menu";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
+import { useToast } from "@/hooks/use-toast";
 
 export default function Header() {
   const [showAuthDialog, setShowAuthDialog] = useState(false);
@@ -15,6 +21,7 @@ export default function Header() {
   );
 
   const { user, isLoggedIn } = useAuth();
+  const { toast } = useToast();
 
   const location = useLocation();
   const navigate = useNavigate();
@@ -62,16 +69,20 @@ export default function Header() {
   // Handle skin test click
   const handleSkinTestClick = (e: React.MouseEvent) => {
     e.preventDefault();
-    
+
     // Kiểm tra trạng thái đăng nhập
     if (!isLoggedIn) {
       // Nếu chưa đăng nhập, hiển thị form đăng nhập
       setAuthDialogTab("login");
       setShowAuthDialog(true);
-      
-      // Hiển thị thông báo yêu cầu đăng nhập
-      alert("Vui lòng đăng nhập để thực hiện bài kiểm tra da.");
-      
+
+      // Hiển thị thông báo yêu cầu đăng nhập bằng toast thay vì alert
+      toast({
+        title: "Thông báo",
+        description: "Vui lòng đăng nhập để thực hiện bài kiểm tra da.",
+        variant: "destructive",
+      });
+
       // Update URL với query parameter
       navigate(`${location.pathname}?auth=login`, { replace: true });
     } else {
@@ -83,7 +94,7 @@ export default function Header() {
   // Xử lý khi click vào nút Tra Cứu
   const handleBookingHistoryClick = (e: React.MouseEvent) => {
     e.preventDefault();
-    
+
     // Kiểm tra trạng thái đăng nhập
     if (isLoggedIn) {
       // Nếu đã đăng nhập, chuyển đến trang lịch sử đặt lịch
@@ -93,18 +104,18 @@ export default function Header() {
       setShowEmailDialog(true);
     }
   };
-  
+
   // Xử lý khi submit form nhập email
   const handleEmailSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     if (bookingEmail.trim()) {
       // Đóng dialog
       setShowEmailDialog(false);
-      
+
       // Chuyển đến trang lịch sử đặt lịch với email được truyền qua query params
       navigate(`/booking-history?email=${encodeURIComponent(bookingEmail)}`);
-      
+
       // Reset email
       setBookingEmail("");
     }
@@ -240,7 +251,7 @@ export default function Header() {
         onOpenChange={setShowAuthDialog}
         defaultTab={authDialogTab}
       />
-      
+
       {/* Dialog nhập email */}
       <Dialog open={showEmailDialog} onOpenChange={setShowEmailDialog}>
         <DialogContent className="sm:max-w-md">
@@ -251,7 +262,10 @@ export default function Header() {
           </DialogHeader>
           <form onSubmit={handleEmailSubmit} className="space-y-4">
             <div className="flex flex-col space-y-2">
-              <label htmlFor="booking-email" className="text-sm font-medium text-pink-700">
+              <label
+                htmlFor="booking-email"
+                className="text-sm font-medium text-pink-700"
+              >
                 Vui lòng nhập email bạn đã dùng để đặt lịch
               </label>
               <Input

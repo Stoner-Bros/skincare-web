@@ -13,6 +13,7 @@ import { useAuth } from "@/hooks/use-auth";
 import { useToast } from "@/hooks/use-toast";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
+import { Link } from "react-router-dom";
 import { z } from "zod";
 
 // Form validation schema
@@ -173,19 +174,19 @@ export default function SignUpForm({ onSuccess }: SignUpFormProps) {
                   className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
                 >
                   Tôi đồng ý với{" "}
-                  <Button
-                    variant="link"
+                  <Link
+                    to="/content-policy"
                     className="text-pink-500 p-0 h-auto text-sm"
                   >
                     điều khoản dịch vụ
-                  </Button>{" "}
+                  </Link>{" "}
                   và{" "}
-                  <Button
-                    variant="link"
+                  <Link
+                    to="/privacy-policy"
                     className="text-pink-500 p-0 h-auto text-sm"
                   >
                     chính sách bảo mật
-                  </Button>
+                  </Link>
                 </label>
                 <FormMessage />
               </div>

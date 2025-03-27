@@ -259,7 +259,7 @@ export default function WaitingBookings() {
     }
   };
 
-  if (state.loading || Object.keys(state.therapistsMap).length === 0) {
+  if (state.loading) {
     return (
       <div className="flex justify-center items-center h-screen">
         <Loader2 className="h-8 w-8 animate-spin" />
