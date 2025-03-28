@@ -4,6 +4,14 @@ import skinTestAnswerService, {
 import { useEffect, useState } from "react";
 
 import { Button } from "@/components/ui/button";
+import {
+  Pagination,
+  PaginationContent,
+  PaginationItem,
+  PaginationLink,
+  PaginationNext,
+  PaginationPrevious,
+} from "@/components/ui/pagination";
 import { Skeleton } from "@/components/ui/skeleton";
 import {
   Table,
@@ -22,15 +30,6 @@ import {
 import { useToast } from "@/hooks/use-toast";
 import { Eye } from "lucide-react";
 import ViewResultDetail from "./view-result-detail";
-import {
-  Pagination,
-  PaginationContent,
-  PaginationEllipsis,
-  PaginationItem,
-  PaginationLink,
-  PaginationNext,
-  PaginationPrevious,
-} from "@/components/ui/pagination";
 
 export default function ManageResult() {
   const [loading, setLoading] = useState<boolean>(true);
@@ -56,9 +55,9 @@ export default function ManageResult() {
         const sortedResults = [...response].sort(
           (a, b) => b.answerId - a.answerId
         );
-        
+
         setResults(sortedResults);
-        
+
         // Tính toán tổng số trang
         setTotalPages(Math.ceil(sortedResults.length / pageSize) || 1);
       } else {
@@ -150,7 +149,9 @@ export default function ManageResult() {
           <h1 className="text-xl font-semibold">
             Quản lý kết quả bài kiểm tra da
           </h1>
-          <Button variant="outline" onClick={fetchResults}>Làm mới</Button>
+          <Button variant="outline" onClick={fetchResults}>
+            Làm mới
+          </Button>
         </div>
 
         <div className="space-y-2">
@@ -168,7 +169,9 @@ export default function ManageResult() {
         <h1 className="text-xl font-semibold">
           Quản lý kết quả bài kiểm tra da
         </h1>
-        <Button variant="outline" onClick={fetchResults}>Làm mới</Button>
+        <Button variant="outline" onClick={fetchResults}>
+          Làm mới
+        </Button>
       </div>
 
       <div className="rounded-md border">

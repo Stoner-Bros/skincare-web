@@ -3,45 +3,6 @@ import { Swiper, SwiperSlide } from "swiper/react";
 import "swiper/swiper-bundle.css";
 
 export default function AboutUs() {
-  const services = [
-    {
-      title: "Chăm sóc da",
-      description:
-        "Nuông chiều làn da khách hàng với dịch vụ chăm sóc da chuyên nghiệp tại SeoulSpa.Vn. Liệu trình cá nhân hóa, chuyên viên giàu kinh nghiệm, công nghệ hiện đại giúp khách hàng sở hữu làn da khỏe mạnh, rạng rỡ.",
-      image: "/c1.jpg",
-    },
-    {
-      title: "Điêu khắc chân mày",
-      description:
-        "Công nghệ điêu khắc chân mày tại SeoulSpa tạo sợi lông mày sắc nét, tinh tế và sống động như thật, giúp khách hàng sở hữu dáng mày đẹp tự nhiên, gương mặt cân đối hài hòa, đem lại vẻ đẹp tươi tắn hơn.",
-      image: "/c2.jpg",
-    },
-    {
-      title: "Phun môi",
-      description:
-        "Giải pháp làm đẹp môi hoàn hảo, giúp khách hàng sở hữu đôi môi căng mọng, quyến rũ. Với kỹ thuật hiện đại, màu mực cao cấp và an toàn, đôi môi được tô điểm sắc nét, tự nhiên, che phủ khuyết điểm tốt",
-      image: "/c3.jpg",
-    },
-    {
-      title: "Triệt lông",
-      description:
-        "SeoulSpa.Vn mang dến dịch vụ triệt lông tiên tiến, loại bỏ vùng lông không mong muốn hiệu quả và lâu dài. Công nghệ hiện đại, an toàn, giảm đau tối đa, giúp khách hàng tự tin khoe làn da mịn màng, quyến rũ",
-      image: "/c4.jpg",
-    },
-    {
-      title: "Tắm trắng",
-      description:
-        "Tắm trắng công nghệ cao giúp khách hàng sở hữu làn da body trắng sáng, mịn màng, đều màu hơn. Kết hợp sản phẩm dưỡng trắng đặc biệt, thành phần an toàn, không gây kích ứng, mang lại làn da trắng khỏe hồng hào.",
-      image: "/c5.jpg",
-    },
-    {
-      title: "Giảm béo",
-      description:
-        "Công nghệ giảm béo hiện đại tác động trực tiếp vào vùng mỡ thừa, không xâm lấn, giúp khách hàng lấy lại vóc dáng thon gọn, săn chắc, quy trình thực hiện chuẩn Y Khoa, đảm bảo mang lại hiệu quả bất ngờ",
-      image: "c6.jpg",
-    },
-  ];
-
   const awards = [
     {
       title: "Sản phẩm - Dịch vụ chất lượng châu Á",

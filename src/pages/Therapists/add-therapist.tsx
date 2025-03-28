@@ -1,9 +1,8 @@
-import { useState } from "react";
-import { useNavigate } from "react-router-dom";
-import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import * as z from "zod";
 import { Loader2 } from "lucide-react";
+import { useState } from "react";
+import { useForm } from "react-hook-form";
+import * as z from "zod";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -16,7 +15,6 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { ServiceCreateRequest } from "@/types/service.types";
 import { useToast } from "@/hooks/use-toast";
 import serviceService from "@/services/service.services";
 // import uploadService from "@/services/upload.services";
@@ -36,10 +34,8 @@ type AddServiceProps = {
 
 export default function AddService({ open, onClose }: AddServiceProps) {
   const { toast } = useToast();
-  const navigate = useNavigate();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [thumbnailFile, setThumbnailFile] = useState<File | null>(null);
-  const [previewUrl, setPreviewUrl] = useState<string>("");
 
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
@@ -54,42 +50,40 @@ export default function AddService({ open, onClose }: AddServiceProps) {
     const file = event.target.files?.[0];
     if (file) {
       setThumbnailFile(file);
-      const fileUrl = URL.createObjectURL(file);
-      setPreviewUrl(fileUrl);
     }
   };
 
   const onSubmit = async (data: FormValues) => {
     try {
       setIsSubmitting(true);
-      
+
       let thumbnailUrl = data.serviceThumbnailUrl || "";
-      
+
       if (thumbnailFile) {
         // Upload file trước
         const formData = new FormData();
         formData.append("file", thumbnailFile);
-        
+
         const response = await fetch(`${import.meta.env.VITE_API_URL}/upload`, {
-          method: 'POST',
+          method: "POST",
           headers: {
-            'Accept': '*/*',
+            Accept: "*/*",
           },
           body: formData,
         });
-        
+
         if (!response.ok) {
-          throw new Error('Lỗi khi upload hình ảnh');
+          throw new Error("Lỗi khi upload hình ảnh");
         }
-        
+
         // Phân tích cú pháp JSON thay vì sử dụng response.text()
         const responseData = await response.json();
         // Lấy tên file từ phản hồi JSON, bỏ đường dẫn /Uploads
         thumbnailUrl = responseData.data.fileName;
       }
-      
+
       // Tạo đối tượng request để gửi đến API
-      const serviceData: ServiceCreateRequest = {
+      const serviceData: any = {
         serviceName: data.serviceName,
         serviceDescription: data.serviceDescription,
         serviceThumbnailUrl: thumbnailUrl,
@@ -97,12 +91,12 @@ export default function AddService({ open, onClose }: AddServiceProps) {
 
       // Sử dụng serviceService thay vì gọi API trực tiếp
       await serviceService.createService(serviceData);
-      
+
       toast({
         title: "Thành công",
         description: "Đã thêm dịch vụ mới thành công",
       });
-      
+
       // Chuyển hướng về trang danh sách dịch vụ
       // navigate("/Home");
     } catch (error) {
@@ -129,10 +123,7 @@ export default function AddService({ open, onClose }: AddServiceProps) {
       <div className="bg-white rounded-lg shadow-xl w-full max-w-2xl">
         <div className="flex justify-between items-center p-6 border-b">
           <h1 className="text-2xl font-bold">Thêm dịch vụ mới</h1>
-          <Button
-            variant="outline"
-            onClick={handleClose}
-          >
+          <Button variant="outline" onClick={handleClose}>
             Đóng
           </Button>
         </div>
@@ -179,7 +170,7 @@ export default function AddService({ open, onClose }: AddServiceProps) {
                   onChange={handleFileChange}
                   className="cursor-pointer"
                 />
-                
+
                 {/* {previewUrl && (
                   <div className="mt-2">
                     <p className="text-sm mb-2">Xem trước:</p>

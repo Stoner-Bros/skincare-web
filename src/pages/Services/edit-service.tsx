@@ -191,7 +191,12 @@ export default function EditService({
                                 type="file"
                                 className="hidden"
                                 accept="image/jpeg, image/png, image/gif"
-                                onChange={handleImageChange}
+                                onChange={(e) => {
+                                  handleImageChange(e);
+                                  field.onChange(
+                                    e.target.files?.[0]?.name || ""
+                                  );
+                                }}
                               />
                             </label>
                           </div>
@@ -208,7 +213,12 @@ export default function EditService({
                                 type="file"
                                 className="hidden"
                                 accept="image/jpeg, image/png, image/gif"
-                                onChange={handleImageChange}
+                                onChange={(e) => {
+                                  handleImageChange(e);
+                                  field.onChange(
+                                    e.target.files?.[0]?.name || ""
+                                  );
+                                }}
                               />
                             </label>
                           </div>

@@ -1,29 +1,18 @@
-import React, { useEffect, useState } from 'react';
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow
-} from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Collapsible,
+  CollapsibleContent,
+  CollapsibleTrigger,
+} from "@/components/ui/collapsible";
 import {
   Dialog,
+  DialogClose,
   DialogContent,
+  DialogFooter,
   DialogHeader,
   DialogTitle,
-  DialogFooter,
-  DialogClose,
 } from "@/components/ui/dialog";
-import {
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle
-} from "@/components/ui/card";
 import {
   Form,
   FormControl,
@@ -32,14 +21,24 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
-import { PlusCircle, Pencil, Trash2, Loader2, ChevronDown } from "lucide-react";
-import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import * as z from "zod";
+import { Input } from "@/components/ui/input";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
-import SkinTestService from '@/services/skin-test';
-import SkinTestQuestionService from '@/services/skin-test-question';
-import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
+import SkinTestService from "@/services/skin-test";
+import SkinTestQuestionService from "@/services/skin-test-question";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { ChevronDown, Loader2, Pencil, PlusCircle, Trash2 } from "lucide-react";
+import { useEffect, useState } from "react";
+import { useForm } from "react-hook-form";
+import * as z from "zod";
 
 // Định nghĩa schema cho form
 const skinTestSchema = z.object({
@@ -80,15 +79,22 @@ export default function SkinTest() {
   const [questions, setQuestions] = useState<Question[]>([]);
   const [loading, setLoading] = useState<boolean>(false);
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
-  const [isQuestionModalOpen, setIsQuestionModalOpen] = useState<boolean>(false);
+  const [isQuestionModalOpen, setIsQuestionModalOpen] =
+    useState<boolean>(false);
   const [isDetailModalOpen, setIsDetailModalOpen] = useState<boolean>(false);
   const [editingId, setEditingId] = useState<number | null>(null);
-  const [editingQuestionId, setEditingQuestionId] = useState<number | null>(null);
-  const [currentSkinTestId, setCurrentSkinTestId] = useState<number | null>(null);
+  const [editingQuestionId, setEditingQuestionId] = useState<number | null>(
+    null
+  );
+  const [currentSkinTestId, setCurrentSkinTestId] = useState<number | null>(
+    null
+  );
   const [currentSkinTest, setCurrentSkinTest] = useState<SkinTest | null>(null);
-  const [openQuestions, setOpenQuestions] = useState<{ [id: number]: boolean }>({});
+  const [openQuestions, setOpenQuestions] = useState<{ [id: number]: boolean }>(
+    {}
+  );
   const { toast } = useToast();
-  
+
   const form = useForm<SkinTestFormValues>({
     resolver: zodResolver(skinTestSchema),
     defaultValues: {
@@ -130,7 +136,10 @@ export default function SkinTest() {
 
   const fetchQuestionsBySkinTestId = async (skinTestId: number) => {
     try {
-      const data = await SkinTestQuestionService.getSkinTestQuestionsBySkinTestId(skinTestId);
+      const data =
+        await SkinTestQuestionService.getSkinTestQuestionsBySkinTestId(
+          skinTestId
+        );
       setQuestions(data);
     } catch (error) {
       toast({
@@ -221,9 +230,9 @@ export default function SkinTest() {
   };
 
   const toggleQuestion = (id: number) => {
-    setOpenQuestions(prev => ({
+    setOpenQuestions((prev) => ({
       ...prev,
-      [id]: !prev[id]
+      [id]: !prev[id],
     }));
   };
 
@@ -244,7 +253,7 @@ export default function SkinTest() {
           variant: "default",
         });
       }
-      
+
       setIsModalOpen(false);
       fetchSkinTests();
     } catch (error) {
@@ -259,21 +268,27 @@ export default function SkinTest() {
   const onSubmitQuestion = async (values: QuestionFormValues) => {
     try {
       if (editingQuestionId) {
-        await SkinTestQuestionService.updateSkinTestQuestion(editingQuestionId, values);
+        await SkinTestQuestionService.updateSkinTestQuestion(
+          editingQuestionId,
+          values
+        );
         toast({
           title: "Thành công",
           description: "Cập nhật câu hỏi thành công",
           variant: "default",
         });
       } else if (currentSkinTestId) {
-        await SkinTestQuestionService.createSkinTestQuestionForSkinTest(currentSkinTestId, values);
+        await SkinTestQuestionService.createSkinTestQuestionForSkinTest(
+          currentSkinTestId,
+          values
+        );
         toast({
           title: "Thành công",
           description: "Thêm câu hỏi thành công",
           variant: "default",
         });
       }
-      
+
       setIsQuestionModalOpen(false);
       if (currentSkinTestId) {
         fetchQuestionsBySkinTestId(currentSkinTestId);
@@ -296,7 +311,9 @@ export default function SkinTest() {
     <div className="container mx-auto p-4">
       <Card>
         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-          <CardTitle className="text-2xl font-bold">Quản lý bài kiểm tra da</CardTitle>
+          <CardTitle className="text-2xl font-bold">
+            Quản lý bài kiểm tra da
+          </CardTitle>
           <Button onClick={handleAdd}>
             <PlusCircle className="mr-2 h-4 w-4" />
             Thêm mới
@@ -326,7 +343,9 @@ export default function SkinTest() {
                       <TableRow key={test.skinTestId}>
                         <TableCell>{test.skinTestId}</TableCell>
                         <TableCell>{test.testName}</TableCell>
-                        <TableCell className="max-w-md whitespace-normal break-words line-clamp-3">{test.description}</TableCell>
+                        <TableCell className="max-w-md whitespace-normal break-words line-clamp-3">
+                          {test.description}
+                        </TableCell>
                         <TableCell>{formatDate(test.createdAt)}</TableCell>
                         <TableCell>
                           <Button
@@ -339,15 +358,15 @@ export default function SkinTest() {
                         </TableCell>
                         <TableCell className="text-right">
                           <div className="flex justify-end gap-2">
-                            <Button 
-                              variant="outline" 
+                            <Button
+                              variant="outline"
                               size="icon"
                               onClick={() => handleEdit(test)}
                             >
                               <Pencil className="h-4 w-4" />
                             </Button>
-                            <Button 
-                              variant="destructive" 
+                            <Button
+                              variant="destructive"
                               size="icon"
                               onClick={() => handleDelete(test.skinTestId)}
                             >
@@ -379,7 +398,7 @@ export default function SkinTest() {
               {editingId ? "Cập nhật bài kiểm tra" : "Thêm bài kiểm tra mới"}
             </DialogTitle>
           </DialogHeader>
-          
+
           <Form {...form}>
             <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
               <FormField
@@ -395,7 +414,7 @@ export default function SkinTest() {
                   </FormItem>
                 )}
               />
-              
+
               <FormField
                 control={form.control}
                 name="description"
@@ -403,22 +422,26 @@ export default function SkinTest() {
                   <FormItem>
                     <FormLabel>Mô tả</FormLabel>
                     <FormControl>
-                      <Textarea 
-                        placeholder="Nhập mô tả cho bài kiểm tra" 
-                        rows={4} 
-                        {...field} 
+                      <Textarea
+                        placeholder="Nhập mô tả cho bài kiểm tra"
+                        rows={4}
+                        {...field}
                       />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
                 )}
               />
-              
+
               <DialogFooter>
                 <DialogClose asChild>
-                  <Button variant="outline" type="button">Hủy</Button>
+                  <Button variant="outline" type="button">
+                    Hủy
+                  </Button>
                 </DialogClose>
-                <Button type="submit">{editingId ? "Cập nhật" : "Thêm mới"}</Button>
+                <Button type="submit">
+                  {editingId ? "Cập nhật" : "Thêm mới"}
+                </Button>
               </DialogFooter>
             </form>
           </Form>
@@ -433,9 +456,12 @@ export default function SkinTest() {
               {editingQuestionId ? "Cập nhật câu hỏi" : "Thêm câu hỏi mới"}
             </DialogTitle>
           </DialogHeader>
-          
+
           <Form {...questionForm}>
-            <form onSubmit={questionForm.handleSubmit(onSubmitQuestion)} className="space-y-4">
+            <form
+              onSubmit={questionForm.handleSubmit(onSubmitQuestion)}
+              className="space-y-4"
+            >
               <FormField
                 control={questionForm.control}
                 name="questionText"
@@ -449,7 +475,7 @@ export default function SkinTest() {
                   </FormItem>
                 )}
               />
-              
+
               <FormField
                 control={questionForm.control}
                 name="optionA"
@@ -463,7 +489,7 @@ export default function SkinTest() {
                   </FormItem>
                 )}
               />
-              
+
               <FormField
                 control={questionForm.control}
                 name="optionB"
@@ -477,7 +503,7 @@ export default function SkinTest() {
                   </FormItem>
                 )}
               />
-              
+
               <FormField
                 control={questionForm.control}
                 name="optionC"
@@ -491,7 +517,7 @@ export default function SkinTest() {
                   </FormItem>
                 )}
               />
-              
+
               <FormField
                 control={questionForm.control}
                 name="optionD"
@@ -505,12 +531,16 @@ export default function SkinTest() {
                   </FormItem>
                 )}
               />
-              
+
               <DialogFooter>
                 <DialogClose asChild>
-                  <Button variant="outline" type="button">Hủy</Button>
+                  <Button variant="outline" type="button">
+                    Hủy
+                  </Button>
                 </DialogClose>
-                <Button type="submit">{editingQuestionId ? "Cập nhật" : "Thêm mới"}</Button>
+                <Button type="submit">
+                  {editingQuestionId ? "Cập nhật" : "Thêm mới"}
+                </Button>
               </DialogFooter>
             </form>
           </Form>
@@ -520,7 +550,6 @@ export default function SkinTest() {
       {/* Modal xem chi tiết bài kiểm tra */}
       <Dialog open={isDetailModalOpen} onOpenChange={setIsDetailModalOpen}>
         <DialogContent className="max-w-4xl">
-          
           {currentSkinTest && (
             <div className="space-y-6">
               <div className="space-y-2">
@@ -536,7 +565,9 @@ export default function SkinTest() {
                   </div>
                   <div className="flex">
                     <p className="text-sm font-medium w-28">Description:</p>
-                    <p className="whitespace-pre-wrap break-words">{currentSkinTest.description}</p>
+                    <p className="whitespace-pre-wrap break-words">
+                      {currentSkinTest.description}
+                    </p>
                   </div>
                 </div>
               </div>
@@ -544,10 +575,12 @@ export default function SkinTest() {
               <div className="space-y-4">
                 <div className="flex justify-between items-center">
                   <h3 className="text-lg font-semibold">Questions:</h3>
-                  <Button 
-                    variant="outline" 
+                  <Button
+                    variant="outline"
                     size="sm"
-                    onClick={() => handleAddQuestion(currentSkinTest.skinTestId)}
+                    onClick={() =>
+                      handleAddQuestion(currentSkinTest.skinTestId)
+                    }
                   >
                     <PlusCircle className="mr-2 h-4 w-4" />
                     Thêm câu hỏi
@@ -557,17 +590,30 @@ export default function SkinTest() {
                 {questions.length > 0 ? (
                   <div className="space-y-4">
                     {questions.map((question, index) => (
-                      <Collapsible 
-                        key={question.skinTestQuestionId} 
-                        open={openQuestions[question.skinTestQuestionId]} 
-                        onOpenChange={() => toggleQuestion(question.skinTestQuestionId)}
+                      <Collapsible
+                        key={question.skinTestQuestionId}
+                        open={openQuestions[question.skinTestQuestionId]}
+                        onOpenChange={() =>
+                          toggleQuestion(question.skinTestQuestionId)
+                        }
                         className="border rounded-md"
                       >
                         <div className="flex items-center justify-between p-4">
                           <CollapsibleTrigger asChild>
-                            <Button variant="ghost" className="flex items-center justify-between w-full">
-                              <span>Question {index + 1}: {question.questionText}</span>
-                              <ChevronDown className={`h-4 w-4 transition-transform ${openQuestions[question.skinTestQuestionId] ? 'rotate-180' : ''}`} />
+                            <Button
+                              variant="ghost"
+                              className="flex items-center justify-between w-full"
+                            >
+                              <span>
+                                Question {index + 1}: {question.questionText}
+                              </span>
+                              <ChevronDown
+                                className={`h-4 w-4 transition-transform ${
+                                  openQuestions[question.skinTestQuestionId]
+                                    ? "rotate-180"
+                                    : ""
+                                }`}
+                              />
                             </Button>
                           </CollapsibleTrigger>
                         </div>
@@ -580,18 +626,22 @@ export default function SkinTest() {
                               <p>4. {question.optionD}</p>
                             </div>
                             <div className="flex justify-end gap-2 mt-4">
-                              <Button 
-                                variant="outline" 
+                              <Button
+                                variant="outline"
                                 size="sm"
                                 onClick={() => handleEditQuestion(question)}
                               >
                                 <Pencil className="mr-2 h-4 w-4" />
                                 Sửa
                               </Button>
-                              <Button 
-                                variant="destructive" 
+                              <Button
+                                variant="destructive"
                                 size="sm"
-                                onClick={() => handleDeleteQuestion(question.skinTestQuestionId)}
+                                onClick={() =>
+                                  handleDeleteQuestion(
+                                    question.skinTestQuestionId
+                                  )
+                                }
                               >
                                 <Trash2 className="mr-2 h-4 w-4" />
                                 Xóa
@@ -610,7 +660,7 @@ export default function SkinTest() {
               </div>
             </div>
           )}
-          
+
           <DialogFooter>
             <DialogClose asChild>
               <Button>Đóng</Button>
