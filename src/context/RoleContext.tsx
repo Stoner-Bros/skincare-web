@@ -59,12 +59,7 @@ export const routePermissions: RoutePermission[] = [
   },
   {
     path: "/dashboard/consultation",
-    allowedRoles: [
-      UserRole.ADMIN,
-      UserRole.MANAGER,
-      UserRole.STAFF,
-      UserRole.SKIN_THERAPIST,
-    ],
+    allowedRoles: [UserRole.ADMIN, UserRole.MANAGER, UserRole.STAFF],
   },
   {
     path: "/dashboard/order-checkin",

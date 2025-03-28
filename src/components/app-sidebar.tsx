@@ -160,12 +160,7 @@ const initialNavData = {
       url: "/dashboard/consultation",
       icon: MessageCircleQuestion,
       isActive: false,
-      allowedRoles: [
-        UserRole.ADMIN,
-        UserRole.MANAGER,
-        UserRole.STAFF,
-        UserRole.SKIN_THERAPIST,
-      ],
+      allowedRoles: [UserRole.ADMIN, UserRole.MANAGER, UserRole.STAFF],
     },
     {
       title: "Blog",
@@ -189,12 +184,7 @@ const initialNavData = {
       url: "/dashboard/comment",
       icon: MessageCircleHeart,
       isActive: false,
-      allowedRoles: [
-        UserRole.ADMIN,
-        UserRole.MANAGER,
-        UserRole.STAFF,
-        UserRole.SKIN_THERAPIST,
-      ],
+      allowedRoles: [UserRole.ADMIN, UserRole.MANAGER, UserRole.STAFF],
     },
     {
       title: "Đăng ký lịch làm việc",
