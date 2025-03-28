@@ -176,9 +176,9 @@ export default function Home() {
     dispatch({ type: "TOGGLE_ADD_SERVICE", payload: false });
   };
 
-  const handleAddBlogClick = () => {
-    dispatch({ type: "TOGGLE_ADD_BLOG", payload: true });
-  };
+  // const handleAddBlogClick = () => {
+  //   dispatch({ type: "TOGGLE_ADD_BLOG", payload: true });
+  // };
 
   const handleCloseModalBlog = () => {
     dispatch({ type: "TOGGLE_ADD_BLOG", payload: false });
@@ -308,7 +308,7 @@ export default function Home() {
                     {service.serviceDescription}
                   </p>
                   <div className="flex mt-4 items-center justify-center">
-                    <Link to={`/services/${service.serviceId}`}>
+                    <Link to={`/treatment/${service.serviceId}`}>
                       <Button className="bg-red-600 text-white">
                         Xem chi tiết
                       </Button>
@@ -557,7 +557,7 @@ export default function Home() {
         </div>
       </section>
 
-      <section className="bg-gray-100 py-12">
+      {/* <section className="bg-gray-100 py-12">
         <div className="container mx-auto text-center">
           <h2 className="text-3xl font-bold text-rose-600">THÔNG TIN LUXSPA</h2>
 
@@ -717,7 +717,7 @@ export default function Home() {
             </div>
           </div>
         </div>
-      </section>
+      </section> */}
 
       <section
         className="relative bg-white py-16"
