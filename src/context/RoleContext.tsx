@@ -20,7 +20,12 @@ export const routePermissions: RoutePermission[] = [
   // Dashboard routes
   {
     path: "/dashboard",
-    allowedRoles: [UserRole.ADMIN, UserRole.MANAGER, UserRole.STAFF],
+    allowedRoles: [
+      UserRole.ADMIN,
+      UserRole.MANAGER,
+      UserRole.STAFF,
+      UserRole.SKIN_THERAPIST,
+    ],
   },
   {
     path: "/dashboard/services/treatments",
