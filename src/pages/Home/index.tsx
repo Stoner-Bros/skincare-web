@@ -89,38 +89,7 @@ export default function Home() {
   const [state, dispatch] = useReducer(homeReducer, initialState);
   const { toast } = useToast();
 
-  const bacSi = [
-    {
-      name: "Nguyễn Kim Khoa",
-      description:
-        'Nguyễn Kim Khoa là bác sĩ giàu kinh nghiệm trong lĩnh vực da liễu và tạo hình thẩm mỹ, được biết đến với chuyên môn sâu rộng và uy tín vững chắc. Ông được xem là một trong những bậc thầy gạo cội, đã dành cả cuộc đời mình để cống hiến cho ngành làm đẹp, để lại dấu ấn sâu đậm với vô số thành tựu. Hơn 30 năm miệt mài trong ngành da liễu và thẩm mỹ tạo hình, bác sĩ Khoa đã gặt hái được những thành tựu đáng ngưỡng mộ. Sở hữu thế mạnh vượt trội về chăm sóc da liễu chuyên sâu, phẫu thuật tạo hình thẩm mỹ mắt – mũi – môi, kết hợp với kinh nghiệm giảng dạy chuyên ngành thẩm mỹ, ông đã xây dựng nên một sự nghiệp lừng lẫy, ghi dấu ấn vang dội. Hành trình cống hiến của bác sĩ Khoa không chỉ dừng lại ở những con số, mà còn là giá trị nhân văn sâu sắc khi mang đến cái đẹp và sự tự tin cho đời. Minh chứng rõ ràng nhất là danh hiệu "Thầy Thuốc Ưu Tú" cao quý mà ông vinh dự được trao tặng lần thứ 13 và 14 vào năm 2020 và 2022. Hơn thế nữa, ông đã thay đổi ngoạn mục nhan sắc cho hơn 15.000 khách hàng, mang đến cho họ một diện mạo mới, mở ra cánh cửa đến cuộc sống tích cực và hạnh phúc hơn.',
-      image: "/nguyenkimkhoa.webp",
-    },
-    {
-      name: "Võ Thành Hướng",
-      description:
-        "Bác sĩ Võ Thành Hướng là chuyên gia da liễu uy tín với bề dày kinh nghiệm và chuyên môn sâu rộng. Sau hơn 6 năm chinh chiến tại các bệnh viện lớn như Bệnh viện Đa Khoa Xuyên Á và Bệnh Viện Đa Khoa Bình Dương, Bác sĩ Hướng đã khẳng định tên tuổi qua hàng nghìn ca chăm sóc da và làm đẹp thành công trên khắp cả nước. Không chỉ dừng lại ở tấm bằng Bác sĩ Đa Khoa, Bác sĩ Võ Thành Hướng còn sở hữu kho tàng kiến thức uyên bác với các chứng chỉ chuyên ngành Nội tổng quát, chuyên khoa Da liễu, và khám chữa bệnh Đa khoa. Hơn thế nữa, Bác sĩ còn liên tục trau dồi chuyên môn qua các khóa đào tạo chuyên sâu về ứng dụng Laser và ánh sáng trong Da liễu cũng như phẫu thuật cơ bản và tiểu phẫu da. Chính sự am hiểu sâu rộng cùng bàn tay tài hoa đã giúp Bác sĩ Võ Thành Hướng xây dựng uy tín vững chắc và trở thành lựa chọn hàng đầu cho những ai mong muốn sở hữu làn da khỏe đẹp. Đến với Bác sĩ Hướng, khách hàng hoàn toàn an tâm về chất lượng dịch vụ và kết quả mỹ mãn.",
-      image: "/vothanhhuong.webp",
-    },
-    {
-      name: "Mai Hữu Nghĩa",
-      description:
-        "Bác sĩ Mai Hữu Nghĩa là một bậc thầy ưu tú, ghi dấu ấn bởi chuyên môn sâu rộng, tâm huyết và tài năng vượt trội. Sở hữu nhiều chứng chỉ danh giá và nền tảng học vấn vững chắc từ Đại học Y Dược TP.HCM và Đại học Y khoa Phạm Ngọc Thạch, Bác sĩ Mai Hữu Nghĩa khẳng định vị thế trong cả thẩm mỹ nội khoa và ngoại khoa tại Thẩm mỹ viện LuxSpa.Vn.Điểm sáng trong sự nghiệp của Bác sĩ chính là sự đa dạng chuyên môn hiếm có. Tinh thông thẩm mỹ khuôn mặt, trẻ hóa da, điều trị sẹo lồi, cùng nhiều chứng chỉ chuyên môn khác, Bác sĩ tự tin đáp ứng mọi nhu cầu thẩm mỹ của khách hàng. Hơn 10 năm cống hiến, Bác sĩ Mai Hữu Nghĩa đã tạo nên kỳ tích trong ngành làm đẹp Việt Nam. Bàn tay tài hoa của Bác sĩ đã mang đến thành công vang dội, kiến tạo nhan sắc cho hàng nghìn người. Thành tựu của Bác sĩ còn được vinh danh bởi giải thưởng cao quý. Ngoài hoạt động chuyên môn, Bác sĩ còn là giảng viên thẩm mỹ uy tín, truyền lửa đam mê cho thế hệ trẻ. Bác sĩ Mai Hữu Nghĩa đề cao triết lý làm đẹp an toàn, tự nhiên và thấu hiểu mong muốn của khách hàng. Bác sĩ tư vấn tận tâm, đưa ra giải pháp tối ưu cho từng cá nhân, tạo nên những tuyệt tác thẩm mỹ hài hòa, tôn vinh nét đẹp riêng biệt. Sự tận tâm và y đức của Bác sĩ hiện hữu trong từng ca phẫu thuật, từng lời tư vấn. Điều này tạo nên sự khác biệt, xây dựng niềm tin tuyệt đối nơi khách hàng. ",
-      image: "/maihuunghia.webp",
-    },
-    {
-      name: "Trương Linh",
-      description:
-        "Hơn 30 năm trong nghề, bác sĩ Trương Linh không chỉ là chuyên gia Da liễu giàu kinh nghiệm, mà còn là người đồng hành đáng tin cậy của hàng ngàn khách hàng trên hành trình tìm kiếm làn da khỏe đẹp. Tốt nghiệp bác sĩ y khoa và sở hữu chứng chỉ chuyên sâu Khoa Da liễu, bác sĩ Linh luôn nỗ lực trau dồi kiến thức, cập nhật những phương pháp điều trị tiên tiến nhất. Bằng chứng là hàng ngàn ca điều trị thành công, giúp khách hàng giải quyết các vấn đề về da, từ mụn, nám, tàn nhang đến lão hóa. Bác sĩ Linh luôn tận tâm với mỗi bệnh nhân, thấu hiểu những mặc cảm, tự ti mà họ phải chịu đựng. Chính vì vậy, bác sĩ không chỉ điều trị da, mà còn truyền cảm hứng, giúp họ tự tin hơn trong cuộc sống.",
-      image: "/truonglinh.webp",
-    },
-    {
-      name: "Đào Thị Tường Vy",
-      description:
-        "Bác sĩ Đào Thị Tường Vy là một chuyên gia xuất sắc trong lĩnh vực thẩm mỹ, được biết đến với chuyên môn sâu rộng, tay nghề khéo léo và tâm huyết không ngừng. Sở hữu nền tảng học vấn vững chắc từ Đại học Y Dược TP.HCM cùng nhiều chứng chỉ danh giá trong và ngoài nước, Bác sĩ Đào Thị Tường Vy khẳng định vị thế hàng đầu trong cả thẩm mỹ nội khoa và ngoại khoa tại Thẩm mỹ viện LuxSpa.Vn. Điểm nổi bật trong sự nghiệp của Bác sĩ Vy chính là sự am hiểu đa dạng về các kỹ thuật thẩm mỹ hiện đại. Từ tạo hình khuôn mặt, trẻ hóa da, điều trị sẹo lồi đến các phương pháp thẩm mỹ tiên tiến khác, Bác sĩ luôn mang đến giải pháp tối ưu, an toàn và phù hợp nhất cho từng khách hàng. Với hơn 10 năm kinh nghiệm, Bác sĩ đã giúp hàng nghìn khách hàng lấy lại sự tự tin, kiến tạo vẻ đẹp hài hòa và tự nhiên. Bên cạnh chuyên môn vững chắc, Bác sĩ Đào Thị Tường Vy còn là một giảng viên uy tín, luôn tận tâm truyền đạt kiến thức và kinh nghiệm cho thế hệ trẻ, góp phần phát triển ngành thẩm mỹ tại Việt Nam. Triết lý làm đẹp của Bác sĩ Vy hướng đến sự an toàn, tinh tế và tôn trọng vẻ đẹp riêng biệt của mỗi người. Sự tận tụy, tài năng và y đức của Bác sĩ thể hiện qua từng ca thẩm mỹ, từng lời tư vấn chân thành. Điều này không chỉ giúp Bác sĩ Vy tạo dựng uy tín vững chắc mà còn trở thành người bạn đồng hành đáng tin cậy trên hành trình làm đẹp của khách hàng.",
-      image: "/bacsinu1.jpg",
-    },
-  ];
+  
   const awards = [
     {
       title: "Quầy lễ tân",
@@ -215,15 +184,9 @@ export default function Home() {
     dispatch({ type: "TOGGLE_ADD_BLOG", payload: false });
   };
 
-  const handleAddTherapistClick = () => {
-    dispatch({ type: "TOGGLE_ADD_THERAPIST", payload: true });
-  };
 
   const handleCloseModalTherapist = () => {
     dispatch({ type: "TOGGLE_ADD_THERAPIST", payload: false });
-  };
-  const handleAddTreatmentClick = () => {
-    dispatch({ type: "TOGGLE_ADD_TREATMENT", payload: true });
   };
 
   const handleCloseModalTreatment = () => {
@@ -454,7 +417,7 @@ export default function Home() {
         </div>
       </section>
 
-      <section className="w-[80%] mx-auto py-10">
+      {/* <section className="w-[80%] mx-auto py-10">
         <div className="w-full grid grid-cols-12 gap-4">
           <div className="col-span-4 flex justify-end">
             <img
@@ -555,7 +518,7 @@ export default function Home() {
             </div>
           </div>
         </div>
-      </section>
+      </section> */}
 
       <section className="py-12 bg-pink-50">
         <div className="container mx-auto">

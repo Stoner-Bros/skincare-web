@@ -35,7 +35,7 @@ import {
   DialogFooter,
 } from "@/components/ui/dialog";
 import MDEditor from "@uiw/react-md-editor";
-import { Loader2, Trash2, Eye } from "lucide-react";
+import { Loader2, Trash2 } from "lucide-react";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -69,9 +69,9 @@ export default function AllBlog() {
   const [loading, setLoading] = useState<boolean>(true);
   const [currentPage, setCurrentPage] = useState<number>(1);
   const [totalPages, setTotalPages] = useState<number>(1);
-  const [selectedBlog, setSelectedBlog] = useState<Blog | null>(null);
+  const [selectedBlog] = useState<Blog | null>(null);
   const [isDetailOpen, setIsDetailOpen] = useState<boolean>(false);
-  const [detailLoading, setDetailLoading] = useState<boolean>(false);
+  const [detailLoading] = useState<boolean>(false);
   const [blogToDelete, setBlogToDelete] = useState<number | null>(null);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState<boolean>(false);
   const pageSize = 6;
@@ -157,49 +157,49 @@ export default function AllBlog() {
     }/${date.getDate()}/${date.getFullYear()}`;
   };
 
-  const handleViewDetail = async (id: number) => {
-    if (!id) {
-      toast({
-        title: "Lỗi",
-        description: "ID không hợp lệ",
-        variant: "destructive",
-      });
-      return;
-    }
+  // const handleViewDetail = async (id: number) => {
+  //   if (!id) {
+  //     toast({
+  //       title: "Lỗi",
+  //       description: "ID không hợp lệ",
+  //       variant: "destructive",
+  //     });
+  //     return;
+  //   }
 
-    try {
-      setDetailLoading(true);
-      setIsDetailOpen(true);
+  //   try {
+  //     setDetailLoading(true);
+  //     setIsDetailOpen(true);
 
-      const response = await BlogService.getBlogById(id);
+  //     const response = await BlogService.getBlogById(id);
 
-      if (response && response.data) {
-        setSelectedBlog(response.data);
-      } else {
-        throw new Error("Không nhận được dữ liệu từ API");
-      }
-    } catch (error: any) {
-      toast({
-        title: "Lỗi khi tải thông tin",
-        description:
-          error.message ||
-          "Không thể tải thông tin chi tiết. Vui lòng thử lại sau.",
-        variant: "destructive",
-      });
+  //     if (response && response.data) {
+  //       setSelectedBlog(response.data);
+  //     } else {
+  //       // throw new Error("Không nhận được dữ liệu từ API");
+  //     }
+  //   } catch (error: any) {
+  //     toast({
+  //       title: "Lỗi khi tải thông tin",
+  //       description:
+  //         error.message ||
+  //         "Không thể tải thông tin chi tiết. Vui lòng thử lại sau.",
+  //       variant: "destructive",
+  //     });
 
-      // Tạo dữ liệu mẫu cho trường hợp lỗi
-      setSelectedBlog({
-        id: id,
-        title: "Lỗi tải dữ liệu",
-        authorName: "Unknown",
-        createdAt: new Date().toISOString(),
-        content: "Không thể tải nội dung bài viết. Vui lòng thử lại sau.",
-        thumbnailUrl: undefined,
-      });
-    } finally {
-      setDetailLoading(false);
-    }
-  };
+  //     // Tạo dữ liệu mẫu cho trường hợp lỗi
+  //     setSelectedBlog({
+  //       id: id,
+  //       title: "Lỗi tải dữ liệu",
+  //       authorName: "Unknown",
+  //       createdAt: new Date().toISOString(),
+  //       content: "Không thể tải nội dung bài viết. Vui lòng thử lại sau.",
+  //       thumbnailUrl: undefined,
+  //     });
+  //   } finally {
+  //     setDetailLoading(false);
+  //   }
+  // };
 
   const renderPagination = () => {
     const pages = [];
@@ -387,7 +387,7 @@ export default function AllBlog() {
                           </TableCell>
                           <TableCell>
                             <div className="flex justify-end space-x-2">
-                              <Button
+                              {/* <Button
                                 variant="outline"
                                 size="icon"
                                 onClick={() =>
@@ -396,7 +396,7 @@ export default function AllBlog() {
                                 title="Xem chi tiết"
                               >
                                 <Eye className="h-4 w-4" />
-                              </Button>
+                              </Button> */}
                               <Button
                                 variant="destructive"
                                 size="icon"

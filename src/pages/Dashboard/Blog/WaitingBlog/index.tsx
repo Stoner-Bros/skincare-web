@@ -37,7 +37,6 @@ import BlogService from "@/services/blog.services";
 import MDEditor from "@uiw/react-md-editor";
 import {
   CheckCircle,
-  Eye,
   Loader2,
   Plus,
   RefreshCw,
@@ -71,9 +70,9 @@ export default function WaitingBlog() {
   const [totalPages, setTotalPages] = useState<number>(1);
   const [isAddBlogOpen, setIsAddBlogOpen] = useState<boolean>(false);
   const [searchTerm, setSearchTerm] = useState<string>("");
-  const [selectedBlog, setSelectedBlog] = useState<Blog | null>(null);
+  const [selectedBlog] = useState<Blog | null>(null);
   const [isDetailOpen, setIsDetailOpen] = useState<boolean>(false);
-  const [detailLoading, setDetailLoading] = useState<boolean>(false);
+  const [detailLoading] = useState<boolean>(false);
   const pageSize = 5;
   const { toast } = useToast();
 
@@ -256,49 +255,49 @@ export default function WaitingBlog() {
     }/${date.getDate()}/${date.getFullYear()}`;
   };
 
-  const handleViewDetail = async (id: number) => {
-    if (!id) {
-      toast({
-        title: "Lỗi",
-        description: "ID không hợp lệ",
-        variant: "destructive",
-      });
-      return;
-    }
+  // const handleViewDetail = async (id: number) => {
+  //   if (!id) {
+  //     toast({
+  //       title: "Lỗi",
+  //       description: "ID không hợp lệ",
+  //       variant: "destructive",
+  //     });
+  //     return;
+  //   }
 
-    try {
-      setDetailLoading(true);
-      setIsDetailOpen(true);
+  //   try {
+  //     setDetailLoading(true);
+  //     setIsDetailOpen(true);
 
-      const response = await BlogService.getBlogById(id);
+  //     const response = await BlogService.getBlogById(id);
 
-      if (response && response.data) {
-        setSelectedBlog(response.data);
-      } else {
-        throw new Error("Không nhận được dữ liệu từ API");
-      }
-    } catch (error: any) {
-      toast({
-        title: "Lỗi khi tải thông tin",
-        description:
-          error.message ||
-          "Không thể tải thông tin chi tiết. Vui lòng thử lại sau.",
-        variant: "destructive",
-      });
+  //     if (response && response.data) {
+  //       setSelectedBlog(response.data);
+  //     } else {
+  //       throw new Error("Không nhận được dữ liệu từ API");
+  //     }
+  //   } catch (error: any) {
+  //     toast({
+  //       title: "Lỗi khi tải thông tin",
+  //       description:
+  //         error.message ||
+  //         "Không thể tải thông tin chi tiết. Vui lòng thử lại sau.",
+  //       variant: "destructive",
+  //     });
 
-      // Tạo dữ liệu mẫu cho trường hợp lỗi
-      setSelectedBlog({
-        id: id,
-        title: "Lỗi tải dữ liệu",
-        authorName: "Unknown",
-        createdAt: new Date().toISOString(),
-        content: "Không thể tải nội dung bài viết. Vui lòng thử lại sau.",
-        thumbnailUrl: undefined,
-      });
-    } finally {
-      setDetailLoading(false);
-    }
-  };
+  //     // Tạo dữ liệu mẫu cho trường hợp lỗi
+  //     setSelectedBlog({
+  //       id: id,
+  //       title: "Lỗi tải dữ liệu",
+  //       authorName: "Unknown",
+  //       createdAt: new Date().toISOString(),
+  //       content: "Không thể tải nội dung bài viết. Vui lòng thử lại sau.",
+  //       thumbnailUrl: undefined,
+  //     });
+  //   } finally {
+  //     setDetailLoading(false);
+  //   }
+  // };
 
   // Hàm để lấy các bài viết cho trang hiện tại
   const getCurrentPageBlogs = () => {
@@ -553,7 +552,7 @@ export default function WaitingBlog() {
                           </TableCell>
                           <TableCell>
                             <div className="flex justify-end space-x-2">
-                              <Button
+                              {/* <Button
                                 variant="outline"
                                 size="sm"
                                 onClick={() =>
@@ -562,7 +561,7 @@ export default function WaitingBlog() {
                                 className="h-8"
                               >
                                 <Eye className="h-4 w-4" />
-                              </Button>
+                              </Button> */}
                               <Button
                                 variant="default"
                                 size="sm"

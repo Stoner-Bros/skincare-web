@@ -293,7 +293,7 @@ export default function BlogDetail() {
         <div className="flex flex-col md:flex-row">
 
           <div className="w-full md:w-1/4 p-4 flex justify-center items-start">
-            <img src="/khachdacbiet.jpg" alt="Fixed Beauty Image" className="rounded-lg shadow-md" />
+            <img src="/nhuongquyen.webp" alt="Fixed Beauty Image" className="rounded-lg shadow-md" />
           </div>
 
 
