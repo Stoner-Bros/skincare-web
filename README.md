@@ -1,6 +1,6 @@
 # React + TypeScript + Vite
 
-WeSoSpeed Team L
+WeSoSpeed Team
 
 This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
 
