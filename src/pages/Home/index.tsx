@@ -89,7 +89,6 @@ export default function Home() {
   const [state, dispatch] = useReducer(homeReducer, initialState);
   const { toast } = useToast();
 
-  
   const awards = [
     {
       title: "Quầy lễ tân",
@@ -148,29 +147,29 @@ export default function Home() {
   const technologies = [
     {
       name: "Nâng cơ Collagen",
-      description: "Sử dụng chỉ Collagen sinh học tạo lưới nâng đỡ da, làm căng vùng da chảy xệ, trẻ hóa tự nhiên không cần phẫu thuật",
-      image: "/nangco.webp"
+      description:
+        "Sử dụng chỉ Collagen sinh học tạo lưới nâng đỡ da, làm căng vùng da chảy xệ, trẻ hóa tự nhiên không cần phẫu thuật",
+      image: "/nangco.webp",
     },
     {
       name: "Căn chỉnh khuôn mặt",
-      description: "Công nghệ CODE định vị và đưa collagen vào nhóm cơ lão hóa, giúp căng da, nâng cơ, giảm nếp nhăn và định hình khuôn mặt.",
-      image: "/canchinh.webp"
+      description:
+        "Công nghệ CODE định vị và đưa collagen vào nhóm cơ lão hóa, giúp căng da, nâng cơ, giảm nếp nhăn và định hình khuôn mặt.",
+      image: "/canchinh.webp",
     },
     {
       name: "MD-CODE",
-      description: "Công nghệ MD-CODE sử dụng sóng vô tuyến để làm căng da, xóa nhăn và mang lại làn da trẻ trung hơn. Không xâm lấn, không thời gian nghỉ dưỡng và mang lại kết quả lâu dài cho mọi loại da",
-      image: "/mdcode.webp"
+      description:
+        "Công nghệ MD-CODE sử dụng sóng vô tuyến để làm căng da, xóa nhăn và mang lại làn da trẻ trung hơn. Không xâm lấn, không thời gian nghỉ dưỡng và mang lại kết quả lâu dài cho mọi loại da",
+      image: "/mdcode.webp",
     },
     {
       name: "Nâng Cơ Sinh Học",
-      description: "Công nghệ căng da không phẫu thuật 5.0 đột phá: ứng dụng chỉ sinh học tự thân, xóa nhăn và trẻ hóa da hiệu quả",
-      image: "/sinhhoc.webp"
+      description:
+        "Công nghệ căng da không phẫu thuật 5.0 đột phá: ứng dụng chỉ sinh học tự thân, xóa nhăn và trẻ hóa da hiệu quả",
+      image: "/sinhhoc.webp",
     },
   ];
-
-  const handleAddServiceClick = () => {
-    dispatch({ type: "TOGGLE_ADD_SERVICE", payload: true });
-  };
 
   const handleCloseModal = () => {
     dispatch({ type: "TOGGLE_ADD_SERVICE", payload: false });
@@ -183,7 +182,6 @@ export default function Home() {
   const handleCloseModalBlog = () => {
     dispatch({ type: "TOGGLE_ADD_BLOG", payload: false });
   };
-
 
   const handleCloseModalTherapist = () => {
     dispatch({ type: "TOGGLE_ADD_THERAPIST", payload: false });
@@ -322,22 +320,8 @@ export default function Home() {
             ) : (
               <div className="col-span-3 text-center py-8">
                 <p>Không tìm thấy dịch vụ nào.</p>
-                <Button
-                  className="bg-red-600 text-white mt-4"
-                  onClick={handleAddServiceClick}
-                >
-                  Thêm dịch vụ mới
-                </Button>
               </div>
             )}
-          </div>
-          <div className="mt-8">
-            <Button
-              className="bg-red-600 text-white"
-              onClick={handleAddServiceClick}
-            >
-              Thêm dịch vụ
-            </Button>
           </div>
         </div>
       </section>
