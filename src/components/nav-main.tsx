@@ -28,6 +28,8 @@ import AddService from "@/pages/Services/add-service";
 import { useToast } from "@/hooks/use-toast";
 import serviceService from "@/services/service.services";
 import EditService from "@/pages/Services/edit-service";
+import AccessControl from "./AccessControl";
+import { UserRole } from "@/context/RoleContext";
 
 export function NavMain({
   items,
@@ -42,6 +44,7 @@ export function NavMain({
       url: string;
       serviceId?: number;
     }[];
+    allowedRoles?: UserRole[];
   }[];
 }) {
   const [isAddServiceOpen, setIsAddServiceOpen] = useState(false);
@@ -112,82 +115,84 @@ export function NavMain({
     <SidebarGroup>
       <SidebarMenu>
         {items.map((item) => (
-          <Collapsible
-            key={item.title}
-            asChild
-            defaultOpen={item.isActive}
-            className="group/collapsible"
-          >
-            <SidebarMenuItem>
-              {item.items ? (
-                <>
-                  <CollapsibleTrigger asChild>
+          <AccessControl allowedRoles={item.allowedRoles}>
+            <Collapsible
+              key={item.title}
+              asChild
+              defaultOpen={item.isActive}
+              className="group/collapsible"
+            >
+              <SidebarMenuItem>
+                {item.items ? (
+                  <>
+                    <CollapsibleTrigger asChild>
+                      <SidebarMenuButton tooltip={item.title}>
+                        {item.icon && <item.icon />}
+                        <span>{item.title}</span>
+                        {item.title === "Dịch vụ" && (
+                          <Plus
+                            className="ml-auto h-4 w-4 cursor-pointer text-gray-500 hover:text-gray-800"
+                            onClick={handleAddServiceClick}
+                          />
+                        )}
+                        {item.title !== "Dịch vụ" && (
+                          <ChevronRight className="ml-auto transition-transform duration-200 group-data-[state=open]/collapsible:rotate-90" />
+                        )}
+                      </SidebarMenuButton>
+                    </CollapsibleTrigger>
+                    <CollapsibleContent>
+                      <SidebarMenuSub>
+                        {item.items?.map((subItem) => (
+                          <SidebarMenuSubItem key={subItem.title}>
+                            <SidebarMenuSubButton
+                              asChild
+                              className="flex justify-between items-center pr-0"
+                            >
+                              <div className="flex w-full">
+                                <Link to={subItem.url} className="flex-grow">
+                                  <span>{subItem.title}</span>
+                                </Link>
+                                {item.title === "Dịch vụ" &&
+                                  subItem.serviceId && (
+                                    <div className="flex gap-2 ml-2">
+                                      <Pencil
+                                        className="h-4 w-4 cursor-pointer text-gray-500 hover:text-gray-800"
+                                        onClick={(e) =>
+                                          handleEditServiceClick(
+                                            e,
+                                            subItem.serviceId!
+                                          )
+                                        }
+                                      />
+                                      <Trash2
+                                        className="h-4 w-4 cursor-pointer text-red-500 hover:text-red-800"
+                                        onClick={(e) =>
+                                          handleDeleteService(
+                                            e,
+                                            subItem.serviceId!
+                                          )
+                                        }
+                                      />
+                                    </div>
+                                  )}
+                              </div>
+                            </SidebarMenuSubButton>
+                          </SidebarMenuSubItem>
+                        ))}
+                      </SidebarMenuSub>
+                    </CollapsibleContent>
+                  </>
+                ) : (
+                  <Link to={item.url} className="w-full">
                     <SidebarMenuButton tooltip={item.title}>
                       {item.icon && <item.icon />}
                       <span>{item.title}</span>
-                      {item.title === "Dịch vụ" && (
-                        <Plus
-                          className="ml-auto h-4 w-4 cursor-pointer text-gray-500 hover:text-gray-800"
-                          onClick={handleAddServiceClick}
-                        />
-                      )}
-                      {item.title !== "Dịch vụ" && (
-                        <ChevronRight className="ml-auto transition-transform duration-200 group-data-[state=open]/collapsible:rotate-90" />
-                      )}
                     </SidebarMenuButton>
-                  </CollapsibleTrigger>
-                  <CollapsibleContent>
-                    <SidebarMenuSub>
-                      {item.items?.map((subItem) => (
-                        <SidebarMenuSubItem key={subItem.title}>
-                          <SidebarMenuSubButton
-                            asChild
-                            className="flex justify-between items-center pr-0"
-                          >
-                            <div className="flex w-full">
-                              <Link to={subItem.url} className="flex-grow">
-                                <span>{subItem.title}</span>
-                              </Link>
-                              {item.title === "Dịch vụ" &&
-                                subItem.serviceId && (
-                                  <div className="flex gap-2 ml-2">
-                                    <Pencil
-                                      className="h-4 w-4 cursor-pointer text-gray-500 hover:text-gray-800"
-                                      onClick={(e) =>
-                                        handleEditServiceClick(
-                                          e,
-                                          subItem.serviceId!
-                                        )
-                                      }
-                                    />
-                                    <Trash2
-                                      className="h-4 w-4 cursor-pointer text-red-500 hover:text-red-800"
-                                      onClick={(e) =>
-                                        handleDeleteService(
-                                          e,
-                                          subItem.serviceId!
-                                        )
-                                      }
-                                    />
-                                  </div>
-                                )}
-                            </div>
-                          </SidebarMenuSubButton>
-                        </SidebarMenuSubItem>
-                      ))}
-                    </SidebarMenuSub>
-                  </CollapsibleContent>
-                </>
-              ) : (
-                <Link to={item.url} className="w-full">
-                  <SidebarMenuButton tooltip={item.title}>
-                    {item.icon && <item.icon />}
-                    <span>{item.title}</span>
-                  </SidebarMenuButton>
-                </Link>
-              )}
-            </SidebarMenuItem>
-          </Collapsible>
+                  </Link>
+                )}
+              </SidebarMenuItem>
+            </Collapsible>
+          </AccessControl>
         ))}
       </SidebarMenu>
 

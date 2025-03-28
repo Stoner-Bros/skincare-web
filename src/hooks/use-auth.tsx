@@ -7,6 +7,7 @@ import React, {
   useEffect,
   ReactNode,
 } from "react";
+import { UserRole } from "@/context/RoleContext";
 
 interface AuthContextType {
   user: any;
@@ -17,6 +18,7 @@ interface AuthContextType {
   register: (userData: any) => Promise<void>;
   logout: () => Promise<void>;
   reloadUser: () => Promise<void>;
+  hasAccess: (allowedRoles: UserRole[]) => boolean;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -124,6 +126,12 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     }
   };
 
+  // Hàm kiểm tra quyền truy cập dựa trên role
+  const hasAccess = (allowedRoles: UserRole[]): boolean => {
+    if (!isLoggedIn || !user?.role) return false;
+    return allowedRoles.includes(user.role as UserRole);
+  };
+
   return (
     <AuthContext.Provider
       value={{
@@ -135,6 +143,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         register,
         logout,
         reloadUser,
+        hasAccess,
       }}
     >
       {children}

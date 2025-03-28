@@ -10,6 +10,8 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { LayoutDashboard, LogOut, User } from "lucide-react";
+import AccessControl from "@/components/AccessControl";
+import { UserRole } from "@/context/RoleContext";
 
 export function UserAvatarMenu() {
   const { user, logout } = useAuth();
@@ -59,13 +61,25 @@ export function UserAvatarMenu() {
           <p className="text-xs text-muted-foreground truncate">{user.email}</p>
         </div>
         <DropdownMenuSeparator />
-        <DropdownMenuItem
-          onClick={() => navigate("/dashboard")}
-          className="cursor-pointer font-semibold"
+
+        {/* Chỉ hiển thị Dashboard cho các role được phép */}
+        <AccessControl
+          allowedRoles={[
+            UserRole.ADMIN,
+            UserRole.MANAGER,
+            UserRole.STAFF,
+            UserRole.SKIN_THERAPIST,
+          ]}
         >
-          <LayoutDashboard className="mr-2 h-4 w-4" />
-          <span>Bảng điều khiển</span>
-        </DropdownMenuItem>
+          <DropdownMenuItem
+            onClick={() => navigate("/dashboard")}
+            className="cursor-pointer font-semibold"
+          >
+            <LayoutDashboard className="mr-2 h-4 w-4" />
+            <span>Bảng điều khiển</span>
+          </DropdownMenuItem>
+        </AccessControl>
+
         <DropdownMenuItem
           onClick={() => navigate("/profile")}
           className="cursor-pointer font-semibold"

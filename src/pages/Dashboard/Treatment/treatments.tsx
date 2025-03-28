@@ -109,7 +109,7 @@ export default function TreatmentsList() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
   const { toast } = useToast();
-  const pageSize = 10;
+  const pageSize = 7;
   const [totalRecords, setTotalRecords] = useState(0);
 
   // Use custom hooks

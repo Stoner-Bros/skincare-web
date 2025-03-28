@@ -4,17 +4,20 @@ import AppRouter from "./routes";
 import { Toaster } from "@/components/ui/toaster";
 import { AuthProvider } from "./hooks/use-auth";
 import { BookingProvider } from "./context/BookingContext";
+import { RoleProvider } from "./context/RoleContext";
 
 function App() {
   return (
     <>
       <SidebarProvider>
         <AuthProvider>
-          <BookingProvider>
-            <BrowserRouter>
-              <AppRouter />
-            </BrowserRouter>
-          </BookingProvider>
+          <RoleProvider>
+            <BookingProvider>
+              <BrowserRouter>
+                <AppRouter />
+              </BrowserRouter>
+            </BookingProvider>
+          </RoleProvider>
         </AuthProvider>
       </SidebarProvider>
       <Toaster />

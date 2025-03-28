@@ -22,6 +22,7 @@ import {
 } from "@/components/ui/sidebar";
 import serviceService from "@/services/service.services";
 import { useNavigate } from "react-router-dom";
+import { UserRole } from "@/context/RoleContext";
 
 // Khởi tạo trạng thái ban đầu
 const initialNavData = {
@@ -32,12 +33,14 @@ const initialNavData = {
       icon: PanelsTopLeft,
       isActive: false,
       // items: [],
+      allowedRoles: [UserRole.ADMIN, UserRole.MANAGER, UserRole.STAFF],
     },
     {
       title: "Dịch vụ",
       url: "#",
       icon: NotebookText,
       isActive: false,
+      allowedRoles: [UserRole.ADMIN, UserRole.MANAGER, UserRole.STAFF],
       items: [
         {
           title: "Chăm sóc da",
@@ -66,6 +69,12 @@ const initialNavData = {
       url: "#",
       icon: BookOpen,
       isActive: false,
+      allowedRoles: [
+        UserRole.ADMIN,
+        UserRole.MANAGER,
+        UserRole.STAFF,
+        UserRole.SKIN_THERAPIST,
+      ],
       items: [
         {
           title: "Quản lý bài kiểm tra",
@@ -86,6 +95,7 @@ const initialNavData = {
       url: "#",
       icon: CalendarArrowDown,
       isActive: false,
+      allowedRoles: [UserRole.ADMIN, UserRole.MANAGER, UserRole.STAFF],
       items: [
         {
           title: "Checkin",
@@ -106,6 +116,7 @@ const initialNavData = {
       url: "#",
       icon: UserRound,
       isActive: false,
+      allowedRoles: [UserRole.ADMIN, UserRole.MANAGER, UserRole.STAFF],
       items: [
         {
           title: "Khách hàng",
@@ -130,25 +141,38 @@ const initialNavData = {
       url: "/dashboard/skinsenger",
       icon: MessagesSquare,
       isActive: false,
+      allowedRoles: [
+        UserRole.ADMIN,
+        UserRole.MANAGER,
+        UserRole.STAFF,
+        UserRole.SKIN_THERAPIST,
+      ],
     },
     {
       title: "Feedback",
       url: "/dashboard/feedback",
       icon: MessageCircleHeart,
       isActive: false,
-      // items: [],
+      allowedRoles: [UserRole.ADMIN, UserRole.MANAGER, UserRole.STAFF],
     },
     {
       title: "Tư vấn",
       url: "/dashboard/consultation",
       icon: MessageCircleQuestion,
       isActive: false,
+      allowedRoles: [
+        UserRole.ADMIN,
+        UserRole.MANAGER,
+        UserRole.STAFF,
+        UserRole.SKIN_THERAPIST,
+      ],
     },
     {
       title: "Blog",
       url: "#",
       icon: BookOpen,
       isActive: false,
+      allowedRoles: [UserRole.ADMIN, UserRole.MANAGER, UserRole.STAFF],
       items: [
         {
           title: "Đợi duyệt",
@@ -165,13 +189,19 @@ const initialNavData = {
       url: "/dashboard/comment",
       icon: MessageCircleHeart,
       isActive: false,
-      // items: [],
+      allowedRoles: [
+        UserRole.ADMIN,
+        UserRole.MANAGER,
+        UserRole.STAFF,
+        UserRole.SKIN_THERAPIST,
+      ],
     },
     {
       title: "Đăng ký lịch làm việc",
       url: "/dashboard/schedule",
       icon: CalendarArrowDown,
       isActive: false,
+      allowedRoles: [UserRole.SKIN_THERAPIST],
     },
   ],
 };

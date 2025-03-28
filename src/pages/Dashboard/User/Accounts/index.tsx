@@ -45,13 +45,7 @@ import * as z from "zod";
 
 const createFormSchema = z.object({
   email: z.string().email("Invalid email address"),
-  password: z
-    .string()
-    .min(8, "Password must be at least 8 characters")
-    .regex(
-      /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)/,
-      "Password must contain at least one uppercase letter, one lowercase letter, and one number"
-    ),
+  password: z.string().min(8, "Password must be at least 8 characters"),
   fullName: z.string().min(2, "Full name must be at least 2 characters"),
   role: z.string().min(1, "Role is required"),
 });
@@ -225,9 +219,6 @@ export default function Accounts() {
             Manage user accounts and their personal information.
           </p>
         </div>
-        <Button onClick={() => setIsCreateDialogOpen(true)}>
-          Add New Account
-        </Button>
       </div>
 
       {/* Table */}

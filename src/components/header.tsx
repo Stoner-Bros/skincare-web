@@ -1,10 +1,3 @@
-import { Phone } from "lucide-react";
-import { useState, useEffect } from "react";
-import { Link, useLocation, useNavigate } from "react-router-dom";
-import { Button } from "./ui/button";
-import AuthDialog from "@/pages/Auth";
-import { useAuth } from "@/hooks/use-auth";
-import { UserAvatarMenu } from "./user-avatar-menu";
 import {
   Dialog,
   DialogContent,
@@ -12,7 +5,16 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
+import { UserRole } from "@/context/RoleContext";
+import { useAuth } from "@/hooks/use-auth";
 import { useToast } from "@/hooks/use-toast";
+import useAccessControl from "@/hooks/useAccessControl";
+import AuthDialog from "@/pages/Auth";
+import { Phone } from "lucide-react";
+import { useEffect, useState } from "react";
+import { Link, useLocation, useNavigate } from "react-router-dom";
+import { Button } from "./ui/button";
+import { UserAvatarMenu } from "./user-avatar-menu";
 
 export default function Header() {
   const [showAuthDialog, setShowAuthDialog] = useState(false);
@@ -21,6 +23,7 @@ export default function Header() {
   );
 
   const { user, isLoggedIn } = useAuth();
+  const { hasRole } = useAccessControl();
   const { toast } = useToast();
 
   const location = useLocation();
@@ -91,6 +94,31 @@ export default function Header() {
     }
   };
 
+  // Handle dashboard click
+  const handleDashboardClick = (e: React.MouseEvent) => {
+    e.preventDefault();
+
+    // Nếu có quyền truy cập dashboard, chuyển hướng
+    if (
+      isLoggedIn &&
+      hasRole([
+        UserRole.ADMIN,
+        UserRole.MANAGER,
+        UserRole.STAFF,
+        UserRole.SKIN_THERAPIST,
+      ])
+    ) {
+      navigate("/dashboard");
+    } else {
+      // Hiển thị thông báo không có quyền truy cập
+      toast({
+        title: "Thông báo",
+        description: "Bạn không có quyền truy cập vào bảng điều khiển.",
+        variant: "destructive",
+      });
+    }
+  };
+
   // Xử lý khi click vào nút Tra Cứu
   const handleBookingHistoryClick = (e: React.MouseEvent) => {
     e.preventDefault();
@@ -149,6 +177,23 @@ export default function Header() {
       onClick: handleBookingHistoryClick,
     },
   ];
+
+  // Thêm menu Dashboard nếu user có quyền truy cập
+  if (
+    isLoggedIn &&
+    hasRole([
+      UserRole.ADMIN,
+      UserRole.MANAGER,
+      UserRole.STAFF,
+      UserRole.SKIN_THERAPIST,
+    ])
+  ) {
+    navigationLinks.push({
+      path: "#",
+      label: "BẢNG ĐIỀU KHIỂN",
+      onClick: handleDashboardClick,
+    });
+  }
 
   return (
     <>
