@@ -1,8 +1,10 @@
 import { useEffect, useState } from "react";
 import { HubConnectionBuilder, HubConnection } from "@microsoft/signalr";
 import axios from "axios";
+// import { useAuth } from "@/hooks/use-auth";
 
 export default function Skinsenger() {
+  // const { user } = useAuth();
   const [threads, setThreads] = useState<any[]>([]); // Ensure threads is always an array
   const [selectedThread, setSelectedThread] = useState<number | null>(null);
   const [messages, setMessages] = useState([]);
@@ -23,7 +25,7 @@ export default function Skinsenger() {
   const joinThread = async (threadId: number) => {
     try {
       // Call API to join the thread
-      await axios.post(`https://skincare-api.azurewebsites.net/api/chat/threads/${threadId}/join?staffId=10`);
+      await axios.post(`https://skincare-api.azurewebsites.net/api/chat/threads/${threadId}/join?staffId=6`);
 
       setSelectedThread(threadId);
 
@@ -55,11 +57,16 @@ export default function Skinsenger() {
       await connection.invoke(
         "SendMessage",
         selectedThread,
-        10, // Replace with actual senderId
+        6, // Replace with actual senderId
         "Staff", // Replace with actual senderRole
         newMessage
       );
       setNewMessage("");
+    }
+  };
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === 'Enter' && newMessage.trim() !== '') {
+      sendMessage();
     }
   };
 
@@ -181,6 +188,7 @@ export default function Skinsenger() {
                   type="text"
                   value={newMessage}
                   onChange={(e) => setNewMessage(e.target.value)}
+                  onKeyDown={handleKeyDown}
                   placeholder="Nhập tin nhắn..."
                   className="flex-1 border rounded-full px-4 py-2 focus:outline-none focus:ring-1 focus:ring-pink-300"
                 />

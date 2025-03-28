@@ -129,12 +129,17 @@ export default function AddTreatment({ open, onClose, serviceId }: AddTreatmentP
     try {
       setIsSubmitting(true);
       
+      // Log ra dữ liệu form trước khi xử lý
+      console.log("Dữ liệu form khi submit:", data);
+      
       let thumbnailUrl = data.treatmentThumbnailUrl || "";
       
       if (thumbnailFile) {
         // Upload file trước
         const formData = new FormData();
         formData.append("file", thumbnailFile);
+        
+        console.log("Đang upload file:", thumbnailFile.name, "kích thước:", thumbnailFile.size);
         
         const response = await fetch(`${import.meta.env.VITE_API_URL}/upload`, {
           method: 'POST',
