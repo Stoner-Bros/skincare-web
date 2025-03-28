@@ -1,10 +1,27 @@
+import { useState } from "react";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
+
 export default function Footer() {
+  const [isRefundPolicyOpen, setIsRefundPolicyOpen] = useState(false);
+
   return (
     <footer className="bg-[#F8F8F8] text-gray-900 py-12">
       <div className="container mx-auto flex flex-col lg:flex-row justify-between">
         <div className="flex flex-col mb-8 lg:mb-0 w-full lg:w-1/3">
           <div className="flex items-center mb-4">
-            <img src="/logo.gif" alt="Slide 1" className="w-full object-cover" />
+            <img
+              src="/logo.gif"
+              alt="Slide 1"
+              className="w-full object-cover"
+            />
           </div>
           <p className="text-sm text-gray-600 mb-4 w-[400px]">
             Thẩm mỹ viện LuxSpa.Vn với nhiều chi nhánh trải dài trên toàn quốc,
@@ -93,9 +110,12 @@ export default function Footer() {
                 </a>
               </li>
               <li>
-                <a href="#" className="hover:text-[#F1588D]">
-                  Chính sách đổi trả hàng
-                </a>
+                <button
+                  onClick={() => setIsRefundPolicyOpen(true)}
+                  className="hover:text-[#F1588D] text-left"
+                >
+                  Chính sách hoàn tiền
+                </button>
               </li>
               <li>
                 <a href="#" className="hover:text-[#F1588D]">
@@ -135,6 +155,37 @@ export default function Footer() {
           Copyright © 2024 LuxSpa.vn. All rights reserved.
         </p>
       </div>
+
+      {/* AlertDialog cho Chính sách hoàn tiền */}
+      <AlertDialog
+        open={isRefundPolicyOpen}
+        onOpenChange={setIsRefundPolicyOpen}
+      >
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle className="text-[#F1588D]">
+              Chính sách hoàn tiền
+            </AlertDialogTitle>
+            <AlertDialogDescription>
+              Để yêu cầu hoàn tiền hoặc tìm hiểu thêm về chính sách hoàn tiền
+              của chúng tôi, vui lòng liên hệ với bộ phận chăm sóc khách hàng
+              qua:
+              <div className="mt-4 font-medium">
+                <p>Email: staff@email.com</p>
+                <p>Hotline: 0987512312</p>
+              </div>
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogAction
+              className="bg-[#F1588D] text-white hover:bg-[#d04575]"
+              onClick={() => setIsRefundPolicyOpen(false)}
+            >
+              Đóng
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </footer>
   );
 }
